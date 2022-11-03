@@ -1,0 +1,19 @@
+# docker compose configuration for development
+version: "3"
+
+services:
+  reverse-proxy:
+    # use different image name than of the production image
+    # to avoid name conflict (now we can keep both containers locally)
+    image: reverse-proxy-dev
+    # since the image is not available in any repository we disable pulling
+    pull_policy: never
+
+    build:
+      dockerfile: ./src/reverse-proxy/dev/Dockerfile
+
+    volumes:
+      - ./src/reverse-proxy/dev/nginx.conf:/etc/nginx/nginx.conf
+
+    ports:
+      - 8080:80

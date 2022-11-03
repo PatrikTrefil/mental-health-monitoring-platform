@@ -1,0 +1,19 @@
+# docker compose for production
+version: "3"
+
+services:
+  reverse-proxy:
+    restart: on-failure
+
+    # use different image name than of the dev image
+    # to avoid name conflict (now we can keep both containers locally)
+    image: reverse-proxy-production
+    # since the image is not available in any repository we disable pulling
+    pull_policy: never
+
+    build:
+      dockerfile: ./src/reverse-proxy/production/Dockerfile
+
+
+    ports:
+      - 80:80
