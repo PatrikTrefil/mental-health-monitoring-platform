@@ -9,8 +9,7 @@ services:
     # since the image is not available in any repository we disable pulling
     pull_policy: never
 
-    build:
-      dockerfile: ./src/reverse-proxy/dev/Dockerfile
+    build: ./src/reverse-proxy/dev/
 
     volumes:
       - ./src/reverse-proxy/dev/nginx.conf:/etc/nginx/nginx.conf
