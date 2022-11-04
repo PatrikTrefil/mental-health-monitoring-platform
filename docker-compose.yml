@@ -36,8 +36,10 @@ services:
     # TODO: this is horrible design by form.io, trying to communicate with them to remove this
     volumes:
       - ./src/formio/:/app:rw
-    env_file:
-      - ./formio.env
+    environment:
+      - ROOT_EMAIL=${ROOT_EMAIL}
+      - ROOT_PASSWORD=${ROOT_PASSWORD}
+      - NODE_CONFIG=${NODE_CONFIG}
     stdin_open: true  # -i
     tty: true # -t
 

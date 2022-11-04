@@ -27,7 +27,7 @@ git submodule update
 
 ## Spouštění aplikace
 
-Před spuštěním aplikace je potřeba dodat `formio.env` soubor pro konfiguraci kontejneru.
+Před spuštěním aplikace je potřeba dodat `.env` soubor pro konfiguraci kontejneru.
 Zde je šablona pro tento soubor:
 
 ```
