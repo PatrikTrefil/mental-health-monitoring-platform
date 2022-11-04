@@ -11,8 +11,7 @@ services:
     # since the image is not available in any repository we disable pulling
     pull_policy: never
 
-    build:
-      dockerfile: ./src/reverse-proxy/production/Dockerfile
+    build: ./src/reverse-proxy/production/
 
 
     ports:
