@@ -16,3 +16,6 @@ services:
 
     ports:
       - 8080:80
+  formio:
+    environment:
+      DEBUG: formio:*
