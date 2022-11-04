@@ -25,14 +25,25 @@ git submodule update
 
 [Dokumentace git submodulů](https://git-scm.com/book/en/v2/Git-Tools-Submodules)
 
-## Spuštění aplikace v produkčním módu
+## Spouštění aplikace
+
+Před spuštěním aplikace je potřeba dodat `formio.env` soubor pro konfiguraci kontejneru.
+Zde je šablona pro tento soubor:
+
+```
+NODE_CONFIG={"jwt":{"secret":"<your secret>"}, "mongoSecret":"<your secret>","mongo": "mongodb://mongo:27017/formio"}
+ROOT_EMAIL=<root email>
+ROOT_PASSWORD=<root password>
+```
+
+### Spuštění aplikace v produkčním módu
 
 ```sh
 $ docker compose up
 ```
 
-## Spuštění aplikace v vývojovém módu
+### Spuštění aplikace v vývojovém módu
 
 ```sh
-$ docker compose -f docker-compose.dev.yml up
+$ docker compose --file ./docker-compose.yml --file ./docker-compose.dev.yml up
 ```
