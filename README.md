@@ -42,8 +42,12 @@ ROOT_PASSWORD=<root password>
 $ docker compose up
 ```
 
+Aplikace je dostupná na `http://localhost`.
+
 ### Spuštění aplikace v vývojovém módu
 
 ```sh
 $ docker compose --file ./docker-compose.yml --file ./docker-compose.dev.yml up
 ```
+
+Aplikace je dostupná na `http://localhost:8080`.
