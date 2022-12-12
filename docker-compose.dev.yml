@@ -19,3 +19,6 @@ services:
   formio:
     environment:
       DEBUG: formio:*
+  mongo:
+    ports:
+      - 27017:27017
