@@ -17,13 +17,20 @@ services:
     ports:
       - 80:80
   mongo:
-    image: mongo:4.1
-    restart: always
+    build:
+      context: ./src/formio-mongo
+      args:
+        - FORMIO_MONGO_USER=${FORMIO_MONGO_USER}
+        - FORMIO_MONGO_PASSWORD=${FORMIO_MONGO_PASSWORD}
+        - MONGO_INITDB_ROOT_USERNAME=${MONGO_INITDB_ROOT_USERNAME}
+        - MONGO_INITDB_ROOT_PASSWORD=${MONGO_INITDB_ROOT_PASSWORD}
+
+    restart: on-failure
     volumes:
       - mongodb-data:/data/db
     environment:
-      MONGO_INITDB_ROOT_USERNAME:
-      MONGO_INITDB_ROOT_PASSWORD:
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_INITDB_ROOT_USERNAME}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_INITDB_ROOT_PASSWORD}
 
   formio:
     build: ./src/formio/
