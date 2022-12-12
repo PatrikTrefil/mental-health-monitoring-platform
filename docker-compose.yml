@@ -2,6 +2,10 @@
 version: "3"
 
 services:
+  web-app:
+    build:
+      context: ./src/web-app
+      dockerfile: Dockerfile.production
   reverse-proxy:
     restart: on-failure
 
