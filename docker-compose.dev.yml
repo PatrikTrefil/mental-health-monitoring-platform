@@ -16,3 +16,9 @@ services:
 
     ports:
       - 8080:80
+  formio:
+    environment:
+      DEBUG: formio:*
+  mongo:
+    ports:
+      - 27017:27017

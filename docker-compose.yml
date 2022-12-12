@@ -16,3 +16,39 @@ services:
 
     ports:
       - 80:80
+  mongo:
+    build:
+      context: ./src/formio-mongo
+      args:
+        - FORMIO_MONGO_USER=${FORMIO_MONGO_USER}
+        - FORMIO_MONGO_PASSWORD=${FORMIO_MONGO_PASSWORD}
+        - MONGO_INITDB_ROOT_USERNAME=${MONGO_INITDB_ROOT_USERNAME}
+        - MONGO_INITDB_ROOT_PASSWORD=${MONGO_INITDB_ROOT_PASSWORD}
+
+    restart: on-failure
+    volumes:
+      - mongodb-data:/data/db
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_INITDB_ROOT_USERNAME}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_INITDB_ROOT_PASSWORD}
+
+  formio:
+    build: ./src/formio/
+    # will restart if mongo unavailable (again a bad choice bad the form.io devs)
+    restart: on-failure
+    depends_on:
+      - mongo
+    ports:
+      - "3001:3001"
+    # TODO: this is horrible design by form.io, trying to communicate with them to remove this
+    volumes:
+      - ./src/formio/:/app:rw
+    environment:
+      - ROOT_EMAIL=${ROOT_EMAIL}
+      - ROOT_PASSWORD=${ROOT_PASSWORD}
+      - NODE_CONFIG=${NODE_CONFIG}
+    stdin_open: true  # -i
+    tty: true # -t
+
+volumes:
+  mongodb-data:
