@@ -22,3 +22,6 @@ services:
   mongo:
     ports:
       - 27017:27017
+  cadvisor:
+    ports:
+      - 9090:8080

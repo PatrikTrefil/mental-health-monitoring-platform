@@ -49,6 +49,21 @@ services:
       - NODE_CONFIG=${NODE_CONFIG}
     stdin_open: true  # -i
     tty: true # -t
+  # TODO: pass cadvisor through reverse proxy
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:latest
+    container_name: cadvisor
+    volumes:
+    - /:/rootfs:ro
+    - /var/run:/var/run:ro
+    - /sys:/sys:ro
+    - /var/lib/docker/:/var/lib/docker:ro
+    - /dev/disk/:/dev/disk:ro
+    # give access to all devices
+    privileged: true
+    # map kernel log
+    devices:
+    - device=/dev/kmsg
 
 volumes:
   mongodb-data:
