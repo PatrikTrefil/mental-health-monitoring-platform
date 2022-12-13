@@ -1,0 +1,20 @@
+# Use node alpine as it's a small node image
+FROM node:alpine
+
+# The app is going to live in /app
+RUN mkdir -p /app
+WORKDIR /app
+
+# Install dependencies
+COPY package*.json /app
+RUN npm install
+
+# This line is necessary, because the server (npm run dev)
+# will start before the mounting from host is done.
+# At least some valid project files are needed to start the server.
+# This seems like a weird hack, but it seems to work okay.
+COPY . /app
+
+EXPOSE 3000
+
+CMD ["npm", "run", "dev"]

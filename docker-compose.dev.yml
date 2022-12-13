@@ -2,6 +2,24 @@
 version: "3"
 
 services:
+  web-app:
+    # use different image name than of the production image
+    # to avoid name conflict (now we can keep both containers locally)
+    image: web-app-dev
+    # since the image is not available in any repository we disable pulling
+    pull_policy: never
+    build:
+      context: src/web-app/
+      dockerfile: Dockerfile.dev
+    # container_name: web
+    restart: always
+    volumes:
+      - ./src/web-app:/app
+      # keep node_modules and .next folders in the container, rather than host
+      - /app/node_modules
+      - /app/.next
+    ports:
+      - 3000:3000
   reverse-proxy:
     # use different image name than of the production image
     # to avoid name conflict (now we can keep both containers locally)
