@@ -49,10 +49,10 @@ services:
       - NODE_CONFIG=${NODE_CONFIG}
     stdin_open: true  # -i
     tty: true # -t
-  # TODO: pass cadvisor through reverse proxy
-  cadvisor:
+  monitoring:
     image: gcr.io/cadvisor/cadvisor:latest
-    container_name: cadvisor
+    command:
+    - '-url_base_prefix=/monitoring'
     volumes:
     - /:/rootfs:ro
     - /var/run:/var/run:ro
