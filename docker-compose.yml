@@ -42,8 +42,6 @@ services:
     restart: on-failure
     depends_on:
       - mongo
-    ports:
-      - "3001:3001"
     # TODO: this is horrible design by form.io, trying to communicate with them to remove this
     volumes:
       - ./src/formio/:/app:rw
