@@ -37,6 +37,8 @@ services:
   formio:
     environment:
       DEBUG: formio:*
+    ports:
+      - 3001:3001
   mongo:
     ports:
       - 27017:27017
