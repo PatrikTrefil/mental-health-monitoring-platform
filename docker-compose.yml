@@ -53,8 +53,6 @@ services:
     tty: true # -t
   monitoring:
     image: gcr.io/cadvisor/cadvisor:latest
-    command:
-    - '-url_base_prefix=/monitoring'
     volumes:
     - /:/rootfs:ro
     - /var/run:/var/run:ro
