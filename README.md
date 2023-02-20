@@ -31,7 +31,7 @@ Před spuštěním aplikace je potřeba dodat `.env` soubor pro konfiguraci kont
 Zde je šablona pro tento soubor:
 
 ```
-NODE_CONFIG={"jwt":{"secret":"<your secret>"}, "mongoSecret":"<your secret>","mongo": "mongodb://mongo:27017/formio"}
+NODE_CONFIG={"jwt":{"secret":"<your secret>"}, "mongoSecret":"<your secret>", "mongo": "mongodb://mongo:27017/formio", "domain": "localhost:3001/formio"}
 ROOT_EMAIL=<root email>
 ROOT_PASSWORD=<root password>
 ```
