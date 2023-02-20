@@ -3,6 +3,8 @@ const nextConfig = {
   reactStrictMode: true,
   swcMinify: true,
   output: 'standalone',
+
+  // this makes hot reloading work when Dockerized
   webpack: config => {
     config.watchOptions = {
       poll: 1000,
