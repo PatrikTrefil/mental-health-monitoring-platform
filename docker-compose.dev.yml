@@ -36,7 +36,8 @@ services:
       - 8080:8080
   formio:
     environment:
-      DEBUG: formio:*
+      # to filter logs to formio use 'formio:*'
+      DEBUG: '*'
     ports:
       - 3001:3001
   mongo:
