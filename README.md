@@ -50,4 +50,13 @@ Aplikace je dostupná na `http://localhost`.
 $ docker compose --file ./docker-compose.yml --file ./docker-compose.dev.yml up
 ```
 
-Aplikace je dostupná na `http://localhost:8080`.
+Aplikace je dostupná na `http://localhost:8080`, kde se přistupuje skrze reverse proxy.
+Na všechny komponenty se lze připojit i přímo (mapování portů je definování v `docker-compose.dev.yml`).
+
+## Užívání softwaru
+
+- `/` - hlavní stránka webového rozhraní
+- `/nginx_status` - status reverse proxy
+- `/health` - vratí 200 pokud je reverse proxy dostupná
+- `/monitoring/` - monitoring aplikace
+- `/formio/` - webové rozhraní/API pro správu formulářů ([oficiální dokumentace](https://apidocs.form.io/))
