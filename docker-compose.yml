@@ -46,9 +46,9 @@ services:
     volumes:
       - ./src/formio/:/app:rw
     environment:
-      - ROOT_EMAIL=${ROOT_EMAIL}
-      - ROOT_PASSWORD=${ROOT_PASSWORD}
-      - NODE_CONFIG=${NODE_CONFIG}
+      - ROOT_EMAIL=${FORMIO_ROOT_EMAIL}
+      - ROOT_PASSWORD=${FORMIO_ROOT_PASSWORD}
+      - NODE_CONFIG=${FORMIO_NODE_CONFIG}
     stdin_open: true  # -i
     tty: true # -t
   monitoring:
