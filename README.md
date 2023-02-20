@@ -31,10 +31,24 @@ Před spuštěním aplikace je potřeba dodat `.env` soubor pro konfiguraci kont
 Zde je šablona pro tento soubor:
 
 ```
-NODE_CONFIG={"jwt":{"secret":"<your secret>"}, "mongoSecret":"<your secret>", "mongo": "mongodb://mongo:27017/formio", "domain": "localhost:3001/formio"}
-ROOT_EMAIL=<root email>
-ROOT_PASSWORD=<root password>
+MONGO_INITDB_ROOT_USERNAME=<root username>
+MONGO_INITDB_ROOT_PASSWORD=<root password>
+FORMIO_NODE_CONFIG={"jwt":{"secret":"<your secret>"}, "mongoSecret":"<your secret>", "mongo": "mongodb://mongo:27017/formio"}
+FORMIO_ROOT_EMAIL=<root email>
+FORMIO_ROOT_PASSWORD=<root password>
+FORMIO_MONGO_USER=<formio username>
+FORMIO_MONGO_PASSWORD=<formio password>
 ```
+
+- konfigurace mongo
+    - `MONGO_INITDB_ROOT_USERNAME` - uživatelské jméno pro přihlášení do MongoDB jako root
+    - `MONGO_INITDB_ROOT_PASSWORD` - heslo pro přihlášení uživatele `MONGO_INITDB_ROOT_USERNAME` do MongoDB jako root
+- konfigurace formio
+    - `FORMIO_NODE_CONFIG` - konfigurace formio aplikace
+    - `FORMIO_ROOT_EMAIL` - email pro přihlášení do formio aplikace jako root
+    - `FORMIO_ROOT_PASSWORD` - heslo pro přihlášení do formio aplikace jako root
+    - `FORMIO_MONGO_USER` - uživatelské jméno pro přístup Formio apliakace do MongoDB
+    - `FORMIO_MONGO_PASSWORD` - heslo pro přihlášení uživatele `FORMIO_MONGO_USER` do MongoDB
 
 ### Spuštění aplikace v produkčním módu
 
