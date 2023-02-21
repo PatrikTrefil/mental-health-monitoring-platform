@@ -16,6 +16,10 @@ services:
     volumes:
       - ./src/web-app:/app
       # keep node_modules and .next folders in the container, rather than host
+      # N.B. when these volumes are created, the folders are filled with contents
+      # of the container. After that, the folders are modified at runtime, but not when
+      # mounting them. This means that if you want to install new dependencies, you need
+      # to rebuild the container and remove the volumes, so that they are recreated.
       - /app/node_modules
       - /app/.next
     ports:
