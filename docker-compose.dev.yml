@@ -11,7 +11,6 @@ services:
     build:
       context: src/web-app/
       dockerfile: Dockerfile.dev
-    # container_name: web
     restart: always
     volumes:
       - ./src/web-app:/app
@@ -20,8 +19,8 @@ services:
       # of the container. After that, the folders are modified at runtime, but not when
       # mounting them. This means that if you want to install new dependencies, you need
       # to rebuild the container and remove the volumes, so that they are recreated.
-      - /app/node_modules
-      - /app/.next
+      - web-app-node-modules:/app/node_modules
+      - web-app-next:/app/.next
     ports:
       - 3000:3000
   reverse-proxy:
@@ -50,3 +49,7 @@ services:
   monitoring:
     ports:
       - 9090:8080
+
+volumes:
+  web-app-node-modules:
+  web-app-next:
