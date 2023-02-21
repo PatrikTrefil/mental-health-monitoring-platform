@@ -1,6 +1,11 @@
 import Head from 'next/head'
 import Image from 'next/image'
 import styles from '../styles/Home.module.css'
+import dynamic from 'next/dynamic'
+
+const DynForm = dynamic(() => import("@formio/react").then((mod) => mod.Form), {
+    ssr: false,
+});
 
 export default function Home() {
   return (
@@ -15,6 +20,11 @@ export default function Home() {
         <h1 className={styles.title}>
           Welcome to <a href="https://nextjs.org">Next.js!</a>
         </h1>
+
+        <DynForm
+            src="http://localhost:8080/formio/user/login"
+            onSubmit={console.log}
+        />
 
         <p className={styles.description}>
           Get started by editing{' '}
