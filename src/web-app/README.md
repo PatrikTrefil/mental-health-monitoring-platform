@@ -2,9 +2,9 @@
 
 ## Prerequisites
 
-- install dependencies using `npm install` or `yarn install`
-- configure the following environment variables in `.env` file
-    - `NEXT_PUBLIC_FORMIO_BASE_URL` - URL of the formio server
+-   install dependencies using `npm install` or `yarn install`
+-   configure the following environment variables in `.env` file
+    -   `NEXT_PUBLIC_FORMIO_BASE_URL` - URL of the formio server
 
 ## Production build
 

@@ -7,7 +7,8 @@ export const UserRoleTitles = {
     ZAMESTNANEC: "Zamestnanec",
 } as const;
 
-export type UserRoleTitle = typeof UserRoleTitles[keyof typeof UserRoleTitles];
+export type UserRoleTitle =
+    (typeof UserRoleTitles)[keyof typeof UserRoleTitles];
 
 export type User = {
     _id: string;

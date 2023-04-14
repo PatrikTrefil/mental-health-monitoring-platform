@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "format:check": "npx prettier --check --ignore-path .gitignore .",
+    "format:write": "npx prettier --write --ignore-path .gitignore ."
   },
   "dependencies": {
     "@formio/react": "^5.2.4-rc.1",
@@ -23,5 +25,9 @@
     "react-dom": "18.2.0",
     "react-redux": "^8.0.5",
     "typescript": "4.9.4"
+  },
+  "devDependencies": {
+    "eslint-config-prettier": "^8.8.0",
+    "prettier": "2.8.7"
   }
 }
