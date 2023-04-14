@@ -55,6 +55,9 @@ const nextConfig = {
     swcMinify: true,
     output: "standalone",
 
+    eslint: {
+        dirs: ["pages", "components", "redux"],
+    },
     // this makes hot reloading work when Dockerized
     webpack: (config) => {
         config.watchOptions = {
