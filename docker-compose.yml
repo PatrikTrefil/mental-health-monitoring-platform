@@ -6,6 +6,8 @@ services:
     build:
       context: ./src/web-app
       dockerfile: Dockerfile.production
+    environment:
+      - NEXT_PUBLIC_FORMIO_BASE_URL=http://${DOMAIN_NAME}:80/formio/
   reverse-proxy:
     restart: on-failure
 

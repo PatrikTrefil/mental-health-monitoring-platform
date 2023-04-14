@@ -1,8 +1,20 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Mental health monitoring platform web application
 
-## Getting Started
+## Prerequisites
 
-First, run the development server:
+- install dependencies using `npm install` or `yarn install`
+- configure the following environment variables in `.env` file
+    - `NEXT_PUBLIC_FORMIO_BASE_URL` - URL of the formio server
+
+## Production build
+
+```bash
+npm run build
+```
+
+## Development mode
+
+Run the development server:
 
 ```bash
 npm run dev
@@ -12,12 +24,6 @@ yarn dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `pages/index.tsx`. The page auto-updates as you edit the file.
-
-[API routes](https://nextjs.org/docs/api-routes/introduction) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.ts`.
-
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/api-routes/introduction) instead of React pages.
-
-## Docker development mode
+### Docker development mode
 
 When installing new dependencies, it's necessary to rebuild the Docker image.
