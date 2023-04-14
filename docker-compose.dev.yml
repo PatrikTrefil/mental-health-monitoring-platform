@@ -21,6 +21,8 @@ services:
       # to rebuild the container and remove the volumes, so that they are recreated.
       - web-app-node-modules:/app/node_modules
       - web-app-next:/app/.next
+    environment:
+      - NEXT_PUBLIC_FORMIO_BASE_URL=http://${DOMAIN_NAME}:8080/formio/
     ports:
       - 3000:3000
   reverse-proxy:

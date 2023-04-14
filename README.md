@@ -49,6 +49,8 @@ FORMIO_MONGO_PASSWORD=<formio password>
     - `FORMIO_ROOT_PASSWORD` - heslo pro přihlášení do formio aplikace jako root
     - `FORMIO_MONGO_USER` - uživatelské jméno pro přístup Formio apliakace do MongoDB
     - `FORMIO_MONGO_PASSWORD` - heslo pro přihlášení uživatele `FORMIO_MONGO_USER` do MongoDB
+- konfigurace webového rozhraní
+    - `DOMAIN_NAME` - doménové jméno, na kterém bude aplikace dostupná (např. `domena.cz`, `localhost`)
 
 ### Spuštění aplikace v produkčním módu
 
