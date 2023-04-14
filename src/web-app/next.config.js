@@ -8,8 +8,10 @@ const DevContentSecurityPolicy = `
 	style-src 'self' 'unsafe-inline';
     `;
 
-const isDev = process.env.NODE_ENV !== 'production'
-const ContentSecurityPolicy = isDev ? DevContentSecurityPolicy : ProductionContentSecurityPolicy;
+const isDev = process.env.NODE_ENV !== "production";
+const ContentSecurityPolicy = isDev
+    ? DevContentSecurityPolicy
+    : ProductionContentSecurityPolicy;
 
 const securityHeaders = [
     {
@@ -43,7 +45,7 @@ const securityHeaders = [
     },
     {
         key: "Content-Security-Policy",
-        value: ContentSecurityPolicy.replace(/\s{2,}/g, ' ').trim() // replace newlines with spaces
+        value: ContentSecurityPolicy.replace(/\s{2,}/g, " ").trim(), // replace newlines with spaces
     },
 ];
 
