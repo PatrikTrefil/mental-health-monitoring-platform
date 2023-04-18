@@ -9,6 +9,10 @@ on:
     branches:
       - main
 
+defaults:
+  run:
+    working-directory: docs
+
 jobs:
   Deploy-Production:
     runs-on: ubuntu-latest
