@@ -1,0 +1,4 @@
+# schema gives autocompletion in VS Code
+$schema: http://json.schemastore.org/prettierrc
+
+proseWrap: always
