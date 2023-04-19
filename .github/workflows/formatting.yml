@@ -6,9 +6,13 @@ on:
   push:
     branches:
       - main
+    paths:
+      - src/web-app/**
   pull_request:
     branches:
       - main
+    paths:
+      - src/web-app/**
 
 jobs:
   run-formatting-checks:
