@@ -1,4 +1,4 @@
-name: Lint
+name: Lint web app
 
 on:
   # Trigger the workflow on push or pull request,
@@ -20,7 +20,7 @@ defaults:
 
 jobs:
   run-linters:
-    name: Run linters
+    name: Run linters web app
     runs-on: ubuntu-latest
 
     steps:
@@ -37,4 +37,3 @@ jobs:
 
       - name: Run linters
         run: npm run lint
-
