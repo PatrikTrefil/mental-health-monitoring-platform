@@ -20,7 +20,7 @@ defaults:
 
 jobs:
   run-formatting-checks:
-    name: Run formatting checks
+    name: Run formatting checks docs
     runs-on: ubuntu-latest
 
     steps:

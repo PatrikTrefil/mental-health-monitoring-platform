@@ -20,7 +20,7 @@ defaults:
 
 jobs:
   run-formatting-checks:
-    name: Run formatting checks
+    name: Run formatting checks web app
     runs-on: ubuntu-latest
 
     steps:
@@ -37,4 +37,3 @@ jobs:
 
       - name: Run formatting checks
         run: npm run format:check
-
