@@ -7,6 +7,7 @@ Software form.io nesbírá žádná data o uživatelích
 ([vyjádření společnosti](https://github.com/formio/formio/issues/1499)).
 
 Konfigurace webového rozhraní je velmi defenzivní. Rozhraní lze použít pouze
-skrze šifrované HTTPS spojení. Aplikace nezískává při načtení v prohlížeči
-žádné zdroje poskytované třetími stranami. Bezpečnostní opatření byla nastavena na základě
+skrze šifrované HTTPS spojení. Aplikace nezískává při načtení v prohlížeči žádné
+zdroje poskytované třetími stranami. Bezpečnostní opatření byla nastavena na
+základě
 [doporučení od Mozilla Foundation](https://infosec.mozilla.org/guidelines/web_security).

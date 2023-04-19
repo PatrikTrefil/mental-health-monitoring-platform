@@ -1,4 +1,5 @@
-Toto téma může být nepříjemné nebo naopak se Vám může zdát nemístné, ale musím se Vás zeptat, zda máte plány nebo myšlenky, že byste si vzal život?
+Toto téma může být nepříjemné nebo naopak se Vám může zdát nemístné, ale musím
+se Vás zeptat, zda máte plány nebo myšlenky, že byste si vzal život?
 
 -   ☒ Ano
 -   ☐ Ne
@@ -11,7 +12,8 @@ Během posledního měsíce:
 
 ## Otázka 10a.
 
-Pomyslel jste si, že by bylo lepší, kdybyste byl mrtev nebo si přál, abyste byl mrtev?
+Pomyslel jste si, že by bylo lepší, kdybyste byl mrtev nebo si přál, abyste byl
+mrtev?
 
 -   ☒ Ano
 -   ☐ Ne
