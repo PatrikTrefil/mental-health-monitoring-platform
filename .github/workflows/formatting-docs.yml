@@ -1,4 +1,4 @@
-name: Formatting checks
+name: Formatting checks docs
 
 on:
   # Trigger the workflow on push or pull request,
@@ -7,16 +7,16 @@ on:
     branches:
       - main
     paths:
-      - src/web-app/**
+      - docs/**
   pull_request:
     branches:
       - main
     paths:
-      - src/web-app/**
+      - docs/**
 
 defaults:
   run:
-    working-directory: src/web-app
+    working-directory: docs
 
 jobs:
   run-formatting-checks:
@@ -37,4 +37,3 @@ jobs:
 
       - name: Run formatting checks
         run: npm run format:check
-
