@@ -13,6 +13,5 @@ z knihovny next. Načtení knihovny je poměrně krkolomé. Lepší
 knihovnou Next, která podporuje označejí souboru, aby běžel pouze
 na klientovi.
 
-
 [nextjs-auth-hoc]: https://theodorusclarence.com/blog/nextjs-auth-hoc#withauth-hoc-component
 [hoc-react-docs]: https://legacy.reactjs.org/docs/higher-order-components.html
