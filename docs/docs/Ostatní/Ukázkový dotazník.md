@@ -1,3 +1,7 @@
+---
+slug: ukazkovy-dotaznik
+---
+
 Toto téma může být nepříjemné nebo naopak se Vám může zdát nemístné, ale musím
 se Vás zeptat, zda máte plány nebo myšlenky, že byste si vzal život?
 
