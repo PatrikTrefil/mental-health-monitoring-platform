@@ -49,6 +49,7 @@ const config = {
                     // TODO: set this
                     editUrl:
                         "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/",
+                    routeBasePath: "/",
                 },
                 theme: {
                     customCss: require.resolve("./src/css/custom.css"),
