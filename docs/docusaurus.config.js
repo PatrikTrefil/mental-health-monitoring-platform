@@ -32,6 +32,10 @@ const config = {
         defaultLocale: "cs",
         locales: ["cs"],
     },
+    markdown: {
+        mermaid: true,
+    },
+    themes: ["@docusaurus/theme-mermaid"],
 
     presets: [
         [
