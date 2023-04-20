@@ -1,3 +1,7 @@
+---
+slug: pravidla-repozitare
+---
+
 ## Užití jazyků
 
 -   Český jazyk

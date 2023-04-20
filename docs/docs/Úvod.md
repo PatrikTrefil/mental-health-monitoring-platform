@@ -1,6 +1,6 @@
 ---
 sidebar_position: 1
-slug: /uvod
+slug: /
 ---
 
 Vítejte v dokumentaci projektu _Platforma na monitorování mentálního zdraví_,

@@ -1,3 +1,7 @@
+---
+slug: datovy-model
+---
+
 ![Diagram](./datovy-model.drawio.svg)
 
 Pro editaci otevři [svg soubor](./architektura.drawio.svg) v
