@@ -17,6 +17,7 @@
     "format:write": "npx prettier --write --ignore-path .gitignore ."
   },
   "dependencies": {
+    "@akebifiky/remark-simple-plantuml": "^1.0.2",
     "@docusaurus/core": "2.4.0",
     "@docusaurus/preset-classic": "2.4.0",
     "@docusaurus/theme-mermaid": "^2.4.0",
