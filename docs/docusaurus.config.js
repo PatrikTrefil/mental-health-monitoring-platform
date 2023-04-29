@@ -50,6 +50,9 @@ const config = {
                     editUrl:
                         "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/",
                     routeBasePath: "/",
+                    remarkPlugins: [
+                        require("@akebifiky/remark-simple-plantuml"),
+                    ],
                 },
                 theme: {
                     customCss: require.resolve("./src/css/custom.css"),
@@ -57,7 +60,6 @@ const config = {
             }),
         ],
     ],
-
     themeConfig:
         /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
         ({
