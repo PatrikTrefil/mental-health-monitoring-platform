@@ -1,6 +1,7 @@
 "use client";
 
 import "bootstrap/dist/css/bootstrap.css";
+import "formiojs/dist/formio.full.min.css";
 
 import "../styles/globals.css";
 import type { AppProps } from "next/app";
