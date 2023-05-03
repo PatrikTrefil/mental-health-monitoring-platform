@@ -1,11 +1,20 @@
 // https://nextjs.org/docs/advanced-features/security-headers
 
-const ProductionContentSecurityPolicy = "default-src 'self';";
+/* HACK: setting `worker-src blob:` is dangerous (formio should fix this,
+   see issue https://github.com/formio/formio.js/issues/5146) */
+const ProductionContentSecurityPolicy = `
+    default-src 'self';
+    script-src 'self' cdn.form.io;
+    img-src 'self' data:;
+    worker-src blob:;
+    `;
 const DevContentSecurityPolicy = `
     default-src 'self';
     connect-src 'self' webpack://* ws://*;
-	script-src 'self' 'unsafe-eval' 'unsafe-inline';
+	script-src 'self' 'unsafe-eval' 'unsafe-inline' cdn.form.io;
 	style-src 'self' 'unsafe-inline';
+    img-src 'self' data:;
+    worker-src blob:;
     `;
 
 const isDev = process.env.NODE_ENV !== "production";
