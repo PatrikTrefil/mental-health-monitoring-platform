@@ -1,10 +1,10 @@
+import WithAuth from "@/components/WithAuth";
+import DynamicFormBuilder from "@/components/dynamicFormio/DynamicFormBuilder";
+import DynamicFormEdit from "@/components/dynamicFormio/DynamicFormEdit";
+import { UserRoleTitles } from "@/redux/users";
+import { Form } from "@/types/form";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
-import WithAuth from "../../../components/WithAuth";
-import DynamicFormBuilder from "../../../components/dynamicFormio/DynamicFormBuilder";
-import DynamicFormEdit from "../../../components/dynamicFormio/DynamicFormEdit";
-import { UserRoleTitles } from "../../../redux/users";
-import { Form } from "../../../types/form";
 
 export default WithAuth(
     <EditFormPage />,

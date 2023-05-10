@@ -1,7 +1,7 @@
+import LoginComponent from "@/components/Login";
+import { UserRoleTitles } from "@/redux/users";
 import Head from "next/head";
 import { useRouter } from "next/router";
-import LoginComponent from "../../components/Login";
-import { UserRoleTitles } from "../../redux/users";
 
 export default function LoginPage() {
     const router = useRouter();

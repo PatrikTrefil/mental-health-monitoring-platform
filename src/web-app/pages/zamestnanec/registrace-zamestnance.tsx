@@ -1,6 +1,6 @@
-import WithAuth from "../../components/WithAuth";
-import DynamicForm from "../../components/dynamicFormio/DynamicForm";
-import { UserRoleTitles } from "../../redux/users";
+import WithAuth from "@/components/WithAuth";
+import DynamicForm from "@/components/dynamicFormio/DynamicForm";
+import { UserRoleTitles } from "@/redux/users";
 
 export default WithAuth(
     <RegistraceZamestnancePage />,

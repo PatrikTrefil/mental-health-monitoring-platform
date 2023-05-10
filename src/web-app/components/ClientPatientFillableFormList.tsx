@@ -1,7 +1,7 @@
-import { useAppSelector } from "../redux/hooks";
-import { roleIdSelector } from "../redux/selectors";
-import { UserRoleTitles } from "../redux/users";
-import { Form } from "../types/form";
+import { useAppSelector } from "@/redux/hooks";
+import { roleIdSelector } from "@/redux/selectors";
+import { UserRoleTitles } from "@/redux/users";
+import { Form } from "@/types/form";
 import { FormLineProps, FormList } from "./FormList";
 
 interface ClientPatientFillableFormListProps {

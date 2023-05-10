@@ -1,6 +1,6 @@
+import styles from "@/styles/Index.module.css";
 import Head from "next/head";
 import Link from "next/link";
-import styles from "../styles/Index.module.css";
 
 export default function HomePage() {
     return (

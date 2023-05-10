@@ -1,4 +1,4 @@
-import { useAppDispatch } from "../redux/hooks";
+import { useAppDispatch } from "@/redux/hooks";
 
 /**
  * Button which triggers logout action. The redux store is updated if the button is clicked.
