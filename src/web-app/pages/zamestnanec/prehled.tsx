@@ -23,7 +23,26 @@ function PrehledPage() {
                 <h1>Zaměstnanec - přehled</h1>
                 <CurrentUserDetails />
                 <LogoutButton />
+                <div>
+                    <Link href="/formular/vytvorit">Vytvořit formulář</Link>
+                </div>
+                    <h2>Seznam formulářů</h2>
+                    <ClientPatientFillableFormList FormLine={ManagerFormLine} />
+                </div>
             </main>
         </>
+    );
+}
+/**
+ * Provides a list item with basic information about the form and buttons to edit and delete the given form.
+ */
+function ManagerFormLine({ form, deleteForm }: FormLineProps) {
+    return (
+        <li>
+            Název: {`"${form.name}"`}{" "}
+            <Link href={"/formular/upravit/" + form._id}>Upravit</Link>
+            <button onClick={deleteForm}>Smazat</button>
+            <ExportButton formId={form._id} />
+        </li>
     );
 }
