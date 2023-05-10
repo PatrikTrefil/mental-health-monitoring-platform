@@ -11,9 +11,6 @@ on:
     paths:
       - docs/**
       - src/web-app/**
-  pull_request:
-    branches:
-      - main
 
 defaults:
   run:
