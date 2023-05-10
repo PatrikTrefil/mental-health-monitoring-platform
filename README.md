@@ -1,3 +1,5 @@
+[![Docs deployment](https://github.com/PatrikTrefil/mental-health-monitoring-platform/actions/workflows/deployment-production-docs.yml/badge.svg)](https://github.com/PatrikTrefil/mental-health-monitoring-platform/actions/workflows/deployment-production-docs.yml)
+
 # Software pro sledování efektivity psychoterapie
 
 Software poskytuje prostředí pro spolupráci psychoterapeutů a jejich
@@ -40,17 +42,17 @@ FORMIO_MONGO_USER=<formio username>
 FORMIO_MONGO_PASSWORD=<formio password>
 ```
 
-- konfigurace mongo
-    - `MONGO_INITDB_ROOT_USERNAME` - uživatelské jméno pro přihlášení do MongoDB jako root
-    - `MONGO_INITDB_ROOT_PASSWORD` - heslo pro přihlášení uživatele `MONGO_INITDB_ROOT_USERNAME` do MongoDB jako root
-- konfigurace formio
-    - `FORMIO_NODE_CONFIG` - konfigurace formio aplikace
-    - `FORMIO_ROOT_EMAIL` - email pro přihlášení do formio aplikace jako root
-    - `FORMIO_ROOT_PASSWORD` - heslo pro přihlášení do formio aplikace jako root
-    - `FORMIO_MONGO_USER` - uživatelské jméno pro přístup Formio apliakace do MongoDB
-    - `FORMIO_MONGO_PASSWORD` - heslo pro přihlášení uživatele `FORMIO_MONGO_USER` do MongoDB
-- konfigurace webového rozhraní
-    - `DOMAIN_NAME` - doménové jméno, na kterém bude aplikace dostupná (např. `domena.cz`, `localhost`)
+-   konfigurace mongo
+    -   `MONGO_INITDB_ROOT_USERNAME` - uživatelské jméno pro přihlášení do MongoDB jako root
+    -   `MONGO_INITDB_ROOT_PASSWORD` - heslo pro přihlášení uživatele `MONGO_INITDB_ROOT_USERNAME` do MongoDB jako root
+-   konfigurace formio
+    -   `FORMIO_NODE_CONFIG` - konfigurace formio aplikace
+    -   `FORMIO_ROOT_EMAIL` - email pro přihlášení do formio aplikace jako root
+    -   `FORMIO_ROOT_PASSWORD` - heslo pro přihlášení do formio aplikace jako root
+    -   `FORMIO_MONGO_USER` - uživatelské jméno pro přístup Formio apliakace do MongoDB
+    -   `FORMIO_MONGO_PASSWORD` - heslo pro přihlášení uživatele `FORMIO_MONGO_USER` do MongoDB
+-   konfigurace webového rozhraní
+    -   `DOMAIN_NAME` - doménové jméno, na kterém bude aplikace dostupná (např. `domena.cz`, `localhost`)
 
 ### Spuštění aplikace v produkčním módu
 
@@ -71,9 +73,9 @@ Na všechny komponenty se lze připojit i přímo (mapování portů je definov�
 
 ## Užívání softwaru
 
-- `/` - hlavní stránka webového rozhraní
-- `/nginx_status` - status reverse proxy
-- `/health` - vratí 200 pokud je reverse proxy dostupná
-- `/monitoring/` - monitoring aplikace
-    - `/monitoring/api` - monitoring API ([oficiální dokumentace](https://github.com/google/cadvisor/blob/master/docs/api.md))
-- `/formio/` - webové rozhraní/API pro správu formulářů ([oficiální dokumentace](https://apidocs.form.io/))
+-   `/` - hlavní stránka webového rozhraní
+-   `/nginx_status` - status reverse proxy
+-   `/health` - vratí 200 pokud je reverse proxy dostupná
+-   `/monitoring/` - monitoring aplikace
+    -   `/monitoring/api` - monitoring API ([oficiální dokumentace](https://github.com/google/cadvisor/blob/master/docs/api.md))
+-   `/formio/` - webové rozhraní/API pro správu formulářů ([oficiální dokumentace](https://apidocs.form.io/))
