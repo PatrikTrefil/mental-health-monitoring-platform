@@ -1,0 +1,5 @@
+{
+  "$schema": "https://typedoc.org/schema.json",
+  "entryPoints": ["redux", "components", "pages", "types"],
+  "entryPointStrategy": "expand"
+}
