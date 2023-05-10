@@ -1,10 +1,3 @@
-interface ExportButtonProps {
-    /**
-     * Form ID of the form to export
-     */
-    formId: string;
-}
-
 /**
  * Button for exporting a form submissions as CSV
  */
@@ -34,4 +27,14 @@ export default function ExportButton({ formId }: ExportButtonProps) {
             Export CSV
         </button>
     );
+}
+
+/**
+ * Props for {@link ExportButton}
+ */
+export interface ExportButtonProps {
+    /**
+     * Form ID of the form to export
+     */
+    formId: string;
 }
