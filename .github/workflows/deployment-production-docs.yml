@@ -28,12 +28,16 @@ jobs:
         with:
           node-version: 18
 
-      - name: Install Vercel CLI
-        run: npm install --global vercel@latest
-
       - name: Install Node.js dependencies of web app
         run: npm ci
         working-directory: src/web-app
+
+      - name: Generate next-env.d.ts in web app
+        run: npm run build
+        working-directory: src/web-app
+
+      - name: Install Vercel CLI
+        run: npm install --global vercel@latest
 
       - name: Pull Vercel Environment Information
         run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
