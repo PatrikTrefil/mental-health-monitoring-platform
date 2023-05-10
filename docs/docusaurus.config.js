@@ -17,7 +17,6 @@ const config = {
                     `${webAppRoot}/components`,
                     `${webAppRoot}/pages`,
                     `${webAppRoot}/types`,
-                    `${webAppRoot}/styles`,
                 ],
                 tsconfig: `${webAppRoot}/tsconfig.json`,
                 entryPointStrategy: "expand",
