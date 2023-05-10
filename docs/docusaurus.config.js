@@ -4,8 +4,30 @@
 const lightCodeTheme = require("prism-react-renderer/themes/github");
 const darkCodeTheme = require("prism-react-renderer/themes/dracula");
 
+const webAppRoot = "../src/web-app/";
+
 /** @type {import('@docusaurus/types').Config} */
 const config = {
+    plugins: [
+        [
+            "docusaurus-plugin-typedoc",
+            {
+                entryPoints: [
+                    `${webAppRoot}/redux`,
+                    `${webAppRoot}/components`,
+                    `${webAppRoot}/pages`,
+                    `${webAppRoot}/types`,
+                ],
+                tsconfig: `${webAppRoot}/tsconfig.json`,
+                entryPointStrategy: "expand",
+                out: "Webová aplikace/Reference",
+                watch: process.env.TYPEDOC_WATCH,
+                sidebar: {
+                    categoryLabel: "Reference",
+                },
+            },
+        ],
+    ],
     title: "Dokumentace - Mental health monitoring platform",
     tagline: "",
     favicon: "img/favicon.ico",
