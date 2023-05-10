@@ -35,7 +35,7 @@ Person(zadavatelUkolu, "Zadavatel úkolů")
 System_Boundary(systemBoundary, "Platforma pro monitorování mentálního zdraví") {
     Container(webApp, "Webová aplikace")
     Container(monitoring, "Monitoring")
-    Container_Ext(userManagement, "Manažer uživatelů a autentifikace")
+    Container(userManagement, "Manažer uživatelů a autentifikace")
     Container(spravaFormularu, "Správa formulářů")
     Container(spravaUkolu, "Správa úkolů")
     ContainerDb(formulareDb, "Databáze správce formulářů")
