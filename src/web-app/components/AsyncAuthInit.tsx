@@ -1,5 +1,5 @@
+import { useAppDispatch } from "@/redux/hooks";
 import { useEffect } from "react";
-import { useAppDispatch } from "../redux/hooks";
 
 /**
  * Asynchronously initialize authentication of the application.

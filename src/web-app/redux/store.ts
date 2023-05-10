@@ -15,7 +15,14 @@ export type AuthState = {
     submissionAccess: unknown;
     formAccess: unknown;
     projectAccess: unknown;
-    roles: unknown;
+    roles: {
+        [key: string]: {
+            _id: string;
+            title: string;
+            admin: boolean;
+            default: boolean;
+        };
+    };
     is: unknown;
     error: string;
 };

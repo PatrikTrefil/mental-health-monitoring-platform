@@ -1,4 +1,4 @@
-import { useAppSelector } from "../redux/hooks";
+import { useAppSelector } from "@/redux/hooks";
 
 /**
  * Display information about currently logged in user.

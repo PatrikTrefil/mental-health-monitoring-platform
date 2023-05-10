@@ -1,9 +1,9 @@
-import { UserRoleTitle } from "../redux/users";
-import DynamicLoginForm from "./DynamicLoginForm";
+import { useAppSelector } from "@/redux/hooks";
+import { roleIdSelector } from "@/redux/selectors";
+import { UserRoleTitle } from "@/redux/users";
 import { useEffect, useState } from "react";
-import { roleIdSelector } from "../redux/selectors";
 import LogoutButton from "./LogoutButton";
-import { useAppSelector } from "../redux/hooks";
+import DynamicLoginForm from "./dynamicFormio/DynamicLoginForm";
 
 type Props = {
     onSucessfullAuth: () => void;

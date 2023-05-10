@@ -1,8 +1,8 @@
+import { useAppSelector } from "@/redux/hooks";
+import { roleIdSelector } from "@/redux/selectors";
+import { UserRoleTitle } from "@/redux/users";
 import { useRouter } from "next/router";
-import { UserRoleTitle } from "../redux/users";
-import { roleIdSelector } from "../redux/selectors";
 import { useEffect } from "react";
-import { useAppSelector } from "../redux/hooks";
 
 /**
  * Wrap a component with authentication logic. The wrapped component is only displayed if the user is logged in and has
