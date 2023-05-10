@@ -4,9 +4,16 @@ import WithAuth from "../components/WithAuth";
 import { UserRoleTitles } from "../redux/users";
 import Head from "next/head";
 
-export default WithAuth(<Prehled />, "/login", UserRoleTitles.KLIENT_PACIENT);
+export default WithAuth(
+    <PrehledPage />,
+    "/login",
+    UserRoleTitles.KLIENT_PACIENT
+);
 
-function Prehled() {
+/**
+ * Prehled (dashboard) page for clients/patients.
+ */
+function PrehledPage() {
     return (
         <>
             <Head>

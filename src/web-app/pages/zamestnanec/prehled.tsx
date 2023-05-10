@@ -5,12 +5,15 @@ import WithAuth from "../../components/WithAuth";
 import Head from "next/head";
 
 export default WithAuth(
-    <Prehled />,
+    <PrehledPage />,
     "/zamestnanec/login",
     UserRoleTitles.ZAMESTNANEC
 );
 
-function Prehled() {
+/**
+ * Prehled (dashboard) page for employees.
+ */
+function PrehledPage() {
     return (
         <>
             <Head>
