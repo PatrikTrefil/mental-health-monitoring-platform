@@ -27,3 +27,11 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 ### Docker development mode
 
 When installing new dependencies, it's necessary to rebuild the Docker image.
+
+## Generate documentation
+
+```bash
+npm run docs
+```
+
+The generated documentation will be available in `docs` folder.
