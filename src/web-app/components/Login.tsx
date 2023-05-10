@@ -1,5 +1,5 @@
 import { UserRoleTitle } from "../redux/users";
-import DynamicLoginForm from "./DynamicLoginForm";
+import DynamicLoginForm from "./dynamicFormio/DynamicLoginForm";
 import { useEffect, useState } from "react";
 import { roleIdSelector } from "../redux/selectors";
 import LogoutButton from "./LogoutButton";
