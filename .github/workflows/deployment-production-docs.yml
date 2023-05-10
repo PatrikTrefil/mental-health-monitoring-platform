@@ -10,6 +10,7 @@ on:
       - main
     paths:
       - docs/**
+      - src/web-app/**
 
 defaults:
   run:
@@ -22,8 +23,17 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+      - name: Set up Node.js
+        uses: actions/setup-node@v1
+        with:
+          node-version: 18
+
       - name: Install Vercel CLI
         run: npm install --global vercel@latest
+
+      - name: Install Node.js dependencies of web app
+        run: npm ci
+        working-directory: src/web-app
 
       - name: Pull Vercel Environment Information
         run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
