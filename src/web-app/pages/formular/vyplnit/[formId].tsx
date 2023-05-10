@@ -1,7 +1,7 @@
 import { useRouter } from "next/router";
+import WithAuth from "../../../components/WithAuth";
 import DynamicForm from "../../../components/dynamicFormio/DynamicForm";
 import { UserRoleTitles } from "../../../redux/users";
-import WithAuth from "../../../components/WithAuth";
 
 export default WithAuth(
     <FillOutFormPage />,

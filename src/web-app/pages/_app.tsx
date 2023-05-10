@@ -3,13 +3,12 @@
 import "bootstrap/dist/css/bootstrap.css";
 import "formiojs/dist/formio.full.min.css";
 
-import "../styles/globals.css";
 import type { AppProps } from "next/app";
-
-import { Provider } from "react-redux";
 import dynamic from "next/dynamic";
-import AsyncAuthInit from "../components/AsyncAuthInit";
 import Head from "next/head";
+import { Provider } from "react-redux";
+import AsyncAuthInit from "../components/AsyncAuthInit";
+import "../styles/globals.css";
 
 export default function App({ Component, pageProps }: AppProps) {
     // We can not use any sort of SSR, because the store depends on "@formio/react",
