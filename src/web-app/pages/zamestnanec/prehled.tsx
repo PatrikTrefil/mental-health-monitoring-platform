@@ -3,6 +3,10 @@ import LogoutButton from "../../components/LogoutButton";
 import CurrentUserDetails from "../../components/CurrentUserDetails";
 import WithAuth from "../../components/WithAuth";
 import Head from "next/head";
+import Link from "next/link";
+import { FormLineProps } from "../../components/FormList";
+import ClientPatientFillableFormList from "../../components/ClientPatientFillableFormList";
+import ExportButton from "../../components/zamestnanec/ExportButton";
 
 export default WithAuth(
     <PrehledPage />,
@@ -26,6 +30,17 @@ function PrehledPage() {
                 <div>
                     <Link href="/formular/vytvorit">Vytvořit formulář</Link>
                 </div>
+                <div>
+                    <Link href="./registrace-zamestnance">
+                        Založit účet nového zaměstnance
+                    </Link>
+                </div>
+                <div>
+                    <Link href="./registrace-pacienta-klienta">
+                        Založit účet nového pacienta/klienta
+                    </Link>
+                </div>
+                <div>
                     <h2>Seznam formulářů</h2>
                     <ClientPatientFillableFormList FormLine={ManagerFormLine} />
                 </div>
