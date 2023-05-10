@@ -5,11 +5,6 @@ import { useEffect, useState } from "react";
 import LogoutButton from "./LogoutButton";
 import DynamicLoginForm from "./dynamicFormio/DynamicLoginForm";
 
-type Props = {
-    onSucessfullAuth: () => void;
-    allowedRoleTitle: UserRoleTitle;
-};
-
 /**
  * Login form with logic around redirects and permissions.
  *
@@ -19,7 +14,10 @@ type Props = {
  * If the user logs in successfully and has required permissions, the onSucessfullAuth callback is called.
  * If the user is already logged in and has required permissions, the onSucessfullAuth callback is called.
  */
-export default function Login({ onSucessfullAuth, allowedRoleTitle }: Props) {
+export default function Login({
+    onSucessfullAuth,
+    allowedRoleTitle,
+}: LoginProps) {
     const user = useAppSelector((state: any) => state?.auth?.user);
     const allowedRoleId = useAppSelector(roleIdSelector(allowedRoleTitle));
     const [showLogout, setShowLogout] = useState(false);
@@ -60,4 +58,12 @@ export default function Login({ onSucessfullAuth, allowedRoleTitle }: Props) {
 
     // This form must not be rendered if the user is already logged in.
     return <DynamicLoginForm />;
+}
+
+/**
+ * Props for {@link Login}
+ */
+export interface LoginProps {
+    onSucessfullAuth: () => void;
+    allowedRoleTitle: UserRoleTitle;
 }

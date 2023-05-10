@@ -1,18 +1,6 @@
 import { Form } from "@/types/form";
 import { useEffect, useState } from "react";
 
-interface FormListProps {
-    /**
-     * Filter function for forms. If this function returns true, the form is shown.
-     * If it returns false, the form is hidden.
-     */
-    filter: (form: Form) => boolean;
-    /**
-     * Component to show for each form.
-     */
-    FormLine: React.ComponentType<FormLineProps>;
-}
-
 /**
  * List of forms which are filtered and shown using FormLine.
  */
@@ -73,6 +61,10 @@ export function FormList({ filter, FormLine }: FormListProps) {
     );
 }
 
+/**
+ * Props of a component, which is used to show a list item of a form.
+ * This component is used in {@link FormList}.
+ */
 export interface FormLineProps {
     /**
      * Form to show.
@@ -82,4 +74,19 @@ export interface FormLineProps {
      * Delete the form that is beign shown.
      */
     deleteForm: () => Promise<void>;
+}
+
+/**
+ * Props for {@link FormList}
+ */
+export interface FormListProps {
+    /**
+     * Filter function for forms. If this function returns true, the form is shown.
+     * If it returns false, the form is hidden.
+     */
+    filter: (form: Form) => boolean;
+    /**
+     * Component to show for each form.
+     */
+    FormLine: React.ComponentType<FormLineProps>;
 }

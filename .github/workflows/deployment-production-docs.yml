@@ -1,4 +1,4 @@
-name: Vercel Production Deployment
+name: Docs Production Deployment
 
 env:
   VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
@@ -10,6 +10,7 @@ on:
       - main
     paths:
       - docs/**
+      - src/web-app/**
 
 defaults:
   run:
@@ -21,6 +22,19 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v1
+        with:
+          node-version: 18
+
+      - name: Install Node.js dependencies of web app
+        run: npm ci
+        working-directory: src/web-app
+
+      - name: Generate next-env.d.ts in web app
+        run: npm run build
+        working-directory: src/web-app
 
       - name: Install Vercel CLI
         run: npm install --global vercel@latest

@@ -4,10 +4,6 @@ import { UserRoleTitles } from "@/redux/users";
 import { Form } from "@/types/form";
 import { FormLineProps, FormList } from "./FormList";
 
-interface ClientPatientFillableFormListProps {
-    FormLine: React.ComponentType<FormLineProps>;
-}
-
 /**
  * List of forms that can be filled by a client/patient.
  */
@@ -29,4 +25,11 @@ export default function ClientPatientFillableFormList({
     };
 
     return <FormList filter={formFilter} FormLine={FormLine} />;
+}
+
+/**
+ * Props for {@link ClientPatientFillableFormList}
+ */
+export interface ClientPatientFillableFormListProps {
+    FormLine: React.ComponentType<FormLineProps>;
 }
