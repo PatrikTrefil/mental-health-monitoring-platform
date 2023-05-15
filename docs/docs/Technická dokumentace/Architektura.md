@@ -34,8 +34,9 @@ Person(zadavatelUkolu, "Zadavatel úkolů")
 
 System_Boundary(systemBoundary, "Platforma pro monitorování mentálního zdraví") {
     Container(webApp, "Webová aplikace")
-    Container(monitoring, "Monitoring")
-    Container(userManagement, "Manažer uživatelů a autentifikace")
+    Container(monitoringWeb, "Monitoring web")
+    Container(monitoringServer, "Monitoring server")
+    Container(manazerUzivatelu, "Manažer uživatelů a autentifikace")
     Container(spravaFormularu, "Správa formulářů")
     Container(spravaUkolu, "Správa úkolů")
     ContainerDb(formulareDb, "Databáze správce formulářů")
@@ -51,21 +52,22 @@ Lay_D(zadavatelUkolu, systemBoundary)
 Rel_D(pacient, webApp, "Používá")
 Rel_D(klient, webApp, "Používá")
 Rel_D(admin, webApp, "Používá")
-Rel_D(admin, monitoring, "Používá")
+Rel_D(admin, monitoringWeb, "Používá")
 Rel_D(zadavatelUkolu, webApp, "Používá")
 Rel_D(spravceUkolu, webApp, "Používá")
 
-Rel(spravaUkolu, ukolyDb, "Stores data")
+Rel(spravaUkolu, ukolyDb, "Ukládá data")
 Rel(webApp, spravaFormularu, "Používá")
 Rel(webApp, spravaUkolu, "Používá")
-Rel(spravaFormularu, formulareDb, "Stores data")
-Rel(spravaFormularu, userManagement, "Authorizes actions")
-Rel(spravaUkolu, userManagement, "Authrizes  actions")
+Rel(spravaFormularu, formulareDb, "Ukládá data")
+Rel(spravaFormularu, manazerUzivatelu, "Autorizuje akce")
+Rel(spravaUkolu, manazerUzivatelu, "Autorizuje akce")
 
-Rel(monitoring, spravaFormularu, "Monitors")
-Rel(monitoring, formulareDb, "Monitors")
-Rel_L(monitoring, webApp, "Monitors")
-Rel(monitoring, spravaUkolu, "Monitors")
+Rel(monitoringServer, spravaFormularu, "Monitoruje")
+Rel(monitoringServer, formulareDb, "Monitoruje")
+Rel(monitoringServer, spravaUkolu, "Monitoruje")
+
+Rel(monitoringWeb, monitoringServer, "Čte data")
 
 @enduml
 ```
