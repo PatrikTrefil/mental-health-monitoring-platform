@@ -8,6 +8,7 @@ import "@/styles/globals.css";
 import type { AppProps } from "next/app";
 import dynamic from "next/dynamic";
 import Head from "next/head";
+import Spinner from "react-bootstrap/Spinner";
 import { Provider } from "react-redux";
 
 export default function App({ Component, pageProps }: AppProps) {
@@ -47,7 +48,13 @@ export default function App({ Component, pageProps }: AppProps) {
         },
         {
             ssr: false,
-            loading: () => <span>Načítání ...</span>,
+            loading: () => (
+                <div className="position-absolute top-50 start-50 translate-middle">
+                    <Spinner animation="border" role="status">
+                        <span className="visually-hidden">Načítání...</span>
+                    </Spinner>
+                </div>
+            ),
         }
     );
 

@@ -5,6 +5,7 @@ import { useAppSelector } from "@/redux/hooks";
 import { roleIdSelector } from "@/redux/selectors";
 import { UserRoleTitles } from "@/redux/users";
 import { useRouter } from "next/router";
+import Spinner from "react-bootstrap/Spinner";
 
 export default WithAuth(
     <CreateFormPage />,
@@ -25,7 +26,13 @@ function CreateFormPage() {
     const router = useRouter();
 
     if (!klientPacientRoleId || !zamestnanecRoleId)
-        return <div>Načítání...</div>;
+        return (
+            <div className="position-absolute top-50 start-50 translate-middle">
+                <Spinner animation="border" role="status">
+                    <span className="visually-hidden">Načítání...</span>
+                </Spinner>
+            </div>
+        );
     else
         return (
             <DynamicFormEdit

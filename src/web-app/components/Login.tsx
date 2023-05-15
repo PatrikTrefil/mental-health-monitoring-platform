@@ -2,6 +2,8 @@ import { useAppSelector } from "@/redux/hooks";
 import { roleIdSelector } from "@/redux/selectors";
 import { UserRoleTitle } from "@/redux/users";
 import { useEffect, useState } from "react";
+import Alert from "react-bootstrap/Alert";
+import Spinner from "react-bootstrap/Spinner";
 import LogoutButton from "./LogoutButton";
 import DynamicLoginForm from "./dynamicFormio/DynamicLoginForm";
 
@@ -42,10 +44,10 @@ export default function Login({
     if (showLogout)
         return (
             <>
-                <span>
+                <Alert variant="danger">
                     Váš účet nemá přístup do této sekce. První se odhlaste a
                     poté se přihlaste jako &quot;{allowedRoleTitle}&quot;.
-                </span>
+                </Alert>
                 <LogoutButton />
             </>
         );
@@ -54,7 +56,13 @@ export default function Login({
     // if the user is already logged in, we still want don't want to display the login form,
     // because the user will either be redirected or notified about insufficient permissions.
     if (!isAuthInitialized || isThereAnOngoingAuthRequest || isUserLoggedIn)
-        return <div>Načítání...</div>;
+        return (
+            <div className="position-absolute top-50 start-50 translate-middle">
+                <Spinner animation="border" role="status">
+                    <span className="visually-hidden">Načítání...</span>
+                </Spinner>
+            </div>
+        );
 
     // This form must not be rendered if the user is already logged in.
     return <DynamicLoginForm />;

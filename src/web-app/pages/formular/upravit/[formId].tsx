@@ -5,6 +5,7 @@ import { UserRoleTitles } from "@/redux/users";
 import { Form } from "@/types/form";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
+import Spinner from "react-bootstrap/Spinner";
 
 export default WithAuth(
     <EditFormPage />,
@@ -50,7 +51,12 @@ function EditFormPage() {
         [router]
     );
 
-    if (form === null) return <div>Načítání...</div>;
+    if (form === null)
+        return (
+            <Spinner animation="border" role="status">
+                <span className="visually-hidden">Načítání...</span>
+            </Spinner>
+        );
     else
         return (
             <DynamicFormEdit

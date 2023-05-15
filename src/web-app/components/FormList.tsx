@@ -1,5 +1,6 @@
 import { Form } from "@/types/form";
 import { useEffect, useState } from "react";
+import { Button } from "react-bootstrap";
 
 /**
  * List of forms which are filtered and shown using FormLine.
@@ -41,13 +42,13 @@ export function FormList({ filter, FormLine }: FormListProps) {
 
     return (
         <>
-            <button
+            <Button
                 onClick={() => {
                     refreshFormsState();
                 }}
             >
                 Aktualizovat seznam formularu
-            </button>
+            </Button>
             <ul>
                 {filteredForms.map((form) => (
                     <FormLine
