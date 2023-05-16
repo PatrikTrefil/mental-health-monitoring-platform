@@ -5,11 +5,14 @@ import "formiojs/dist/formio.full.min.css";
 
 import AsyncAuthInit from "@/components/AsyncAuthInit";
 import "@/styles/globals.css";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { AppProps } from "next/app";
 import dynamic from "next/dynamic";
 import Head from "next/head";
 import Spinner from "react-bootstrap/Spinner";
 import { Provider } from "react-redux";
+
+const queryClient = new QueryClient();
 
 export default function App({ Component, pageProps }: AppProps) {
     // We can not use any sort of SSR, because the store depends on "@formio/react",
@@ -67,7 +70,9 @@ export default function App({ Component, pageProps }: AppProps) {
                     content="width=device-width, initial-scale=1"
                 />
             </Head>
-            <ProviderWithStoreLoaded />
+            <QueryClientProvider client={queryClient}>
+                <ProviderWithStoreLoaded />
+            </QueryClientProvider>
         </>
     );
 }

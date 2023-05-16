@@ -24,7 +24,14 @@ export default function ClientPatientFillableFormList({
         );
     };
 
-    return <FormList filter={formFilter} FormLine={FormLine} />;
+    return (
+        <FormList
+            filterOptions={{
+                tags: "klientPacient",
+            }}
+            FormLine={FormLine}
+        />
+    );
 }
 
 /**
