@@ -54,6 +54,9 @@ function ManagerFormLine({ form, deleteForm }: FormLineProps) {
         <li className="d-flex flex-wrap justify-content-between align-content-center list-group-item align-items-baseline">
             {form.name}
             <div className="d-flex flex-wrap gap-2 align-content-center justify-content-center">
+                <Button as="a" href={"/formular/nahled/" + form._id}>
+                    Náhled
+                </Button>
                 <Button as="a" href={"/formular/upravit/" + form._id}>
                     Upravit
                 </Button>
