@@ -1,6 +1,6 @@
 import styles from "@/styles/Index.module.css";
 import Head from "next/head";
-import Link from "next/link";
+import { Button } from "react-bootstrap";
 
 export default function HomePage() {
     return (
@@ -16,7 +16,9 @@ export default function HomePage() {
                 <h1 className={styles.title}>
                     Vítejte na platformě pro monitorování mentálního zdraví
                 </h1>
-                <Link href="/login">Přihlásit se</Link>
+                <Button href="/login" as="a">
+                    Přihlásit se
+                </Button>
             </main>
         </div>
     );

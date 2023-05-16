@@ -1,4 +1,5 @@
 import dynamic from "next/dynamic";
+import Spinner from "react-bootstrap/Spinner";
 
 /**
  * This component is used to dynamically load the Formio Builder component.
@@ -12,7 +13,13 @@ const DynamicFormBuilder = dynamic(
         }),
     {
         ssr: false,
-        loading: () => <span>Načítání ...</span>,
+        loading: () => (
+            <div className="position-absolute top-50 start-50 translate-middle">
+                <Spinner animation="border" role="status">
+                    <span className="visually-hidden">Načítání...</span>
+                </Spinner>
+            </div>
+        ),
     }
 );
 

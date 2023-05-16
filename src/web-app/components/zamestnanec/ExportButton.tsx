@@ -1,3 +1,5 @@
+import { Button } from "react-bootstrap";
+
 /**
  * Button for exporting a form submissions as CSV
  */
@@ -5,15 +7,16 @@ export default function ExportButton({ formId }: ExportButtonProps) {
     const token = localStorage.getItem("formioToken");
     // HACK: using link before setting up file saving
     return (
-        <a
+        <Button
             href={`/formio/form/${formId}/export?format=csv&x-jwt-token=${token}`}
+            as="a"
         >
             Export CSV
-        </a>
+        </Button>
     );
 
     return (
-        <button
+        <Button
             onClick={async () => {
                 const response = await fetch(
                     `/formio/form/${formId}/export?format=csv`
@@ -25,7 +28,7 @@ export default function ExportButton({ formId }: ExportButtonProps) {
             }}
         >
             Export CSV
-        </button>
+        </Button>
     );
 }
 

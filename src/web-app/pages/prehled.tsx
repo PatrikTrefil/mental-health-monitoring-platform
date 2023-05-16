@@ -5,6 +5,7 @@ import LogoutButton from "@/components/LogoutButton";
 import WithAuth from "@/components/WithAuth";
 import { UserRoleTitles } from "@/redux/users";
 import Head from "next/head";
+import { Button } from "react-bootstrap";
 
 export default WithAuth(
     <PrehledPage />,
@@ -39,9 +40,11 @@ function PrehledPage() {
  */
 function UserFormLine({ form }: FormLineProps) {
     return (
-        <li>
+        <li className="list-group-item">
             Název: {`"${form.name}"`}{" "}
-            <a href={`/formular/vyplnit/${form._id}`}>vyplnit</a>
+            <Button as="a" href={`/formular/vyplnit/${form._id}`}>
+                vyplnit
+            </Button>
         </li>
     );
 }
