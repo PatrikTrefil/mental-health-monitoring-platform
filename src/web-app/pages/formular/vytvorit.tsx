@@ -96,6 +96,7 @@ function CreateFormPage() {
                                 roles: [klientPacientRoleId],
                             },
                         ],
+                        tags: ["klientPacient"],
                     }}
                 >
                     <DynamicFormBuilder />

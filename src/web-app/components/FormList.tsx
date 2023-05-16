@@ -1,27 +1,109 @@
 import { Form } from "@/types/form";
-import { useEffect, useState } from "react";
-import { Button } from "react-bootstrap";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useCallback, useEffect, useState } from "react";
+import { Alert, Button, Spinner } from "react-bootstrap";
 
 /**
  * List of forms which are filtered and shown using FormLine.
  */
-export function FormList({ filter, FormLine }: FormListProps) {
-    const [forms, setForms] = useState<Form[]>([]);
+export function FormList({ filterOptions, FormLine }: FormListProps) {
+    const queryClient = useQueryClient();
 
-    const refreshFormsState = async () => {
-        const { Formio } = await import("formiojs");
-        const formio = new Formio(
-            process.env.NEXT_PUBLIC_FORMIO_BASE_URL as string
+    const pageSize = 10;
+    const [pageIndex, setPageIndex] = useState(0);
+    const [totalPages, setTotalPages] = useState(0);
+
+    const fetchForms = useCallback(
+        async (page: number, currentTotalPages: number) => {
+            const url = new URL(
+                (process.env.NEXT_PUBLIC_FORMIO_BASE_URL as string) + "/form/"
+            );
+            url.searchParams.set("limit", pageSize.toString());
+            url.searchParams.set("skip", (page * pageSize).toString());
+            url.searchParams.set("type", "form");
+            for (const [key, value] of Object.entries(filterOptions)) {
+                url.searchParams.set(key, value);
+            }
+
+            const response = await fetch(url, {
+                headers: new Headers({
+                    "x-jwt-token": localStorage.getItem(
+                        "formioToken"
+                    ) as string,
+                }),
+            });
+            const contentRangeParser =
+                /(?<range>(?<rangeStart>[0-9]+)-(?<rangeEnd>[0-9]+)|\*)\/(?<size>[0-9]+)/;
+            const match = response.headers
+                .get("content-range")
+                ?.match(contentRangeParser);
+
+            if (!match) throw new Error("Invalid content-range header");
+
+            const groups = match.groups as {
+                range: string;
+                rangeStart: string | undefined;
+                rangeEnd: string | undefined;
+                size: string;
+            };
+            const newTotalPages =
+                groups.range === "*"
+                    ? 0
+                    : Math.ceil(parseInt(groups.size) / pageSize);
+
+            if (newTotalPages !== currentTotalPages) {
+                setTotalPages(newTotalPages);
+            }
+
+            return {
+                forms: (await response.json()) as Form[],
+                hasMore:
+                    groups.range === "*"
+                        ? false
+                        : parseInt(groups.rangeEnd!) <
+                          parseInt(groups.size) - 1,
+            };
+        },
+        [filterOptions]
+    );
+    const {
+        isLoading,
+        isError,
+        error,
+        data,
+        isFetching,
+        refetch,
+        isPreviousData,
+    } = useQuery({
+        queryKey: ["forms", pageIndex, totalPages],
+        queryFn: () => fetchForms(pageIndex, totalPages),
+        keepPreviousData: true,
+    });
+    // Prefetch the next page!
+    useEffect(() => {
+        if (!isPreviousData && data?.hasMore) {
+            queryClient.prefetchQuery({
+                // eslint-disable-next-line @tanstack/query/exhaustive-deps
+                queryKey: ["forms", pageIndex + 1],
+                queryFn: () => fetchForms(pageIndex + 1, totalPages),
+            });
+        }
+    }, [data, isPreviousData, pageIndex, queryClient, fetchForms, totalPages]);
+
+    if (isLoading)
+        return (
+            <div className="position-absolute top-50 start-50 translate-middle">
+                <Spinner animation="border" role="status">
+                    <span className="visually-hidden">Načítání...</span>
+                </Spinner>
+            </div>
         );
-        // TODO: add pagination
-        const newForms = await formio.loadForms({
-            // HACK: use query params for filtering instead of filter function
-            params: {
-                limit: 100,
-            },
-        });
-        setForms(newForms);
-    };
+    if (isError) {
+        console.error(error);
+        return (
+            <Alert variant="danger">Načítání seznamu formulářů selhalo.</Alert>
+        );
+    }
 
     const deleteForm = async (form: Form) => {
         const { Formio } = await import("formiojs");
@@ -31,27 +113,32 @@ export function FormList({ filter, FormLine }: FormListProps) {
                 form.path
         );
         await formio.deleteForm();
-        await refreshFormsState();
+        await queryClient.invalidateQueries(["forms"]);
     };
-
-    useEffect(function initForms() {
-        refreshFormsState();
-    }, []);
-
-    const filteredForms = forms.filter(filter);
 
     return (
         <>
-            <Button
-                onClick={() => {
-                    refreshFormsState();
-                }}
-                className="mb-1"
-            >
-                Aktualizovat
-            </Button>
+            <div className="d-flex flex-wrap align-items-center gap-2">
+                <Button
+                    onClick={() => {
+                        refetch();
+                    }}
+                    className="mb-1"
+                >
+                    Aktualizovat
+                </Button>
+                {/* Since the last page's data potentially
+                    sticks around between page requests, // we can use
+                    `isFetching` to show a background loading // indicator since
+                    our `status === 'loading'` state won't be triggered */}
+                {isFetching ? (
+                    <Spinner animation="border" role="status" size="sm">
+                        <span className="visually-hidden">Načítání...</span>
+                    </Spinner>
+                ) : null}
+            </div>
             <ul className="list-group">
-                {filteredForms.map((form) => (
+                {data.forms.map((form) => (
                     <FormLine
                         key={form._id}
                         form={form}
@@ -59,6 +146,22 @@ export function FormList({ filter, FormLine }: FormListProps) {
                     />
                 ))}
             </ul>
+            <div>Current Page: {pageIndex + 1}</div>
+            <div>Total pages: {totalPages}</div>
+            <Button
+                onClick={() => setPageIndex((old) => Math.max(old - 1, 0))}
+                disabled={pageIndex === 0}
+            >
+                Previous Page
+            </Button>
+            <Button
+                onClick={() => {
+                    setPageIndex((old) => (data?.hasMore ? old + 1 : old));
+                }}
+                disabled={isPreviousData || !data?.hasMore}
+            >
+                Next Page
+            </Button>
         </>
     );
 }
@@ -83,10 +186,9 @@ export interface FormLineProps {
  */
 export interface FormListProps {
     /**
-     * Filter function for forms. If this function returns true, the form is shown.
-     * If it returns false, the form is hidden.
-     */
-    filter: (form: Form) => boolean;
+     * Filter options for the form query. @see https://apidocs.form.io/#a39be766-02dd-0b95-49bd-971fcef25a32
+     **/
+    filterOptions: { [key: string]: string };
     /**
      * Component to show for each form.
      */
