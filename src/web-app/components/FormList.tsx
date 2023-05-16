@@ -46,10 +46,11 @@ export function FormList({ filter, FormLine }: FormListProps) {
                 onClick={() => {
                     refreshFormsState();
                 }}
+                className="mb-1"
             >
-                Aktualizovat seznam formularu
+                Aktualizovat
             </Button>
-            <ul>
+            <ul className="list-group">
                 {filteredForms.map((form) => (
                     <FormLine
                         key={form._id}

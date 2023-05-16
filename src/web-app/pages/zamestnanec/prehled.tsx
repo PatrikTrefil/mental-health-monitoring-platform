@@ -51,13 +51,15 @@ function PrehledPage() {
  */
 function ManagerFormLine({ form, deleteForm }: FormLineProps) {
     return (
-        <li>
-            Název: {`"${form.name}"`}{" "}
-            <Button as="a" href={"/formular/upravit/" + form._id}>
-                Upravit
-            </Button>
-            <Button onClick={deleteForm}>Smazat</Button>
-            <ExportButton formId={form._id} />
+        <li className="d-flex flex-wrap justify-content-between align-content-center list-group-item align-items-baseline">
+            {form.name}
+            <div className="d-flex flex-wrap gap-2 align-content-center justify-content-center">
+                <Button as="a" href={"/formular/upravit/" + form._id}>
+                    Upravit
+                </Button>
+                <Button onClick={deleteForm}>Smazat</Button>
+                <ExportButton formId={form._id} />
+            </div>
         </li>
     );
 }

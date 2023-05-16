@@ -40,7 +40,7 @@ function PrehledPage() {
  */
 function UserFormLine({ form }: FormLineProps) {
     return (
-        <li>
+        <li className="list-group-item">
             Název: {`"${form.name}"`}{" "}
             <Button as="a" href={`/formular/vyplnit/${form._id}`}>
                 vyplnit
