@@ -1,3 +1,7 @@
+import {
+    PHASE_DEVELOPMENT_SERVER,
+    PHASE_PRODUCTION_SERVER,
+} from "next/constants.js";
 // https://nextjs.org/docs/advanced-features/security-headers
 
 /* HACK: setting `worker-src blob:` is dangerous (formio should fix this,
@@ -94,4 +98,15 @@ const nextConfig = {
     },
 };
 
-module.exports = nextConfig;
+export default async (phase) => {
+    if (
+        phase === PHASE_DEVELOPMENT_SERVER ||
+        phase === PHASE_PRODUCTION_SERVER
+    ) {
+        const env = await import("./src/env.mjs");
+        // check that all environment variables are set
+        env.envVarSchema.parse(process.env);
+    }
+
+    return nextConfig;
+};

@@ -67,7 +67,7 @@ function EditFormPage() {
                 const { Formio } = await import("formiojs");
 
                 const client = new Formio(
-                    (process.env.NEXT_PUBLIC_FORMIO_BASE_URL as string) +
+                    process.env.NEXT_PUBLIC_FORMIO_BASE_URL +
                         "/form/" +
                         router.query.formId
                 );
@@ -166,8 +166,6 @@ function EditFormPage() {
 async function saveFormToServer(formSchema: unknown) {
     const { Formio } = await import("formiojs");
 
-    const client = new Formio(
-        process.env.NEXT_PUBLIC_FORMIO_BASE_URL as string
-    );
+    const client = new Formio(process.env.NEXT_PUBLIC_FORMIO_BASE_URL);
     await client.saveForm(formSchema);
 }

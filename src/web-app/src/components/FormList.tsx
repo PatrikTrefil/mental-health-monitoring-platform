@@ -17,7 +17,7 @@ export function FormList({ filterOptions, FormLine }: FormListProps) {
     const fetchForms = useCallback(
         async (page: number, currentTotalPages: number) => {
             const url = new URL(
-                (process.env.NEXT_PUBLIC_FORMIO_BASE_URL as string) + "/form/"
+                process.env.NEXT_PUBLIC_FORMIO_BASE_URL + "/form/"
             );
             url.searchParams.set("limit", pageSize.toString());
             url.searchParams.set("skip", (page * pageSize).toString());
@@ -109,7 +109,7 @@ export function FormList({ filterOptions, FormLine }: FormListProps) {
     const deleteForm = async (form: Form) => {
         const { Formio } = await import("formiojs");
         const formio = new Formio(
-            `${process.env.NEXT_PUBLIC_FORMIO_BASE_URL as string}/${form.path}`
+            `${process.env.NEXT_PUBLIC_FORMIO_BASE_URL}/${form.path}`
         );
         await formio.deleteForm();
         await queryClient.invalidateQueries(["forms"]);
