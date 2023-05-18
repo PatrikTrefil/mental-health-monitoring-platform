@@ -2,10 +2,10 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@/components/*": ["components/*"],
-      "@/redux/*": ["redux/*"],
-      "@/types/*": ["types/*"],
-      "@/styles/*": ["styles/*"]
+      "@/components/*": ["src/components/*"],
+      "@/redux/*": ["src/redux/*"],
+      "@/types/*": ["src/types/*"],
+      "@/styles/*": ["src/styles/*"]
     },
     "target": "es5",
     "lib": ["dom", "dom.iterable", "esnext"],
