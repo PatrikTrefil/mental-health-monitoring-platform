@@ -1,6 +1,5 @@
-import ClientPatientFillableFormList from "@/components/ClientPatientFillableFormList";
 import CurrentUserDetails from "@/components/CurrentUserDetails";
-import { FormLineProps } from "@/components/FormList";
+import { FormLineProps, FormList } from "@/components/FormList";
 import LogoutButton from "@/components/LogoutButton";
 import WithAuth from "@/components/WithAuth";
 import ExportButton from "@/components/zamestnanec/ExportButton";
@@ -40,7 +39,12 @@ function PrehledPage() {
                 </div>
                 <div>
                     <h2>Seznam formulářů</h2>
-                    <ClientPatientFillableFormList FormLine={ManagerFormLine} />
+                    <FormList
+                        filterOptions={{
+                            tags: "klientPacient",
+                        }}
+                        FormLine={ManagerFormLine}
+                    />
                 </div>
             </main>
         </>

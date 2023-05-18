@@ -1,6 +1,5 @@
-import ClientPatientFillableFormList from "@/components/ClientPatientFillableFormList";
 import CurrentUserDetails from "@/components/CurrentUserDetails";
-import { FormLineProps } from "@/components/FormList";
+import { FormLineProps, FormList } from "@/components/FormList";
 import LogoutButton from "@/components/LogoutButton";
 import WithAuth from "@/components/WithAuth";
 import { UserRoleTitles } from "@/redux/users";
@@ -27,7 +26,12 @@ function PrehledPage() {
                 <CurrentUserDetails />
                 <LogoutButton />
                 <h2>Seznam formulářů k vyplnění</h2>
-                <ClientPatientFillableFormList FormLine={UserFormLine} />
+                <FormList
+                    filterOptions={{
+                        tags: "klientPacient",
+                    }}
+                    FormLine={UserFormLine}
+                />
             </main>
         </>
     );
