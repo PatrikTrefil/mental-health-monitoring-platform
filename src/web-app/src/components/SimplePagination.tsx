@@ -1,5 +1,11 @@
 import { Pagination } from "react-bootstrap";
 
+export interface PaginationProps {
+    pageIndex: number;
+    totalPages: number;
+    setPageIndex: (pageIndex: number) => void;
+}
+
 export default function SimplePagination({
     pageIndex,
     totalPages,
@@ -26,10 +32,4 @@ export default function SimplePagination({
             />
         </Pagination>
     );
-}
-
-interface PaginationProps {
-    pageIndex: number;
-    totalPages: number;
-    setPageIndex: (pageIndex: number) => void;
 }
