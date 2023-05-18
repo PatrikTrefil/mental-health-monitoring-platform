@@ -1,3 +1,7 @@
+const env = await import("./src/env.mjs");
+// check that all environment variables are set
+env.envVarSchema.parse(process.env);
+
 // https://nextjs.org/docs/advanced-features/security-headers
 
 /* HACK: setting `worker-src blob:` is dangerous (formio should fix this,
@@ -94,4 +98,4 @@ const nextConfig = {
     },
 };
 
-module.exports = nextConfig;
+export default nextConfig;
