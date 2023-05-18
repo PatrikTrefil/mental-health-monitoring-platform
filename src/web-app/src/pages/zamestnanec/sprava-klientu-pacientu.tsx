@@ -27,9 +27,7 @@ function SpravaUzivatelu() {
     const fetchUsers = useCallback(
         async (page: number, currentTotalPages: number) => {
             const url = new URL(
-                `${
-                    process.env.NEXT_PUBLIC_FORMIO_BASE_URL as string
-                }/klientpacient/submission`
+                `${process.env.NEXT_PUBLIC_FORMIO_BASE_URL}/klientpacient/submission`
             );
             url.searchParams.set("limit", pageSize.toString());
             url.searchParams.set("skip", (page * pageSize).toString());
@@ -117,9 +115,7 @@ function SpravaUzivatelu() {
     const deleteUser = async (userSubmissionId: string) => {
         const formiojs = await import("formiojs");
         const formio = new formiojs.Formio(
-            `${
-                process.env.NEXT_PUBLIC_FORMIO_BASE_URL as string
-            }/klientpacient/submission/${userSubmissionId}`
+            `${process.env.NEXT_PUBLIC_FORMIO_BASE_URL}/klientpacient/submission/${userSubmissionId}`
         );
         try {
             await formio.deleteSubmission();
