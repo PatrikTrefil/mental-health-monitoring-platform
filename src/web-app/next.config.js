@@ -65,7 +65,7 @@ const nextConfig = {
     output: "standalone",
 
     eslint: {
-        dirs: ["pages", "components", "redux"],
+        dirs: ["src"],
     },
     // this makes hot reloading work when Dockerized
     webpack: (config) => {

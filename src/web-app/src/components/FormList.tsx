@@ -1,7 +1,8 @@
 import { Form } from "@/types/form";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useState } from "react";
-import { Alert, Button, Pagination, Spinner } from "react-bootstrap";
+import { Alert, Button, Spinner } from "react-bootstrap";
+import SimplePagination from "./SimplePagination";
 
 /**
  * List of forms which are filtered and shown using FormLine.
@@ -145,25 +146,11 @@ export function FormList({ filterOptions, FormLine }: FormListProps) {
                         />
                     ))}
                 </ul>
-                <Pagination>
-                    <Pagination.First
-                        onClick={() => setPageIndex(0)}
-                        disabled={pageIndex === 0}
-                    />
-                    <Pagination.Prev
-                        onClick={() => setPageIndex(pageIndex - 1)}
-                        disabled={pageIndex === 0}
-                    />
-                    <Pagination.Item active>{pageIndex + 1}</Pagination.Item>
-                    <Pagination.Next
-                        disabled={pageIndex === totalPages - 1}
-                        onClick={() => setPageIndex(pageIndex + 1)}
-                    />
-                    <Pagination.Last
-                        onClick={() => setPageIndex(totalPages - 1)}
-                        disabled={pageIndex === totalPages - 1}
-                    />
-                </Pagination>
+                <SimplePagination
+                    pageIndex={pageIndex}
+                    totalPages={totalPages}
+                    setPageIndex={setPageIndex}
+                />
             </div>
         </>
     );
