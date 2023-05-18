@@ -12,12 +12,7 @@ const config = {
         [
             "docusaurus-plugin-typedoc",
             {
-                entryPoints: [
-                    `${webAppRoot}/redux`,
-                    `${webAppRoot}/components`,
-                    `${webAppRoot}/pages`,
-                    `${webAppRoot}/types`,
-                ],
+                entryPoints: [`${webAppRoot}/src`],
                 tsconfig: `${webAppRoot}/tsconfig.json`,
                 entryPointStrategy: "expand",
                 out: "Webová aplikace/Reference",
