@@ -34,8 +34,8 @@ function PrehledPage() {
                     <Button as="a" href="./registrace-zamestnance">
                         Založit účet nového zaměstnance
                     </Button>
-                    <Button as="a" href="./registrace-pacienta-klienta">
-                        Založit účet nového pacienta/klienta
+                    <Button as="a" href="./sprava-klientu-pacientu">
+                        Správa klientů/pacientů
                     </Button>
                 </div>
                 <div>
