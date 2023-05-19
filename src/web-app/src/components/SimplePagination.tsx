@@ -1,11 +1,17 @@
 import { Pagination } from "react-bootstrap";
 
+/**
+ * Props for the {@link SimplePagination} component.
+ */
 export interface PaginationProps {
     pageIndex: number;
     totalPages: number;
     setPageIndex: (pageIndex: number) => void;
 }
 
+/**
+ * Provides a "footer" for a paginated list.
+ */
 export default function SimplePagination({
     pageIndex,
     totalPages,
