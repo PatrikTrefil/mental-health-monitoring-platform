@@ -1,18 +1,13 @@
 import { Form } from "@/types/form";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useCallback, useEffect, useState } from "react";
-import { Alert, Button, Spinner } from "react-bootstrap";
-import SimplePagination from "./SimplePagination";
+import { QueryClient } from "@tanstack/react-query";
+import { useCallback } from "react";
+import PaginatedList from "./PaginatedList";
 
 /**
  * List of forms which are filtered and shown using FormLine.
  */
 export function FormList({ filterOptions, FormLine }: FormListProps) {
-    const queryClient = useQueryClient();
-
     const pageSize = 10;
-    const [pageIndex, setPageIndex] = useState(0);
-    const [totalPages, setTotalPages] = useState(0);
 
     const fetchForms = useCallback(
         async (page: number, currentTotalPages: number) => {
@@ -52,107 +47,46 @@ export function FormList({ filterOptions, FormLine }: FormListProps) {
                     ? 0
                     : Math.ceil(parseInt(groups.size) / pageSize);
 
-            if (newTotalPages !== currentTotalPages) {
-                setTotalPages(newTotalPages);
-            }
-
+            const forms = (await response.json()) as Form[];
             return {
-                forms: (await response.json()) as Form[],
+                data: forms,
                 hasMore:
                     groups.range === "*"
                         ? false
                         : parseInt(groups.rangeEnd!) <
                           parseInt(groups.size) - 1,
+                totalPages: newTotalPages,
             };
         },
         [filterOptions]
     );
-    const {
-        isLoading,
-        isError,
-        error,
-        data,
-        isFetching,
-        refetch,
-        isPreviousData,
-    } = useQuery({
-        queryKey: ["forms", pageIndex, totalPages],
-        queryFn: () => fetchForms(pageIndex, totalPages),
-        keepPreviousData: true,
-    });
-    // Prefetch the next page!
-    useEffect(() => {
-        if (!isPreviousData && data?.hasMore) {
-            queryClient.prefetchQuery({
-                // eslint-disable-next-line @tanstack/query/exhaustive-deps
-                queryKey: ["forms", pageIndex + 1],
-                queryFn: () => fetchForms(pageIndex + 1, totalPages),
-            });
-        }
-    }, [data, isPreviousData, pageIndex, queryClient, fetchForms, totalPages]);
 
-    if (isLoading)
-        return (
-            <div className="position-absolute top-50 start-50 translate-middle">
-                <Spinner animation="border" role="status">
-                    <span className="visually-hidden">Načítání...</span>
-                </Spinner>
-            </div>
-        );
-    if (isError) {
-        console.error(error);
-        return (
-            <Alert variant="danger">Načítání seznamu formulářů selhalo.</Alert>
-        );
-    }
+    const formsQueryName = "forms";
 
-    const deleteForm = async (form: Form) => {
-        const { Formio } = await import("formiojs");
-        const formio = new Formio(
-            `${process.env.NEXT_PUBLIC_FORMIO_BASE_URL}/${form.path}`
-        );
-        await formio.deleteForm();
-        await queryClient.invalidateQueries(["forms"]);
-    };
+    const deleteForm = useCallback(
+        async (form: Form, queryClient: QueryClient) => {
+            const { Formio } = await import("formiojs");
+            const formio = new Formio(
+                `${process.env.NEXT_PUBLIC_FORMIO_BASE_URL}/${form.path}`
+            );
+            await formio.deleteForm();
+            await queryClient.invalidateQueries([formsQueryName]);
+        },
+        [formsQueryName]
+    );
 
     return (
-        <>
-            <div className="d-flex flex-wrap align-items-center gap-2">
-                <Button
-                    onClick={() => {
-                        refetch();
-                    }}
-                    className="mb-1"
-                >
-                    Aktualizovat
-                </Button>
-                {/* Since the last page's data potentially
-                    sticks around between page requests, // we can use
-                    `isFetching` to show a background loading // indicator since
-                    our `status === 'loading'` state won't be triggered */}
-                {isFetching ? (
-                    <Spinner animation="border" role="status" size="sm">
-                        <span className="visually-hidden">Načítání...</span>
-                    </Spinner>
-                ) : null}
-            </div>
-            <div className="d-flex flex-column align-items-center gap-2">
-                <ul className="list-group w-100">
-                    {data.forms.map((form) => (
-                        <FormLine
-                            key={form._id}
-                            form={form}
-                            deleteForm={() => deleteForm(form)}
-                        />
-                    ))}
-                </ul>
-                <SimplePagination
-                    pageIndex={pageIndex}
-                    totalPages={totalPages}
-                    setPageIndex={setPageIndex}
+        <PaginatedList
+            queryName={formsQueryName}
+            fetchPage={fetchForms}
+            extractKey={(item) => item._id}
+            renderItem={(form: Form, queryClient: QueryClient) => (
+                <FormLine
+                    form={form}
+                    deleteForm={() => deleteForm(form, queryClient)}
                 />
-            </div>
-        </>
+            )}
+        />
     );
 }
 
