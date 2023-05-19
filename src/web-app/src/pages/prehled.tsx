@@ -44,11 +44,11 @@ function PrehledPage() {
  */
 function UserFormLine({ form }: FormLineProps) {
     return (
-        <li className="list-group-item">
-            Název: {`"${form.name}"`}{" "}
+        <div className="w-100 d-flex justify-content-between align-content-center align-items-baseline">
+            {form.name}
             <Button as="a" href={`/formular/vyplnit/${form._id}`}>
-                vyplnit
+                Vyplnit
             </Button>
-        </li>
+        </div>
     );
 }

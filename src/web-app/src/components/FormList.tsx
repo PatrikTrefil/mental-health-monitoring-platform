@@ -114,7 +114,7 @@ export interface FormListProps {
      **/
     filterOptions: { [key: string]: string };
     /**
-     * Component to show for each form.
+     * Component to show for each form (contents of <li>)
      */
     FormLine: React.ComponentType<FormLineProps>;
 }
