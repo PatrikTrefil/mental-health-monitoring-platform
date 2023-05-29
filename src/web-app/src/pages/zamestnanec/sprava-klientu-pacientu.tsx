@@ -1,5 +1,5 @@
-import SimplePagination from "@/components/SimplePagination";
-import DynamicForm from "@/components/dynamicFormio/DynamicForm";
+import SimplePagination from "@/components/shared/SimplePagination";
+import DynamicForm from "@/components/shared/dynamicFormio/DynamicForm";
 import { CreateFormio } from "@/lib/formiojsWrapper";
 import { UserFormSubmission } from "@/types/userFormSubmission";
 import { useQuery, useQueryClient } from "@tanstack/react-query";

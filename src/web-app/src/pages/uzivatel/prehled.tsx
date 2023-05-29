@@ -1,6 +1,6 @@
-import CurrentUserDetails from "@/components/CurrentUserDetails";
-import { FormLineProps, FormList } from "@/components/FormList";
-import LogoutButton from "@/components/LogoutButton";
+import CurrentUserDetails from "@/components/shared/CurrentUserDetails";
+import { FormLineProps, FormList } from "@/components/shared/FormList";
+import LogoutButton from "@/components/shared/LogoutButton";
 import Head from "next/head";
 import { Button } from "react-bootstrap";
 
