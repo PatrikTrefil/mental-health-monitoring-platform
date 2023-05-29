@@ -1,5 +1,5 @@
-import DynamicFormBuilder from "@/components/dynamicFormio/DynamicFormBuilder";
-import DynamicFormEdit from "@/components/dynamicFormio/DynamicFormEdit";
+import DynamicFormBuilder from "@/components/shared/dynamicFormio/DynamicFormBuilder";
+import DynamicFormEdit from "@/components/shared/dynamicFormio/DynamicFormEdit";
 import { CreateFormio } from "@/lib/formiojsWrapper";
 import { Form } from "@/types/form";
 import { useSession } from "next-auth/react";
