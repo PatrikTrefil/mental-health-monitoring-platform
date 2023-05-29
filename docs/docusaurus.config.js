@@ -28,8 +28,7 @@ const config = {
     favicon: "img/favicon.ico",
 
     // Set the production url of your site here
-    // TODO: set this
-    url: "https://your-docusaurus-test-site.com",
+    url: "https://mental-health-monitoring-platform.vercel.app",
     // Set the /<baseUrl>/ pathname under which your site is served
     // For GitHub pages deployment, it is often '/<projectName>/'
     baseUrl: "/",
@@ -40,7 +39,7 @@ const config = {
     projectName: "mental-health-monitoring-platform", // Usually your repo name.
 
     onBrokenLinks: "throw",
-    onBrokenMarkdownLinks: "warn",
+    onBrokenMarkdownLinks: "throw",
 
     // Even if you don't use internalization, you can use this field to set useful
     // metadata like html lang. For example, if your site is Chinese, you may want
@@ -63,9 +62,8 @@ const config = {
                     sidebarPath: require.resolve("./sidebars.js"),
                     // Please change this to your repo.
                     // Remove this to remove the "edit this page" links.
-                    // TODO: set this
                     editUrl:
-                        "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/",
+                        "https://github.com/PatrikTrefil/mental-health-monitoring-platform/tree/main/docs",
                     routeBasePath: "/",
                     remarkPlugins: [
                         require("@akebifiky/remark-simple-plantuml"),
