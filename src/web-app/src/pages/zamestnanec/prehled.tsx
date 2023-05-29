@@ -9,7 +9,6 @@ import { Button } from "react-bootstrap";
  * Prehled (dashboard) page for employees.
  */
 export default function PrehledPage() {
-    console.log(useSession().data?.user.formioToken);
     return (
         <>
             <Head>
