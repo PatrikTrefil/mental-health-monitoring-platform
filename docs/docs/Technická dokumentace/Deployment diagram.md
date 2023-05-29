@@ -23,7 +23,10 @@ Deployment_Node(server, "Server", "Ubuntu, CPU: 2 jádra, RAM: 4 GB") {
        }
 
         Deployment_Node(mongo_docker, "Docker container", "Docker Engine") {
-            ContainerDb(formulareDb, "Databáze správce formulářů",  "MongoDB")
+            Deployment_Node(mongo, "MongoDB") {
+                ContainerDb(formulareDb, "Databáze správce formulářů")
+                ContainerDb(uzivateleDb, "Databáze uživatelů")
+            }
         }
         Deployment_Node(spravceUkolu_docker, "Docker container", "Docker Engine") {
             ContainerDb(ukolyDb, "Databáze úkolů",  "SQLite")
@@ -43,9 +46,11 @@ Deployment_Node(server, "Server", "Ubuntu, CPU: 2 jádra, RAM: 4 GB") {
 Rel(spravaUkolu, ukolyDb, "Ukládá data", "PrismaORM")
 Rel(webApp, spravaFormularu, "Používá", "HTTPS")
 Rel(webApp, spravaUkolu, "Používá", "tRPC, HTTPS")
+Rel(webApp, manazerUzivatelu, "Spravuje uživatele a autorizuje akce", "HTTPS")
 Rel(spravaFormularu, formulareDb, "Ukládá data", "MongoDB Wire Protocol")
 Rel(spravaFormularu, manazerUzivatelu, "Autorizuje akce")
 Rel(spravaUkolu, manazerUzivatelu, "Autorizuje akce", "HTTPS")
+Rel(manazerUzivatelu, uzivateleDb, "Ukládá data")
 
 Rel(monitoringWeb, monitoringServer, "Čte data")
 
