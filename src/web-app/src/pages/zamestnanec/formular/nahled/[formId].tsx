@@ -1,4 +1,4 @@
-import DynamicForm from "@/components/dynamicFormio/DynamicForm";
+import DynamicForm from "@/components/shared/dynamicFormio/DynamicForm";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import {
