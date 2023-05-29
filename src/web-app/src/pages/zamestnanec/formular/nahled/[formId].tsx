@@ -1,4 +1,7 @@
 import DynamicForm from "@/components/shared/dynamicFormio/DynamicForm";
+import { Form } from "@/types/form";
+import { useQuery } from "@tanstack/react-query";
+import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import {
@@ -9,31 +12,64 @@ import {
     ModalFooter,
     ModalHeader,
     ModalTitle,
+    Spinner,
 } from "react-bootstrap";
 
 /**
  * Page for previewing form with given form id (from url)
  */
 export default function PreviewFormPage() {
-    const router = useRouter();
-    const formId = router.query.formId;
     const [showModal, setShowModal] = useState(false);
 
-    if (typeof formId !== "string")
+    const router = useRouter();
+    const formId = router.query.formId;
+
+    const { data } = useSession();
+
+    const {
+        isLoading,
+        isError,
+        data: form,
+    } = useQuery({
+        enabled: !!data?.user.formioToken && !!formId,
+        // eslint-disable-next-line @tanstack/query/exhaustive-deps
+        queryKey: ["form", formId],
+        queryFn: async () => {
+            const response = await fetch(
+                `${process.env.NEXT_PUBLIC_FORMIO_BASE_URL}/form/${formId}`,
+                {
+                    headers: {
+                        "x-jwt-token": data!.user.formioToken,
+                    },
+                }
+            );
+            return (await response.json()) as Form;
+        },
+    });
+
+    if (isError)
         return (
             <>
                 <Alert variant="danger">
-                    Chyba: id formuláře musí byt string (nyní má typ{" "}
-                    {typeof formId})
+                    Při načítání formuláře došlo k chybě.
                 </Alert>
                 <Button href="/zamestnanec/prehled">Zpět na přehled</Button>
             </>
         );
 
+    if (isLoading)
+        return (
+            <div className="position-absolute top-50 start-50 translate-middle">
+                <Spinner animation="border" role="status">
+                    <span className="visually-hidden">Načítání...</span>
+                </Spinner>
+            </div>
+        );
+
     return (
         <>
             <DynamicForm
-                src={`/form/${formId}`}
+                form={form}
                 onSubmit={() => {
                     setShowModal(true);
                 }}
