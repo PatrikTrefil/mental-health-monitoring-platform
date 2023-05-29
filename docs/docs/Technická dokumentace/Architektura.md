@@ -41,6 +41,7 @@ System_Boundary(systemBoundary, "Platforma pro monitorování mentálního zdrav
     Container(spravaUkolu, "Správa úkolů")
     ContainerDb(formulareDb, "Databáze správce formulářů")
     ContainerDb(ukolyDb, "Databáze úkolů")
+    ContainerDb(uzivateleDb, "Databáze uživatelů")
 }
 
 Lay_D(pacient, systemBoundary)
@@ -59,9 +60,11 @@ Rel_D(spravceUkolu, webApp, "Používá")
 Rel(spravaUkolu, ukolyDb, "Ukládá data")
 Rel(webApp, spravaFormularu, "Používá")
 Rel(webApp, spravaUkolu, "Používá")
+Rel(webApp, manazerUzivatelu, "Spravuje uživatele a autorizuje akce")
 Rel(spravaFormularu, formulareDb, "Ukládá data")
 Rel(spravaFormularu, manazerUzivatelu, "Autorizuje akce")
 Rel(spravaUkolu, manazerUzivatelu, "Autorizuje akce")
+Rel(manazerUzivatelu, uzivateleDb, "Ukládá data")
 
 Rel(monitoringServer, spravaFormularu, "Monitoruje")
 Rel(monitoringServer, formulareDb, "Monitoruje")
