@@ -1,22 +1,16 @@
 import CurrentUserDetails from "@/components/CurrentUserDetails";
 import { FormLineProps, FormList } from "@/components/FormList";
 import LogoutButton from "@/components/LogoutButton";
-import WithAuth from "@/components/WithAuth";
 import ExportButton from "@/components/zamestnanec/ExportButton";
-import { UserRoleTitles } from "@/redux/users";
+import { useSession } from "next-auth/react";
 import Head from "next/head";
 import { Button } from "react-bootstrap";
-
-export default WithAuth(
-    <PrehledPage />,
-    "/zamestnanec/login",
-    UserRoleTitles.ZAMESTNANEC
-);
 
 /**
  * Prehled (dashboard) page for employees.
  */
-function PrehledPage() {
+export default function PrehledPage() {
+    console.log(useSession().data?.user.formioToken);
     return (
         <>
             <Head>
@@ -27,7 +21,7 @@ function PrehledPage() {
                 <CurrentUserDetails />
                 <LogoutButton />
                 <div className="d-flex flex-wrap gap-2 mt-2">
-                    <Button as="a" href="/formular/vytvorit">
+                    <Button as="a" href="/zamestnanec/formular/vytvorit">
                         Vytvořit formulář
                     </Button>
                     <Button as="a" href="./registrace-zamestnance">
@@ -58,10 +52,16 @@ function ManagerFormLine({ form, deleteForm }: FormLineProps) {
         <li className="d-flex flex-wrap justify-content-between align-content-center list-group-item align-items-baseline">
             {form.name}
             <div className="d-flex flex-wrap gap-2 align-content-center justify-content-center">
-                <Button as="a" href={"/formular/nahled/" + form._id}>
+                <Button
+                    as="a"
+                    href={"/zamestnanec/formular/nahled/" + form._id}
+                >
                     Náhled
                 </Button>
-                <Button as="a" href={"/formular/upravit/" + form._id}>
+                <Button
+                    as="a"
+                    href={"/zamestnanec/formular/upravit/" + form._id}
+                >
                     Upravit
                 </Button>
                 <Button onClick={deleteForm}>Smazat</Button>

@@ -16,7 +16,7 @@ export default function HomePage() {
                 <h1 className={styles.title}>
                     Vítejte na platformě pro monitorování mentálního zdraví
                 </h1>
-                <Button href="/login" as="a">
+                <Button className="m-3" href="/login" as="a">
                     Přihlásit se
                 </Button>
             </main>

@@ -1,77 +1,119 @@
-import { useAppSelector } from "@/redux/hooks";
-import { roleIdSelector } from "@/redux/selectors";
-import { UserRoleTitle } from "@/redux/users";
-import { useEffect, useState } from "react";
-import Alert from "react-bootstrap/Alert";
-import Spinner from "react-bootstrap/Spinner";
-import LogoutButton from "./LogoutButton";
-import DynamicLoginForm from "./dynamicFormio/DynamicLoginForm";
+import { UserRoleTitles } from "@/types/users";
+import { signIn, useSession } from "next-auth/react";
+import { useSearchParams } from "next/navigation";
+import { useRouter } from "next/router";
+import { FormEventHandler, useEffect, useState } from "react";
+import { Button, Form, Toast, ToastContainer } from "react-bootstrap";
 
 /**
- * Login form with logic around redirects and permissions.
+ * Login form which includes all the necessary logic.
  *
- * If user is not logged in, a login form is displayed.
- * If user is logged in, but does not have required permissions, a logout button is displayed and
- * the user is notified about the insufficient permissions.
- * If the user logs in successfully and has required permissions, the onSucessfullAuth callback is called.
- * If the user is already logged in and has required permissions, the onSucessfullAuth callback is called.
+ * If the user is already logged in, they are redirected to the page they came from (or to a default page).
+ * If the user is not logged in, they are presented with a login form and then they are redirected to the
+ * page they came from (or to a default page).
+ * Choice of the default redirect depends on the user's role.
  */
-export default function Login({
-    onSucessfullAuth,
-    allowedRoleTitle,
-}: LoginProps) {
-    const user = useAppSelector((state: any) => state?.auth?.user);
-    const allowedRoleId = useAppSelector(roleIdSelector(allowedRoleTitle));
-    const [showLogout, setShowLogout] = useState(false);
-    const isThereAnOngoingAuthRequest = useAppSelector(
-        (state) => state?.auth?.isActive
+export default function Login() {
+    const [id, setId] = useState("");
+    const [password, setPassword] = useState("");
+    const [error, setError] = useState("");
+
+    const router = useRouter();
+    const session = useSession();
+    const searchParams = useSearchParams();
+
+    const searchParamsCallbackUrl = searchParams.get("callbackUrl");
+    const clientPatientDefaultCallback = "/uzivatel/prehled";
+    const employeeDefaultCallback = "/zamestnanec/prehled";
+
+    useEffect(
+        function redirectIfLoggedIn() {
+            if (session?.data) {
+                if (searchParamsCallbackUrl)
+                    router.push(searchParamsCallbackUrl);
+                else if (
+                    session.data.user.roleTitles.includes(
+                        UserRoleTitles.ZAMESTNANEC
+                    )
+                ) {
+                    router.push(employeeDefaultCallback);
+                } else if (
+                    session.data.user.roleTitles.includes(
+                        UserRoleTitles.KLIENT_PACIENT
+                    )
+                ) {
+                    router.push(clientPatientDefaultCallback);
+                } else {
+                    setError("Nemáte ani jednu z vyžadovaných rolí.");
+                }
+            }
+        },
+        [session.data, router, searchParamsCallbackUrl]
     );
-    const isAuthInitialized = useAppSelector((state) => state?.auth?.init);
 
-    useEffect(() => {
-        const isUserLoggedIn = !!user;
+    const handleSubmit: FormEventHandler<HTMLFormElement> = async (e) => {
+        e.preventDefault();
+        const result = await signIn("credentials", {
+            ID: id,
+            password,
+            redirect: false,
+        });
 
-        if (isUserLoggedIn) {
-            const hasUserRequiredPermissions = user.roles.some(
-                (role: string) => allowedRoleId && allowedRoleId === role
-            );
+        if (result?.error) setError(result.error);
+    };
+    const getErrorToastContent = (error: string) => {
+        if (error === "CredentialsSignin")
+            return "Nesprávné uživatelské jméno nebo heslo.";
+        else return error;
+    };
 
-            if (hasUserRequiredPermissions) onSucessfullAuth();
-            else setShowLogout(true);
-        } else setShowLogout(false);
-    }, [user, allowedRoleId, onSucessfullAuth]);
-
-    if (showLogout)
-        return (
-            <>
-                <Alert variant="danger">
-                    Váš účet nemá přístup do této sekce. První se odhlaste a
-                    poté se přihlaste jako &quot;{allowedRoleTitle}&quot;.
-                </Alert>
-                <LogoutButton />
-            </>
-        );
-
-    const isUserLoggedIn = !!user;
-    // if the user is already logged in, we still want don't want to display the login form,
-    // because the user will either be redirected or notified about insufficient permissions.
-    if (!isAuthInitialized || isThereAnOngoingAuthRequest || isUserLoggedIn)
-        return (
-            <div className="position-absolute top-50 start-50 translate-middle">
-                <Spinner animation="border" role="status">
-                    <span className="visually-hidden">Načítání...</span>
-                </Spinner>
-            </div>
-        );
-
-    // This form must not be rendered if the user is already logged in.
-    return <DynamicLoginForm />;
-}
-
-/**
- * Props for {@link Login}
- */
-export interface LoginProps {
-    onSucessfullAuth: () => void;
-    allowedRoleTitle: UserRoleTitle;
+    return (
+        <>
+            {!!error && (
+                <ToastContainer
+                    position="bottom-end"
+                    style={{ zIndex: 1 }}
+                    className="p-3"
+                >
+                    <Toast
+                        show={!!error}
+                        bg="danger"
+                        onClose={() => setError("")}
+                    >
+                        <Toast.Header closeLabel="Zavřít">
+                            <strong className="me-auto">
+                                Nastala chyba při přihlášení
+                            </strong>
+                        </Toast.Header>
+                        <Toast.Body>{getErrorToastContent(error)}</Toast.Body>
+                    </Toast>
+                </ToastContainer>
+            )}
+            <Form onSubmit={handleSubmit}>
+                <Form.Label htmlFor="input-id">ID</Form.Label>
+                <Form.Control
+                    required
+                    onChange={(e) => setId(e.target.value)}
+                    value={id}
+                    placeholder="ID"
+                    type="text"
+                    name="id"
+                    id="input-id"
+                />
+                <Form.Label htmlFor="input-password">Heslo</Form.Label>
+                <Form.Control
+                    required
+                    type="password"
+                    placeholder="Heslo"
+                    onChange={(e) => setPassword(e.target.value)}
+                    value={password}
+                    name="password"
+                    id="input-password"
+                />
+                <Button type="submit" className="mt-3 w-100">
+                    Přihlásit se
+                </Button>
+            </Form>
+        </>
+    );
 }

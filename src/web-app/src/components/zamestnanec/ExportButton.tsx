@@ -1,4 +1,5 @@
 import { saveAs } from "file-saver";
+import { useSession } from "next-auth/react";
 import { useState } from "react";
 import {
     Button,
@@ -14,7 +15,9 @@ import {
  */
 export default function ExportButton({ formId }: ExportButtonProps) {
     const [isErrorModalOpen, setIsErrorModalOpen] = useState(false);
-    const token = localStorage.getItem("formioToken");
+
+    const session = useSession();
+    const token = session.data?.user.formioToken;
 
     if (!token) return null;
 

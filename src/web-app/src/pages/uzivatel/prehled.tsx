@@ -1,21 +1,13 @@
 import CurrentUserDetails from "@/components/CurrentUserDetails";
 import { FormLineProps, FormList } from "@/components/FormList";
 import LogoutButton from "@/components/LogoutButton";
-import WithAuth from "@/components/WithAuth";
-import { UserRoleTitles } from "@/redux/users";
 import Head from "next/head";
 import { Button } from "react-bootstrap";
-
-export default WithAuth(
-    <PrehledPage />,
-    "/login",
-    UserRoleTitles.KLIENT_PACIENT
-);
 
 /**
  * Prehled (dashboard) page for clients/patients.
  */
-function PrehledPage() {
+export default function PrehledPage() {
     return (
         <>
             <Head>
@@ -46,7 +38,7 @@ function UserFormLine({ form }: FormLineProps) {
     return (
         <li className="list-group-item">
             Název: {`"${form.name}"`}{" "}
-            <Button as="a" href={`/formular/vyplnit/${form._id}`}>
+            <Button as="a" href={`./formular/vyplnit/${form._id}`}>
                 vyplnit
             </Button>
         </li>
