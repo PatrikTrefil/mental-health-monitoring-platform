@@ -86,6 +86,9 @@ export const authOptions: AuthOptions = {
             },
         }),
     ],
+    jwt: {
+        maxAge: 230, // this must be lower that the validity of the formio token
+    },
     callbacks: {
         /**
          * Creates the JWT token on the server.
