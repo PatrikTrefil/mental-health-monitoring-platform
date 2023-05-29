@@ -1,12 +1,14 @@
-import WithAuth from "@/components/WithAuth";
 import DynamicFormBuilder from "@/components/dynamicFormio/DynamicFormBuilder";
 import DynamicFormEdit from "@/components/dynamicFormio/DynamicFormEdit";
-import { useAppSelector } from "@/redux/hooks";
-import { roleIdSelector } from "@/redux/selectors";
-import { UserRoleTitles } from "@/redux/users";
+import { CreateFormio } from "@/lib/formiojsWrapper";
+import { Role } from "@/types/role";
+import { UserRoleTitles } from "@/types/users";
+import { useQuery } from "@tanstack/react-query";
+import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import {
+    Alert,
     Button,
     Modal,
     ModalBody,
@@ -15,12 +17,6 @@ import {
     ModalTitle,
 } from "react-bootstrap";
 import Spinner from "react-bootstrap/Spinner";
-
-export default WithAuth(
-    <CreateFormPage />,
-    "/zamestnanec/login",
-    UserRoleTitles.ZAMESTNANEC
-);
 
 /**
  * Status of form creation
@@ -42,19 +38,33 @@ enum CreationStatus {
 /**
  * Page for creating a form.
  */
-function CreateFormPage() {
+export default function CreateFormPage() {
     const [creationStatus, setCreationStatus] = useState(
         CreationStatus.NOT_SUBMITTED
     );
-    const klientPacientRoleId = useAppSelector(
-        roleIdSelector(UserRoleTitles.KLIENT_PACIENT)
-    );
-    const zamestnanecRoleId = useAppSelector(
-        roleIdSelector(UserRoleTitles.ZAMESTNANEC)
-    );
+    const session = useSession();
+    const fetchRoles = async () => {
+        const response = await fetch(
+            `${process.env.NEXT_PUBLIC_FORMIO_BASE_URL}role`,
+            {
+                headers: {
+                    "x-jwt-token": session.data!.user.formioToken, // token won't be null, because the query is disabled when it is
+                },
+            }
+        );
+        const roles = (await response.json()) as Role[];
+        return roles;
+    };
+    const { isLoading, isError, error, data } = useQuery({
+        queryKey: ["roles"],
+        queryFn: fetchRoles,
+        keepPreviousData: true,
+        enabled: !!session.data?.user.formioToken,
+    });
     const router = useRouter();
+    const errorResult = <Alert variant="danger">Načítání rolí selhalo.</Alert>;
 
-    if (!klientPacientRoleId || !zamestnanecRoleId)
+    if (isLoading)
         return (
             <div className="position-absolute top-50 start-50 translate-middle">
                 <Spinner animation="border" role="status">
@@ -62,19 +72,30 @@ function CreateFormPage() {
                 </Spinner>
             </div>
         );
-    else
+    else if (isError) {
+        console.error(error);
+        return errorResult;
+    } else {
+        const klientPacientRoleId = data?.find(
+            (role) => role.title === UserRoleTitles.KLIENT_PACIENT
+        )?._id;
+        const zamestnanecRoleId = data?.find(
+            (role) => role.title === UserRoleTitles.ZAMESTNANEC
+        )?._id;
+        if (!klientPacientRoleId || !zamestnanecRoleId) return errorResult;
+
         return (
             <>
                 <DynamicFormEdit
                     saveText="Vytvořit formulář"
                     saveForm={async (formSchema: any) => {
-                        const { Formio } = await import("formiojs");
-
-                        const client = new Formio(
+                        const client = await CreateFormio(
                             process.env.NEXT_PUBLIC_FORMIO_BASE_URL
                         );
                         try {
-                            await client.saveForm(formSchema);
+                            await client.saveForm(formSchema, {
+                                "x-jwt-token": session.data!.user.formioToken, // token won't be null, because the query is disabled when it is
+                            });
                         } catch (e) {
                             setCreationStatus(CreationStatus.CREATION_FAILED);
                             return;
@@ -135,4 +156,5 @@ function CreateFormPage() {
                 </Modal>
             </>
         );
+    }
 }

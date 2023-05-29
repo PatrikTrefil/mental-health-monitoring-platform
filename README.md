@@ -54,6 +54,7 @@ FORMIO_MONGO_PASSWORD=<formio password>
     -   `FORMIO_MONGO_PASSWORD` - heslo pro přihlášení uživatele `FORMIO_MONGO_USER` do MongoDB
 -   konfigurace webového rozhraní
     -   `DOMAIN_NAME` - doménové jméno, na kterém bude aplikace dostupná (např. `domena.cz`, `localhost`)
+    -   `NEXTAUTH_SECRET` - klíč pro šifrování tokenů
 
 ### Spuštění aplikace v produkčním módu
 

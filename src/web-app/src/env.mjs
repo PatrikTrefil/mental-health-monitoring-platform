@@ -8,5 +8,10 @@
 import { z } from "zod";
 
 export const envVarSchema = z.object({
-    NEXT_PUBLIC_FORMIO_BASE_URL: z.string(),
+    NEXT_PUBLIC_FORMIO_BASE_URL: z.string().url(),
+    NEXTAUTH_URL: z.string().url(),
+    NEXTAUTH_SECRET: z.string(),
+    FORMIO_SERVER_URL: z.string().url(),
+    FORMIO_ROOT_EMAIL: z.string().email(),
+    FORMIO_ROOT_PASSWORD: z.string(),
 });

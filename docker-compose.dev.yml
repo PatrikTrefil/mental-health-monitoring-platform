@@ -23,6 +23,8 @@ services:
       - web-app-next:/app/.next
     environment:
       - NEXT_PUBLIC_FORMIO_BASE_URL=http://${DOMAIN_NAME}:8080/formio/
+      - NEXTAUTH_URL=http://${DOMAIN_NAME}:8080
+      - NEXTAUTH_SECRET=dev-secret
     ports:
       - 3000:3000
   reverse-proxy:
@@ -42,7 +44,7 @@ services:
   formio:
     environment:
       # to filter logs to formio use 'formio:*'
-      DEBUG: '*'
+      DEBUG: "*"
     ports:
       - 3001:3001
   mongo:

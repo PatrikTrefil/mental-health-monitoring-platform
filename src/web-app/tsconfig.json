@@ -5,7 +5,8 @@
       "@/components/*": ["src/components/*"],
       "@/redux/*": ["src/redux/*"],
       "@/types/*": ["src/types/*"],
-      "@/styles/*": ["src/styles/*"]
+      "@/styles/*": ["src/styles/*"],
+      "@/lib/*": ["src/lib/*"]
     },
     "target": "es5",
     "lib": ["dom", "dom.iterable", "esnext"],

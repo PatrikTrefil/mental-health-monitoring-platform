@@ -1,20 +1,12 @@
-import WithAuth from "@/components/WithAuth";
 import DynamicForm from "@/components/dynamicFormio/DynamicForm";
-import { UserRoleTitles } from "@/redux/users";
 import { useRouter } from "next/router";
 import { Button } from "react-bootstrap";
 import Alert from "react-bootstrap/Alert";
 
-export default WithAuth(
-    <FillOutFormPage />,
-    "/login",
-    UserRoleTitles.KLIENT_PACIENT
-);
-
 /**
  * Page for filling out form with given form id (from url)
  */
-function FillOutFormPage() {
+export default function FillOutFormPage() {
     const router = useRouter();
     const formId = router.query.formId;
 

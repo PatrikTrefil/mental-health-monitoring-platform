@@ -1,8 +1,8 @@
-import WithAuth from "@/components/WithAuth";
 import DynamicFormBuilder from "@/components/dynamicFormio/DynamicFormBuilder";
 import DynamicFormEdit from "@/components/dynamicFormio/DynamicFormEdit";
-import { UserRoleTitles } from "@/redux/users";
+import { CreateFormio } from "@/lib/formiojsWrapper";
 import { Form } from "@/types/form";
+import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import {
@@ -15,12 +15,6 @@ import {
 } from "react-bootstrap";
 import Alert from "react-bootstrap/Alert";
 import Spinner from "react-bootstrap/Spinner";
-
-export default WithAuth(
-    <EditFormPage />,
-    "/zamestnanec/login",
-    UserRoleTitles.ZAMESTNANEC
-);
 
 /**
  * Status of form edit
@@ -43,7 +37,7 @@ enum EditStatus {
 /**
  * Page for editing form with given form id (from url)
  */
-function EditFormPage() {
+export default function EditFormPage() {
     const router = useRouter();
     const [form, setForm] = useState<Form | null>(null);
     const [editStatus, setEditStatus] = useState<EditStatus>(
@@ -51,6 +45,7 @@ function EditFormPage() {
     );
     const [initFormError, setInitFormError] = useState<string | null>(null);
 
+    const { data } = useSession();
     useEffect(
         function initForm() {
             const getForm = async () => {
@@ -64,17 +59,15 @@ function EditFormPage() {
                     return;
                 }
 
-                const { Formio } = await import("formiojs");
-
-                const client = new Formio(
-                    process.env.NEXT_PUBLIC_FORMIO_BASE_URL +
-                        "/form/" +
-                        router.query.formId
+                const client = await CreateFormio(
+                    `/form/${router.query.formId}`
                 );
 
                 let newForm;
                 try {
-                    newForm = await client.loadForm();
+                    newForm = await client.loadForm(undefined, {
+                        "x-jwt-token": data?.user.formioToken, // TODO: use react query
+                    });
                 } catch (e) {
                     setInitFormError(`Chyba: načítání formuláře selhalo: ${e}`);
                     return;
@@ -83,7 +76,7 @@ function EditFormPage() {
             };
             getForm();
         },
-        [router]
+        [router, data]
     );
 
     const formInitFailed = initFormError !== null;
@@ -100,7 +93,7 @@ function EditFormPage() {
             </>
         );
 
-    const isFormLoading = form === null;
+    const isFormLoading = form === null || data?.user.formioToken === undefined;
     if (isFormLoading)
         return (
             <div className="position-absolute top-50 start-50 translate-middle">
@@ -116,7 +109,7 @@ function EditFormPage() {
                 saveText="Uložit formulář"
                 saveForm={(formSchema: unknown) => {
                     try {
-                        saveFormToServer(formSchema);
+                        saveFormToServer(formSchema, data.user.formioToken);
                     } catch (e) {
                         setEditStatus(EditStatus.EDIT_FAILED);
                     }
@@ -163,9 +156,9 @@ function EditFormPage() {
  * @param formSchema Form schema to save to server
  * @throws Error if saving fails
  */
-async function saveFormToServer(formSchema: unknown) {
-    const { Formio } = await import("formiojs");
-
-    const client = new Formio(process.env.NEXT_PUBLIC_FORMIO_BASE_URL);
-    await client.saveForm(formSchema);
+async function saveFormToServer(formSchema: unknown, formioToken: string) {
+    const client = await CreateFormio(process.env.NEXT_PUBLIC_FORMIO_BASE_URL);
+    await client.saveForm(formSchema, {
+        "x-jwt-token": formioToken,
+    });
 }

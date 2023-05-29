@@ -1,19 +1,16 @@
 import SimplePagination from "@/components/SimplePagination";
-import WithAuth from "@/components/WithAuth";
 import DynamicForm from "@/components/dynamicFormio/DynamicForm";
-import { UserRoleTitles } from "@/redux/users";
+import { CreateFormio } from "@/lib/formiojsWrapper";
 import { UserFormSubmission } from "@/types/userFormSubmission";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useSession } from "next-auth/react";
 import { useCallback, useEffect, useState } from "react";
 import { Alert, Button, Modal, Spinner } from "react-bootstrap";
 
-export default WithAuth(
-    <SpravaUzivatelu />,
-    "/zamestnanec/login",
-    UserRoleTitles.ZAMESTNANEC
-);
-
-function SpravaUzivatelu() {
+/**
+ * Page for managing users.
+ */
+export default function SpravaUzivateluPage() {
     const queryClient = useQueryClient();
 
     const [showCreateUserModal, setShowCreateUserModal] = useState(false);
@@ -24,19 +21,22 @@ function SpravaUzivatelu() {
     const [pageIndex, setPageIndex] = useState(0);
     const [totalPages, setTotalPages] = useState(0);
 
+    const session = useSession();
+
     const fetchUsers = useCallback(
         async (page: number, currentTotalPages: number) => {
             const url = new URL(
-                `${process.env.NEXT_PUBLIC_FORMIO_BASE_URL}/klientpacient/submission`
+                `${process.env.NEXT_PUBLIC_FORMIO_BASE_URL}klientpacient/submission`
             );
             url.searchParams.set("limit", pageSize.toString());
             url.searchParams.set("skip", (page * pageSize).toString());
 
+            if (!session.data?.user.formioToken)
+                throw new Error("No token in session");
+
             const response = await fetch(url, {
                 headers: new Headers({
-                    "x-jwt-token": localStorage.getItem(
-                        "formioToken"
-                    ) as string,
+                    "x-jwt-token": session.data.user.formioToken,
                 }),
             });
             const contentRangeParser =
@@ -71,8 +71,9 @@ function SpravaUzivatelu() {
                           parseInt(groups.size) - 1,
             };
         },
-        []
+        [session.data?.user.formioToken]
     );
+
     const {
         isLoading,
         isError,
@@ -85,7 +86,9 @@ function SpravaUzivatelu() {
         queryKey: ["users", pageIndex, totalPages],
         queryFn: () => fetchUsers(pageIndex, totalPages),
         keepPreviousData: true,
+        enabled: !!session.data?.user.formioToken,
     });
+
     // Prefetch the next page!
     useEffect(() => {
         if (!isPreviousData && data?.hasMore) {
@@ -113,12 +116,13 @@ function SpravaUzivatelu() {
     }
 
     const deleteUser = async (userSubmissionId: string) => {
-        const formiojs = await import("formiojs");
-        const formio = new formiojs.Formio(
-            `${process.env.NEXT_PUBLIC_FORMIO_BASE_URL}/klientpacient/submission/${userSubmissionId}`
+        const formio = await CreateFormio(
+            `${process.env.NEXT_PUBLIC_FORMIO_BASE_URL}klientpacient/submission/${userSubmissionId}`
         );
         try {
-            await formio.deleteSubmission();
+            await formio.deleteSubmission({
+                "x-jwt-token": session.data!.user.formioToken, // token won't be null, because the query is disabled when it is
+            });
         } catch (e) {
             setShowDeleteUserFailureModal(true);
             return;
@@ -195,7 +199,7 @@ function SpravaUzivatelu() {
                 </Modal.Header>
                 <Modal.Body>
                     <DynamicForm
-                        src="/klientpacient/register"
+                        src={`/klientpacient/register`}
                         onSubmitDone={() => {
                             setShowCreateUserModal(false);
                             queryClient.invalidateQueries(["users"]);

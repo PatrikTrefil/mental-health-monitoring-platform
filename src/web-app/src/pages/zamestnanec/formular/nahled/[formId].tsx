@@ -1,6 +1,4 @@
-import WithAuth from "@/components/WithAuth";
 import DynamicForm from "@/components/dynamicFormio/DynamicForm";
-import { UserRoleTitles } from "@/redux/users";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import {
@@ -13,16 +11,10 @@ import {
     ModalTitle,
 } from "react-bootstrap";
 
-export default WithAuth(
-    <PreviewFormPage />,
-    "/zamestnanec/login",
-    UserRoleTitles.ZAMESTNANEC
-);
-
 /**
  * Page for previewing form with given form id (from url)
  */
-function PreviewFormPage() {
+export default function PreviewFormPage() {
     const router = useRouter();
     const formId = router.query.formId;
     const [showModal, setShowModal] = useState(false);

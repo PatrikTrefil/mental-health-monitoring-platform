@@ -82,7 +82,7 @@ const nextConfig = {
     redirects: async () => [
         {
             source: "/zamestnanec",
-            destination: "/zamestnanec/login",
+            destination: "/zamestnanec/prehled",
             permanent: true,
         },
     ],

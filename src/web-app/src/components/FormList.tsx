@@ -1,5 +1,7 @@
+import { CreateFormio } from "@/lib/formiojsWrapper";
 import { Form } from "@/types/form";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useSession } from "next-auth/react";
 import { useCallback, useEffect, useState } from "react";
 import { Alert, Button, Spinner } from "react-bootstrap";
 import SimplePagination from "./SimplePagination";
@@ -14,10 +16,12 @@ export function FormList({ filterOptions, FormLine }: FormListProps) {
     const [pageIndex, setPageIndex] = useState(0);
     const [totalPages, setTotalPages] = useState(0);
 
+    const session = useSession();
+
     const fetchForms = useCallback(
         async (page: number, currentTotalPages: number) => {
             const url = new URL(
-                process.env.NEXT_PUBLIC_FORMIO_BASE_URL + "/form/"
+                `${process.env.NEXT_PUBLIC_FORMIO_BASE_URL}form/`
             );
             url.searchParams.set("limit", pageSize.toString());
             url.searchParams.set("skip", (page * pageSize).toString());
@@ -27,11 +31,9 @@ export function FormList({ filterOptions, FormLine }: FormListProps) {
             }
 
             const response = await fetch(url, {
-                headers: new Headers({
-                    "x-jwt-token": localStorage.getItem(
-                        "formioToken"
-                    ) as string,
-                }),
+                headers: {
+                    "x-jwt-token": session.data!.user.formioToken, // token won't be null, because the query is disabled when it is
+                },
             });
             const contentRangeParser =
                 /(?<range>(?<rangeStart>[0-9]+)-(?<rangeEnd>[0-9]+)|\*)\/(?<size>[0-9]+)/;
@@ -65,7 +67,7 @@ export function FormList({ filterOptions, FormLine }: FormListProps) {
                           parseInt(groups.size) - 1,
             };
         },
-        [filterOptions]
+        [filterOptions, session.data]
     );
     const {
         isLoading,
@@ -79,6 +81,7 @@ export function FormList({ filterOptions, FormLine }: FormListProps) {
         queryKey: ["forms", pageIndex, totalPages],
         queryFn: () => fetchForms(pageIndex, totalPages),
         keepPreviousData: true,
+        enabled: !!session.data?.user.formioToken,
     });
     // Prefetch the next page!
     useEffect(() => {
@@ -107,9 +110,8 @@ export function FormList({ filterOptions, FormLine }: FormListProps) {
     }
 
     const deleteForm = async (form: Form) => {
-        const { Formio } = await import("formiojs");
-        const formio = new Formio(
-            `${process.env.NEXT_PUBLIC_FORMIO_BASE_URL}/${form.path}`
+        const formio = await CreateFormio(
+            `${process.env.NEXT_PUBLIC_FORMIO_BASE_URL}${form.path}`
         );
         await formio.deleteForm();
         await queryClient.invalidateQueries(["forms"]);

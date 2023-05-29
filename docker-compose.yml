@@ -8,6 +8,11 @@ services:
       dockerfile: Dockerfile.production
     environment:
       - NEXT_PUBLIC_FORMIO_BASE_URL=http://${DOMAIN_NAME}:80/formio/
+      - NEXTAUTH_URL=http://${DOMAIN_NAME}/api/auth
+      - NEXTAUTH_SECRET=${NEXTAUTH_SECRET}
+      - FORMIO_SERVER_URL=http://formio:3001
+      - FORMIO_ROOT_EMAIL=${FORMIO_ROOT_EMAIL}
+      - FORMIO_ROOT_PASSWORD=${FORMIO_ROOT_PASSWORD}
   reverse-proxy:
     restart: on-failure
 
@@ -18,7 +23,6 @@ services:
     pull_policy: never
 
     build: ./src/reverse-proxy/production/
-
 
     ports:
       - 80:80
@@ -51,21 +55,21 @@ services:
       - ROOT_EMAIL=${FORMIO_ROOT_EMAIL}
       - ROOT_PASSWORD=${FORMIO_ROOT_PASSWORD}
       - NODE_CONFIG=${FORMIO_NODE_CONFIG}
-    stdin_open: true  # -i
+    stdin_open: true # -i
     tty: true # -t
   monitoring:
     image: gcr.io/cadvisor/cadvisor:latest
     volumes:
-    - /:/rootfs:ro
-    - /var/run:/var/run:ro
-    - /sys:/sys:ro
-    - /var/lib/docker/:/var/lib/docker:ro
-    - /dev/disk/:/dev/disk:ro
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /dev/disk/:/dev/disk:ro
     # give access to all devices
     privileged: true
     # map kernel log
     devices:
-    - device=/dev/kmsg
+      - device=/dev/kmsg
 
 volumes:
   mongodb-data:
