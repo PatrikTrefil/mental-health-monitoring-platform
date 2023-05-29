@@ -13,6 +13,9 @@ Kontrola práv uživatele při přístupu na ochráněnou stránku se kontrola p
 middlewaru NextJS serveru. Pokud uživatel nemá dostatečná práva, je přesměrován
 na `/403`.
 
+Životnost jednoho tokenu musí být stejná nebo nižší než životnost tokenu
+vydaného formulářovým systémem (viz [Formio](../Formio/Autentifikace.md)).
+
 ```plantuml
 @startuml
 actor klient as "Klient"
