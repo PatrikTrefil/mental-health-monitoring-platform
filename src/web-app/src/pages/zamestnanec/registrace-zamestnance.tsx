@@ -1,4 +1,4 @@
-import DynamicForm from "@/components/shared/dynamicFormio/DynamicForm";
+import DynamicForm from "@/components/shared/formio/DynamicForm";
 
 /**
  * Page for registering a new employee.

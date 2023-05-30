@@ -1,4 +1,4 @@
-import DynamicForm from "@/components/shared/dynamicFormio/DynamicForm";
+import DynamicForm from "@/components/shared/formio/DynamicForm";
 import { Form } from "@/types/form";
 import { useQuery } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";

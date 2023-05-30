@@ -1,5 +1,5 @@
-import DynamicFormBuilder from "@/components/shared/dynamicFormio/DynamicFormBuilder";
-import DynamicFormEdit from "@/components/shared/dynamicFormio/DynamicFormEdit";
+import DynamicFormBuilder from "@/components/shared/formio/DynamicFormBuilder";
+import DynamicFormEdit from "@/components/shared/formio/DynamicFormEdit";
 import { CreateFormio } from "@/lib/formiojsWrapper";
 import { Role } from "@/types/role";
 import { UserRoleTitles } from "@/types/users";
