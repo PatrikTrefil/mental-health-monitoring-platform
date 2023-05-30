@@ -67,8 +67,14 @@ export default function SpravaUzivateluPage() {
             columnHelper.accessor("data.id", {
                 header: "ID",
             }),
+            columnHelper.accessor("created", {
+                header: "Vytvořeno dne",
+                cell: (props) =>
+                    new Date(props.row.original.created).toLocaleString(),
+            }),
             columnHelper.display({
                 id: "actions",
+                header: "Akce",
                 cell: (props) => (
                     <Button
                         variant="danger"
@@ -137,7 +143,10 @@ export default function SpravaUzivateluPage() {
             <Button as="a" href="./prehled">
                 Zpět na přehled
             </Button>
-            <Button onClick={() => setShowCreateUserModal(true)}>
+            <Button
+                onClick={() => setShowCreateUserModal(true)}
+                className="mx-2"
+            >
                 Založit účet nového pacienta/klienta
             </Button>
             <h2>Seznam pacientů/klientů</h2>
@@ -161,6 +170,7 @@ export default function SpravaUzivateluPage() {
                 ) : null}
             </div>
             <Form.Select
+                className="my-2"
                 value={table.getState().pagination.pageSize}
                 onChange={(e) => {
                     table.setPageSize(Number(e.target.value));
@@ -172,7 +182,7 @@ export default function SpravaUzivateluPage() {
                     </option>
                 ))}
             </Form.Select>
-            <Table striped bordered hover>
+            <Table striped bordered hover className="my-2">
                 <thead>
                     {table.getHeaderGroups().map((headerGroup) => (
                         <tr key={headerGroup.id}>
