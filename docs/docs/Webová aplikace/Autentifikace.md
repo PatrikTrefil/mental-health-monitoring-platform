@@ -43,7 +43,8 @@ klient <-- webAppKlient: Uživatel je přesměrován
 
 klient -> webAppKlient
 webAppKlient -> webAppServer
-note right of webAppServer: Již není potřeba komunikovat s manažerem uživatelů a autentifikace
+webAppServer -> manazerUzivatelu: Žádost o obnovení JWT tokenu
+webAppServer <-- manazerUzivatelu: Nový JWT token
 webAppKlient <-- webAppServer
 klient <-- webAppKlient
 @enduml
