@@ -1,10 +1,11 @@
-import DynamicFormBuilder from "@/components/shared/dynamicFormio/DynamicFormBuilder";
-import DynamicFormEdit from "@/components/shared/dynamicFormio/DynamicFormEdit";
+import DynamicFormBuilder from "@/components/shared/formio/DynamicFormBuilder";
+import DynamicFormEdit from "@/components/shared/formio/DynamicFormEdit";
 import { CreateFormio } from "@/lib/formiojsWrapper";
 import { Form } from "@/types/form";
+import { useQuery } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
     Button,
     Modal,
@@ -39,51 +40,43 @@ enum EditStatus {
  */
 export default function EditFormPage() {
     const router = useRouter();
-    const [form, setForm] = useState<Form | null>(null);
     const [editStatus, setEditStatus] = useState<EditStatus>(
         EditStatus.NOT_SUBMITTED
     );
-    const [initFormError, setInitFormError] = useState<string | null>(null);
+    // used to prevent re-fetching form data
+    // if the data was refetched, it would reset the form and delete the user's changes
+    const [isInitialized, setIsInitialized] = useState(false);
 
     const { data } = useSession();
-    useEffect(
-        function initForm() {
-            const getForm = async () => {
-                if (router.query.formId === undefined) return;
 
-                if (typeof router.query.formId !== "string") {
-                    setInitFormError(
-                        `Chyba: id formuláře musí byt string (nyní má typ ${typeof router
-                            .query.formId})`
-                    );
-                    return;
+    const {
+        data: form,
+        isLoading,
+        isError,
+    } = useQuery({
+        enabled:
+            !!data?.user.formioToken && !!router.query.formId && !isInitialized,
+        // eslint-disable-next-line @tanstack/query/exhaustive-deps
+        queryKey: ["form", router.query.formId],
+        queryFn: async () => {
+            const response = await fetch(
+                `${process.env.NEXT_PUBLIC_FORMIO_BASE_URL}/form/${router.query.formId}`,
+                {
+                    headers: {
+                        "x-jwt-token": data!.user.formioToken,
+                    },
                 }
-
-                const client = await CreateFormio(
-                    `/form/${router.query.formId}`
-                );
-
-                let newForm;
-                try {
-                    newForm = await client.loadForm(undefined, {
-                        "x-jwt-token": data?.user.formioToken, // TODO: use react query
-                    });
-                } catch (e) {
-                    setInitFormError(`Chyba: načítání formuláře selhalo: ${e}`);
-                    return;
-                }
-                setForm(newForm);
-            };
-            getForm();
+            );
+            const result = (await response.json()) as Form;
+            setIsInitialized(true);
+            return result;
         },
-        [router, data]
-    );
+    });
 
-    const formInitFailed = initFormError !== null;
-    if (formInitFailed)
+    if (isError)
         return (
             <>
-                <Alert variant="danger">{initFormError}</Alert>
+                <Alert variant="danger">Načítání formuláře selhalo</Alert>
                 <div className="d-flex flex-wrap gap-2">
                     <Button onClick={() => router.reload()}>
                         Znovu načíst stránku
@@ -93,8 +86,7 @@ export default function EditFormPage() {
             </>
         );
 
-    const isFormLoading = form === null || data?.user.formioToken === undefined;
-    if (isFormLoading)
+    if (isLoading)
         return (
             <div className="position-absolute top-50 start-50 translate-middle">
                 <Spinner animation="border" role="status">
@@ -109,9 +101,12 @@ export default function EditFormPage() {
                 saveText="Uložit formulář"
                 saveForm={(formSchema: unknown) => {
                     try {
-                        saveFormToServer(formSchema, data.user.formioToken);
+                        if (data)
+                            saveFormToServer(formSchema, data.user.formioToken);
+                        else throw new Error("Token not available");
                     } catch (e) {
                         setEditStatus(EditStatus.EDIT_FAILED);
+                        return;
                     }
                     setEditStatus(EditStatus.EDIT_SUCCEEDED);
                 }}

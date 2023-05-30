@@ -1,104 +1,126 @@
 import SimplePagination from "@/components/shared/SimplePagination";
-import DynamicForm from "@/components/shared/dynamicFormio/DynamicForm";
-import { CreateFormio } from "@/lib/formiojsWrapper";
+import DynamicFormWithAuth from "@/components/shared/formio/DynamicFormWithAuth";
 import { UserFormSubmission } from "@/types/userFormSubmission";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+    createColumnHelper,
+    flexRender,
+    getCoreRowModel,
+    getPaginationRowModel,
+    useReactTable,
+} from "@tanstack/react-table";
 import { useSession } from "next-auth/react";
-import { useCallback, useEffect, useState } from "react";
-import { Alert, Button, Modal, Spinner } from "react-bootstrap";
+import { useCallback, useMemo, useState } from "react";
+import {
+    Alert,
+    Button,
+    Form,
+    Modal,
+    Spinner,
+    Table,
+    Toast,
+    ToastContainer,
+} from "react-bootstrap";
 
 /**
  * Page for managing users.
  */
 export default function SpravaUzivateluPage() {
     const queryClient = useQueryClient();
-
-    const [showCreateUserModal, setShowCreateUserModal] = useState(false);
-    const [showDeleteUserFailureModal, setShowDeleteUserFailureModal] =
-        useState(false);
-
-    const pageSize = 10;
-    const [pageIndex, setPageIndex] = useState(0);
-    const [totalPages, setTotalPages] = useState(0);
-
     const session = useSession();
 
-    const fetchUsers = useCallback(
-        async (page: number, currentTotalPages: number) => {
-            const url = new URL(
-                `${process.env.NEXT_PUBLIC_FORMIO_BASE_URL}klientpacient/submission`
-            );
-            url.searchParams.set("limit", pageSize.toString());
-            url.searchParams.set("skip", (page * pageSize).toString());
+    const [showDeleteUserFailureToast, setShowDeleteUserFailureModal] =
+        useState(false);
+    const deleteUser = useCallback(
+        async (userSubmissionId: string) => {
+            console.debug("Deleting user ...", { userSubmissionId });
 
-            if (!session.data?.user.formioToken)
-                throw new Error("No token in session");
+            try {
+                if (!session.data?.user.formioToken) {
+                    console.error("No token in session.");
+                    return;
+                }
 
-            const response = await fetch(url, {
-                headers: new Headers({
-                    "x-jwt-token": session.data.user.formioToken,
-                }),
-            });
-            const contentRangeParser =
-                /(?<range>(?<rangeStart>[0-9]+)-(?<rangeEnd>[0-9]+)|\*)\/(?<size>[0-9]+)/;
-            const match = response.headers
-                .get("content-range")
-                ?.match(contentRangeParser);
-
-            if (!match) throw new Error("Invalid content-range header");
-
-            const groups = match.groups as {
-                range: string;
-                rangeStart: string | undefined;
-                rangeEnd: string | undefined;
-                size: string;
-            };
-            const newTotalPages =
-                groups.range === "*"
-                    ? 0
-                    : Math.ceil(parseInt(groups.size) / pageSize);
-
-            if (newTotalPages !== currentTotalPages) {
-                setTotalPages(newTotalPages);
+                await fetch(
+                    `${process.env.NEXT_PUBLIC_FORMIO_BASE_URL}klientpacient/submission/${userSubmissionId}`,
+                    {
+                        method: "DELETE",
+                        headers: {
+                            "x-jwt-token": session.data.user.formioToken,
+                        },
+                    }
+                );
+            } catch (e) {
+                console.error("Failed to delete user.", { userSubmissionId });
+                setShowDeleteUserFailureModal(true);
+                return;
             }
-
-            return {
-                users: (await response.json()) as UserFormSubmission[],
-                hasMore:
-                    groups.range === "*"
-                        ? false
-                        : parseInt(groups.rangeEnd!) <
-                          parseInt(groups.size) - 1,
-            };
+            console.debug("User deleted.", { userSubmissionId });
+            await queryClient.invalidateQueries(["users"]);
         },
-        [session.data?.user.formioToken]
+        [queryClient, session.data]
     );
 
-    const {
-        isLoading,
-        isError,
-        error,
-        data,
-        isFetching,
-        refetch,
-        isPreviousData,
-    } = useQuery({
-        queryKey: ["users", pageIndex, totalPages],
-        queryFn: () => fetchUsers(pageIndex, totalPages),
-        keepPreviousData: true,
+    const columnHelper = createColumnHelper<UserFormSubmission>();
+    const columns = useMemo(
+        () => [
+            columnHelper.accessor("data.id", {
+                header: "ID",
+            }),
+            columnHelper.accessor("created", {
+                header: "Vytvořeno dne",
+                cell: (props) =>
+                    new Date(props.row.original.created).toLocaleString(),
+            }),
+            columnHelper.display({
+                id: "actions",
+                header: "Akce",
+                cell: (props) => (
+                    <Button
+                        variant="danger"
+                        onClick={() => deleteUser(props.row.original._id)}
+                    >
+                        Smazat
+                    </Button>
+                ),
+            }),
+        ],
+        [columnHelper, deleteUser]
+    );
+
+    const [showCreateUserModal, setShowCreateUserModal] = useState(false);
+
+    const [showRegistrationFailureToast, setShowRegistrationFailureToast] =
+        useState(false);
+
+    const fetchUsers = useCallback(async () => {
+        if (!session.data?.user.formioToken)
+            throw new Error("No token in session");
+
+        const response = await fetch(
+            `${process.env.NEXT_PUBLIC_FORMIO_BASE_URL}klientpacient/submission`,
+            {
+                headers: {
+                    "x-jwt-token": session.data.user.formioToken,
+                },
+            }
+        );
+
+        return (await response.json()) as UserFormSubmission[];
+    }, [session.data?.user.formioToken]);
+
+    const { isLoading, isError, error, data, isFetching, refetch } = useQuery({
+        queryKey: ["users"],
+        queryFn: () => fetchUsers(),
         enabled: !!session.data?.user.formioToken,
     });
 
-    // Prefetch the next page!
-    useEffect(() => {
-        if (!isPreviousData && data?.hasMore) {
-            queryClient.prefetchQuery({
-                // eslint-disable-next-line @tanstack/query/exhaustive-deps
-                queryKey: ["users", pageIndex + 1],
-                queryFn: () => fetchUsers(pageIndex + 1, totalPages),
-            });
-        }
-    }, [data, isPreviousData, pageIndex, queryClient, fetchUsers, totalPages]);
+    const table = useReactTable({
+        columns,
+        data: data ?? [],
+        getCoreRowModel: getCoreRowModel(),
+        getPaginationRowModel: getPaginationRowModel(),
+    });
 
     if (isLoading)
         return (
@@ -108,6 +130,7 @@ export default function SpravaUzivateluPage() {
                 </Spinner>
             </div>
         );
+
     if (isError) {
         console.error(error);
         return (
@@ -115,27 +138,15 @@ export default function SpravaUzivateluPage() {
         );
     }
 
-    const deleteUser = async (userSubmissionId: string) => {
-        const formio = await CreateFormio(
-            `${process.env.NEXT_PUBLIC_FORMIO_BASE_URL}klientpacient/submission/${userSubmissionId}`
-        );
-        try {
-            await formio.deleteSubmission({
-                "x-jwt-token": session.data!.user.formioToken, // token won't be null, because the query is disabled when it is
-            });
-        } catch (e) {
-            setShowDeleteUserFailureModal(true);
-            return;
-        }
-        await queryClient.invalidateQueries(["users"]);
-    };
-
     return (
-        <>
+        <main className="vh-100">
             <Button as="a" href="./prehled">
                 Zpět na přehled
             </Button>
-            <Button onClick={() => setShowCreateUserModal(true)}>
+            <Button
+                onClick={() => setShowCreateUserModal(true)}
+                className="mx-2"
+            >
                 Založit účet nového pacienta/klienta
             </Button>
             <h2>Seznam pacientů/klientů</h2>
@@ -158,69 +169,107 @@ export default function SpravaUzivateluPage() {
                     </Spinner>
                 ) : null}
             </div>
-            <div className="d-flex flex-column align-items-center gap-2">
-                <ul className="list-group w-100">
-                    {data.users.map((userSubmission) => (
-                        <li
-                            className="list-group-item d-flex justify-content-between align-items-center"
-                            key={userSubmission._id}
-                        >
-                            <div>
-                                ID: {userSubmission.data.id} (účet vytvořen:{" "}
-                                {new Date(
-                                    userSubmission.created
-                                ).toLocaleString()}
-                                )
-                            </div>
-                            <div>
-                                <Button
-                                    variant="danger"
-                                    onClick={() =>
-                                        deleteUser(userSubmission._id)
-                                    }
-                                >
-                                    Smazat
-                                </Button>
-                            </div>
-                        </li>
+            <Form.Select
+                className="my-2"
+                value={table.getState().pagination.pageSize}
+                onChange={(e) => {
+                    table.setPageSize(Number(e.target.value));
+                }}
+            >
+                {[10, 20, 30].map((pageSize: number) => (
+                    <option key={pageSize} value={pageSize}>
+                        Zobrazit {pageSize}
+                    </option>
+                ))}
+            </Form.Select>
+            <Table striped bordered hover className="my-2">
+                <thead>
+                    {table.getHeaderGroups().map((headerGroup) => (
+                        <tr key={headerGroup.id}>
+                            {headerGroup.headers.map((header) => (
+                                <th key={header.id}>
+                                    {header.isPlaceholder
+                                        ? null
+                                        : flexRender(
+                                              header.column.columnDef.header,
+                                              header.getContext()
+                                          )}
+                                </th>
+                            ))}
+                        </tr>
                     ))}
-                </ul>
+                </thead>
+                <tbody>
+                    {table.getRowModel().rows.map((row) => (
+                        <tr key={row.id}>
+                            {row.getVisibleCells().map((cell) => (
+                                <td key={cell.id}>
+                                    {flexRender(
+                                        cell.column.columnDef.cell,
+                                        cell.getContext()
+                                    )}
+                                </td>
+                            ))}
+                        </tr>
+                    ))}
+                </tbody>
+            </Table>
+            <div className="d-flex justify-content-center align-items-center">
                 <SimplePagination
-                    pageIndex={pageIndex}
-                    totalPages={totalPages}
-                    setPageIndex={setPageIndex}
+                    pageIndex={table.getState().pagination.pageIndex}
+                    totalPages={table.getPageCount()}
+                    setPageIndex={table.setPageIndex}
                 />
             </div>
-            <Modal show={showCreateUserModal}>
-                <Modal.Header>
+            <Modal
+                show={showCreateUserModal}
+                onHide={() => setShowCreateUserModal(false)}
+            >
+                <Modal.Header closeButton>
                     <Modal.Title>
                         Založení nového účtu pro pacienta/klienta
                     </Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    <DynamicForm
-                        src={`/klientpacient/register`}
+                    <DynamicFormWithAuth
+                        absoluteSrc={`${process.env.NEXT_PUBLIC_FORMIO_BASE_URL}klientpacient/register`}
                         onSubmitDone={() => {
                             setShowCreateUserModal(false);
                             queryClient.invalidateQueries(["users"]);
                         }}
+                        onSubmitFail={() => {
+                            setShowCreateUserModal(false);
+                            setShowRegistrationFailureToast(true);
+                        }}
                     />
                 </Modal.Body>
             </Modal>
-            <Modal show={showDeleteUserFailureModal}>
-                <Modal.Header>
-                    <Modal.Title>Smazání selhalo</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>Smazání účtu selhalo.</Modal.Body>
-                <Modal.Footer>
-                    <Button
-                        variant="secondary"
-                        onClick={() => setShowDeleteUserFailureModal(false)}
-                    >
-                        Zavřít
-                    </Button>
-                </Modal.Footer>
-            </Modal>
-        </>
+            <ToastContainer
+                className="p-3"
+                position="bottom-end"
+                style={{ zIndex: 1 }}
+            >
+                <Toast
+                    show={showDeleteUserFailureToast}
+                    onClose={() => setShowDeleteUserFailureModal(false)}
+                    bg="danger"
+                >
+                    <Toast.Header closeLabel="Zavřít">
+                        <strong className="me-auto">Smazání selhalo</strong>
+                    </Toast.Header>
+                    <Toast.Body>Smazání účtu selhalo.</Toast.Body>
+                </Toast>
+                <Toast
+                    show={showRegistrationFailureToast}
+                    onClose={() => setShowRegistrationFailureToast(false)}
+                    bg="danger"
+                >
+                    <Toast.Header closeLabel="Zavřít">
+                        <strong className="me-auto">Registrace selhala</strong>
+                    </Toast.Header>
+                    <Toast.Body>Registrování uživatele selhalo.</Toast.Body>
+                </Toast>
+            </ToastContainer>
+        </main>
     );
 }
