@@ -95,7 +95,15 @@ export const authOptions: AuthOptions = {
          */
         async jwt({ token, user }) {
             // the user is available only in the first call
-            if (user) token.user = user;
+            // initial sign in
+            if (user) {
+                token.user = user;
+            } else {
+                if (!token.user) throw new Error("No user in token");
+                // update the formio token (may throw)
+                const newToken = await refreshToken(token.user.formioToken);
+                token.user.formioToken = newToken;
+            }
 
             return token;
         },
@@ -235,4 +243,26 @@ async function fetchRoleList(adminToken: string) {
     }[];
 
     return roleList;
+}
+
+/**
+ * Refreshes the token of a user.
+ * @param currentToken current JWT token of the user
+ * @throws RequestError if the request fails
+ */
+async function refreshToken(currentToken: string) {
+    console.log("Refreshing token...");
+    const refreshResponse = await fetch(
+        `${process.env.FORMIO_SERVER_URL}/current`,
+        {
+            headers: {
+                "x-jwt-token": currentToken,
+            },
+        }
+    );
+    if (!refreshResponse.ok) throw new RequestError(refreshResponse.status);
+    const newToken = refreshResponse.headers.get("x-jwt-token");
+    if (!newToken) throw new Error("No token received");
+    console.log("Token refreshed.");
+    return newToken;
 }
