@@ -3,7 +3,8 @@ import { signIn, useSession } from "next-auth/react";
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/router";
 import { FormEventHandler, useEffect, useState } from "react";
-import { Button, Form, Toast, ToastContainer } from "react-bootstrap";
+import { Button, Form } from "react-bootstrap";
+import { toast } from "react-toastify";
 
 /**
  * Login form which includes all the necessary logic.
@@ -16,7 +17,6 @@ import { Button, Form, Toast, ToastContainer } from "react-bootstrap";
 export default function Login() {
     const [id, setId] = useState("");
     const [password, setPassword] = useState("");
-    const [error, setError] = useState("");
 
     const router = useRouter();
     const session = useSession();
@@ -44,7 +44,7 @@ export default function Login() {
                 ) {
                     router.push(clientPatientDefaultCallback);
                 } else {
-                    setError("Nemáte ani jednu z vyžadovaných rolí.");
+                    toast.error("Nemáte ani jednu z vyžadovaných rolí.");
                 }
             }
         },
@@ -59,36 +59,16 @@ export default function Login() {
             redirect: false,
         });
 
-        if (result?.error) setError(result.error);
-    };
-    const getErrorToastContent = (error: string) => {
-        if (error === "CredentialsSignin")
-            return "Nesprávné uživatelské jméno nebo heslo.";
-        else return error;
+        if (result?.error)
+            toast.error(
+                result.error === "CredentialsSignin"
+                    ? "Nesprávné uživatelské jméno nebo heslo."
+                    : result.error
+            );
     };
 
     return (
         <>
-            {!!error && (
-                <ToastContainer
-                    position="bottom-end"
-                    style={{ zIndex: 1 }}
-                    className="p-3"
-                >
-                    <Toast
-                        show={!!error}
-                        bg="danger"
-                        onClose={() => setError("")}
-                    >
-                        <Toast.Header closeLabel="Zavřít">
-                            <strong className="me-auto">
-                                Nastala chyba při přihlášení
-                            </strong>
-                        </Toast.Header>
-                        <Toast.Body>{getErrorToastContent(error)}</Toast.Body>
-                    </Toast>
-                </ToastContainer>
-            )}
             <Form onSubmit={handleSubmit}>
                 <Form.Label htmlFor="input-id">ID</Form.Label>
                 <Form.Control

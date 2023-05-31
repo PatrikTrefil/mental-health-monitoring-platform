@@ -11,16 +11,8 @@ import {
 } from "@tanstack/react-table";
 import { useSession } from "next-auth/react";
 import { useCallback, useMemo, useState } from "react";
-import {
-    Alert,
-    Button,
-    Form,
-    Modal,
-    Spinner,
-    Table,
-    Toast,
-    ToastContainer,
-} from "react-bootstrap";
+import { Alert, Button, Form, Modal, Spinner, Table } from "react-bootstrap";
+import { toast } from "react-toastify";
 
 /**
  * Page for managing users.
@@ -29,8 +21,6 @@ export default function SpravaUzivateluPage() {
     const queryClient = useQueryClient();
     const session = useSession();
 
-    const [showDeleteUserFailureToast, setShowDeleteUserFailureModal] =
-        useState(false);
     const deleteUser = useCallback(
         async (userSubmissionId: string) => {
             console.debug("Deleting user ...", { userSubmissionId });
@@ -52,7 +42,7 @@ export default function SpravaUzivateluPage() {
                 );
             } catch (e) {
                 console.error("Failed to delete user.", { userSubmissionId });
-                setShowDeleteUserFailureModal(true);
+                toast.error("Smazání účtu selhalo.");
                 return;
             }
             console.debug("User deleted.", { userSubmissionId });
@@ -89,9 +79,6 @@ export default function SpravaUzivateluPage() {
     );
 
     const [showCreateUserModal, setShowCreateUserModal] = useState(false);
-
-    const [showRegistrationFailureToast, setShowRegistrationFailureToast] =
-        useState(false);
 
     const fetchUsers = useCallback(async () => {
         if (!session.data?.user.formioToken)
@@ -239,37 +226,11 @@ export default function SpravaUzivateluPage() {
                         }}
                         onSubmitFail={() => {
                             setShowCreateUserModal(false);
-                            setShowRegistrationFailureToast(true);
+                            toast.error("Registrování uživatele selhalo.");
                         }}
                     />
                 </Modal.Body>
             </Modal>
-            <ToastContainer
-                className="p-3"
-                position="bottom-end"
-                style={{ zIndex: 1 }}
-            >
-                <Toast
-                    show={showDeleteUserFailureToast}
-                    onClose={() => setShowDeleteUserFailureModal(false)}
-                    bg="danger"
-                >
-                    <Toast.Header closeLabel="Zavřít">
-                        <strong className="me-auto">Smazání selhalo</strong>
-                    </Toast.Header>
-                    <Toast.Body>Smazání účtu selhalo.</Toast.Body>
-                </Toast>
-                <Toast
-                    show={showRegistrationFailureToast}
-                    onClose={() => setShowRegistrationFailureToast(false)}
-                    bg="danger"
-                >
-                    <Toast.Header closeLabel="Zavřít">
-                        <strong className="me-auto">Registrace selhala</strong>
-                    </Toast.Header>
-                    <Toast.Body>Registrování uživatele selhalo.</Toast.Body>
-                </Toast>
-            </ToastContainer>
         </main>
     );
 }

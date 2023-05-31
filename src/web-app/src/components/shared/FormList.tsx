@@ -3,6 +3,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
 import { useCallback, useEffect, useState } from "react";
 import { Alert, Button, Spinner } from "react-bootstrap";
+import { toast } from "react-toastify";
 import SimplePagination from "./SimplePagination";
 
 /**
@@ -119,8 +120,8 @@ export function FormList({ filterOptions, FormLine }: FormListProps) {
             }
         );
         if (!response.ok) {
-            // TODO: handle error
             console.error("Failed to delete form", { status: response.status });
+            toast.error("Smazání formuláře selhalo.");
         }
         await queryClient.invalidateQueries(["forms"]);
     };
