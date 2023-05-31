@@ -1,6 +1,5 @@
 import DynamicFormBuilder from "@/components/shared/formio/DynamicFormBuilder";
 import DynamicFormEdit from "@/components/shared/formio/DynamicFormEdit";
-import { CreateFormio } from "@/lib/formiojsWrapper";
 import { Role } from "@/types/role";
 import { UserRoleTitles } from "@/types/users";
 import { useQuery } from "@tanstack/react-query";
@@ -88,18 +87,23 @@ export default function CreateFormPage() {
             <>
                 <DynamicFormEdit
                     saveText="Vytvořit formulář"
-                    saveForm={async (formSchema: any) => {
-                        const client = await CreateFormio(
-                            process.env.NEXT_PUBLIC_FORMIO_BASE_URL
+                    saveForm={async (formSchema: unknown) => {
+                        const response = await fetch(
+                            `${process.env.NEXT_PUBLIC_FORMIO_BASE_URL}/form`,
+                            {
+                                method: "POST",
+                                headers: {
+                                    "Content-Type": "application/json",
+                                    "x-jwt-token":
+                                        session.data!.user.formioToken,
+                                },
+                                body: JSON.stringify(formSchema),
+                            }
                         );
-                        try {
-                            await client.saveForm(formSchema, {
-                                "x-jwt-token": session.data!.user.formioToken, // token won't be null, because the query is disabled when it is
-                            });
-                        } catch (e) {
+
+                        if (!response.ok)
                             setCreationStatus(CreationStatus.CREATION_FAILED);
-                            return;
-                        }
+
                         setCreationStatus(CreationStatus.CREATION_SUCCEEDED);
                     }}
                     // Make clients/patients able to fill out the form

@@ -62,7 +62,9 @@ function ManagerFormLine({ form, deleteForm }: FormLineProps) {
                 >
                     Upravit
                 </Button>
-                <Button onClick={deleteForm}>Smazat</Button>
+                <Button onClick={deleteForm} variant="danger">
+                    Smazat
+                </Button>
                 <ExportButton formId={form._id} />
             </div>
         </li>
