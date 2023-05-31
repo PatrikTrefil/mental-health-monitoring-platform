@@ -31,7 +31,7 @@ export default function SpravaUzivateluPage() {
                     return;
                 }
 
-                await fetch(
+                const response = await fetch(
                     `${process.env.NEXT_PUBLIC_FORMIO_BASE_URL}klientpacient/submission/${userSubmissionId}`,
                     {
                         method: "DELETE",
@@ -40,6 +40,11 @@ export default function SpravaUzivateluPage() {
                         },
                     }
                 );
+                if (!response.ok) {
+                    throw new Error(
+                        `Failed to delete user with status code ${response.status}`
+                    );
+                }
             } catch (e) {
                 console.error("Failed to delete user.", { userSubmissionId });
                 toast.error("Smazání účtu selhalo.");
