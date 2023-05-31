@@ -99,10 +99,13 @@ export default function EditFormPage() {
         <>
             <DynamicFormEdit
                 saveText="Uložit formulář"
-                saveForm={(formSchema: unknown) => {
+                saveForm={async (formSchema: unknown) => {
                     try {
                         if (data)
-                            saveFormToServer(formSchema, data.user.formioToken);
+                            await saveFormToServer(
+                                formSchema,
+                                data.user.formioToken
+                            );
                         else throw new Error("Token not available");
                     } catch (e) {
                         setEditStatus(EditStatus.EDIT_FAILED);
@@ -153,7 +156,10 @@ export default function EditFormPage() {
  */
 async function saveFormToServer(formSchema: unknown, formioToken: string) {
     const client = await CreateFormio(process.env.NEXT_PUBLIC_FORMIO_BASE_URL);
+    console.log(formioToken);
     await client.saveForm(formSchema, {
-        "x-jwt-token": formioToken,
+        headers: {
+            "x-jwt-token": formioToken,
+        },
     });
 }
