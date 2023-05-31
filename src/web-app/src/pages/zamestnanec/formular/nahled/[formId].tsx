@@ -23,11 +23,8 @@ export default function PreviewFormPage() {
         <>
             <DynamicFormWithAuth
                 absoluteSrc={`${process.env.NEXT_PUBLIC_FORMIO_BASE_URL}/form/${formId}`}
-                onSubmitDone={() => {
+                onSubmit={() => {
                     setShowModal(true);
-                }}
-                onSubmitFail={() => {
-                    console.error("Submit should never fail");
                 }}
             />
             <Modal show={showModal}>

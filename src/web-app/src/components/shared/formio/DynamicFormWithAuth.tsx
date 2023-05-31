@@ -14,14 +14,15 @@ import DynamicForm from "./DynamicForm";
  * will be passed to the Form component using the `form` prop. The `onSubmitDone` prop is required,
  * to force notification of the user and it is run after the form is successfully submitted. The `onSubmitFail`
  * prop is required, to force notification of the user and it is run after the form is unsuccessfully submitted.
+ * By default the form is submitted to the `formProps.absoluteSrc` using a POST request. You can override this
+ * behavior by providing your own `formProps.onSubmit` function.
  *
  * @see DynamicForm
  */
 export default function DynamicFormWithAuth(
     formProps: Omit<FormProps, "form"> & {
         absoluteSrc: string;
-        onSubmitFail: () => void;
-        onSubmitDone: Function;
+        onSubmitFail?: (error?: string) => void;
     }
 ) {
     const [isInitialized, setIsInitialized] = useState(false);
@@ -60,25 +61,39 @@ export default function DynamicFormWithAuth(
         return <Alert variant="danger">Načítání formuláře selhalo</Alert>;
     }
 
+    const defaultSubmit = async (submission: unknown) => {
+        const response = await fetch(form.path, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "x-jwt-token": data!.user.formioToken,
+            },
+            body: JSON.stringify(submission),
+        });
+        if (!response.ok) {
+            throw new Error(
+                `Failed to submit form with status code ${response.status}`
+            );
+        }
+    };
+
     return (
         <DynamicForm
             form={form}
             {...formProps}
-            onSubmit={async (submission: unknown) => {
-                const response = await fetch(form.path, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "x-jwt-token": data!.user.formioToken,
-                    },
-                    body: JSON.stringify(submission),
-                });
-                if (!response.ok) {
-                    formProps.onSubmitFail();
-                    return;
+            onSubmit={(submission: unknown) => {
+                try {
+                    if (formProps.onSubmit) formProps.onSubmit();
+                    else defaultSubmit(submission);
+                } catch (e) {
+                    if (formProps.onSubmitFail) {
+                        if (e instanceof Error)
+                            formProps.onSubmitFail(e.message);
+                        else formProps.onSubmitFail();
+                    }
                 }
 
-                formProps.onSubmitDone();
+                if (formProps.onSubmitDone) formProps.onSubmitDone();
             }}
         />
     );
