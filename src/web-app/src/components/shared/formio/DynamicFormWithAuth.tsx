@@ -1,3 +1,4 @@
+import { Form } from "@/types/form";
 import { FormProps } from "@formio/react/lib/components/Form";
 import { useQuery } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
@@ -40,7 +41,7 @@ export default function DynamicFormWithAuth(
                 },
             });
             setIsInitialized(true);
-            return response.json();
+            return (await response.json()) as Form;
         },
         enabled: !!data?.user.formioToken && !isInitialized,
     });
@@ -64,7 +65,7 @@ export default function DynamicFormWithAuth(
             form={form}
             {...formProps}
             onSubmit={async (submission: unknown) => {
-                const response = await fetch(formProps.absoluteSrc, {
+                const response = await fetch(form.path, {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
