@@ -62,14 +62,17 @@ export default function DynamicFormWithAuth(
     }
 
     const defaultSubmit = async (submission: unknown) => {
-        const response = await fetch(form.path, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "x-jwt-token": data!.user.formioToken,
-            },
-            body: JSON.stringify(submission),
-        });
+        const response = await fetch(
+            `${process.env.NEXT_PUBLIC_FORMIO_BASE_URL}${form.path}`,
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "x-jwt-token": data!.user.formioToken,
+                },
+                body: JSON.stringify(submission),
+            }
+        );
         if (!response.ok) {
             throw new Error(
                 `Failed to submit form with status code ${response.status}`
@@ -81,16 +84,17 @@ export default function DynamicFormWithAuth(
         <DynamicForm
             form={form}
             {...formProps}
-            onSubmit={(submission: unknown) => {
+            onSubmit={async (submission: unknown) => {
                 try {
-                    if (formProps.onSubmit) formProps.onSubmit();
-                    else defaultSubmit(submission);
+                    if (formProps.onSubmit) await formProps.onSubmit();
+                    else await defaultSubmit(submission);
                 } catch (e) {
                     if (formProps.onSubmitFail) {
                         if (e instanceof Error)
                             formProps.onSubmitFail(e.message);
                         else formProps.onSubmitFail();
                     }
+                    return;
                 }
 
                 if (formProps.onSubmitDone) formProps.onSubmitDone();
