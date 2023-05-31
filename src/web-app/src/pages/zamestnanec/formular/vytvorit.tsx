@@ -87,7 +87,7 @@ export default function CreateFormPage() {
             <>
                 <DynamicFormEdit
                     saveText="Vytvořit formulář"
-                    saveForm={async (formSchema: any) => {
+                    saveForm={async (formSchema: unknown) => {
                         const response = await fetch(
                             `${process.env.NEXT_PUBLIC_FORMIO_BASE_URL}/form`,
                             {
