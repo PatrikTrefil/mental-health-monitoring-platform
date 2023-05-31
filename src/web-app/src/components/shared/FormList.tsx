@@ -1,4 +1,3 @@
-import { CreateFormio } from "@/lib/formiojsWrapper";
 import { Form } from "@/types/form";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
@@ -110,10 +109,19 @@ export function FormList({ filterOptions, FormLine }: FormListProps) {
     }
 
     const deleteForm = async (form: Form) => {
-        const formio = await CreateFormio(
-            `${process.env.NEXT_PUBLIC_FORMIO_BASE_URL}${form.path}`
+        const response = await fetch(
+            `${process.env.NEXT_PUBLIC_FORMIO_BASE_URL}${form.path}`,
+            {
+                method: "DELETE",
+                headers: {
+                    "x-jwt-token": session.data!.user.formioToken,
+                },
+            }
         );
-        await formio.deleteForm();
+        if (!response.ok) {
+            // TODO: handle error
+            console.error("Failed to delete form", { status: response.status });
+        }
         await queryClient.invalidateQueries(["forms"]);
     };
 
