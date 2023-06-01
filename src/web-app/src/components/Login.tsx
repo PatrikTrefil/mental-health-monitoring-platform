@@ -1,7 +1,8 @@
+"use client";
+
 import { UserRoleTitles } from "@/types/users";
 import { signIn, useSession } from "next-auth/react";
-import { useSearchParams } from "next/navigation";
-import { useRouter } from "next/router";
+import { useRouter, useSearchParams } from "next/navigation";
 import { FormEventHandler, useEffect, useState } from "react";
 import { Button, Form } from "react-bootstrap";
 import { toast } from "react-toastify";
@@ -22,7 +23,7 @@ export default function Login() {
     const session = useSession();
     const searchParams = useSearchParams();
 
-    const searchParamsCallbackUrl = searchParams.get("callbackUrl");
+    const searchParamsCallbackUrl = searchParams?.get("callbackUrl");
     const clientPatientDefaultCallback = "/uzivatel/prehled";
     const employeeDefaultCallback = "/zamestnanec/prehled";
 
