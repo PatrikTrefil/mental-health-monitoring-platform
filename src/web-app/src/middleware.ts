@@ -1,10 +1,9 @@
 import { UserRoleTitles } from "@/types/users";
-import { withAuth } from "next-auth/middleware";
-import type { NextRequest } from "next/server";
+import { NextRequestWithAuth, withAuth } from "next-auth/middleware";
 import { NextResponse } from "next/server";
 
 export default withAuth(
-    function middleware(req: NextRequest) {
+    function middleware(req: NextRequestWithAuth) {
         // if accessing /zamestnanec/*, check if user has role ZAMESTNANEC
         // if accessing /uzivatel/*, check if user has role KLIENT_PACIENT
         const hasSufficientPrivileges =
