@@ -1,7 +1,7 @@
 import { Button } from "@/components/shared/client-react-bootstrap";
 import { Metadata } from "next";
 
-export const metdata: Metadata = {
+export const metadata: Metadata = {
     title: "Platforma pro monitorování mentálního zdraví",
     description: "Platforma pro monitorování mentálního zdraví",
 };

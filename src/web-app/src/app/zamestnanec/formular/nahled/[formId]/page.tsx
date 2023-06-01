@@ -1,7 +1,7 @@
 import { Metadata } from "next";
 import ClientPreviewFormPage from "./ClientPreviewFormPage";
 
-export const metdata: Metadata = {
+export const metadata: Metadata = {
     title: "Náhled formuláře",
 };
 
