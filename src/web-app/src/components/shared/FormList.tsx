@@ -1,3 +1,5 @@
+"use client";
+
 import { Form } from "@/types/form";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
