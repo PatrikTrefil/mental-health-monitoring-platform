@@ -13,6 +13,9 @@ services:
       - FORMIO_SERVER_URL=http://formio:3001
       - FORMIO_ROOT_EMAIL=${FORMIO_ROOT_EMAIL}
       - FORMIO_ROOT_PASSWORD=${FORMIO_ROOT_PASSWORD}
+      - DATABASE_URL=file:/data/sqlitedb/db.sqlite
+    volumes:
+      - sqlite-todo-data:/data/sqlitedb
   reverse-proxy:
     restart: on-failure
 
@@ -73,3 +76,4 @@ services:
 
 volumes:
   mongodb-data:
+  sqlite-todo-data:

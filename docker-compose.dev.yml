@@ -27,6 +27,7 @@ services:
       - NEXTAUTH_SECRET=dev-secret
     ports:
       - 3000:3000
+      - 5555:5555 # prisma studio's default port (prisma studio has to be started manually)
   reverse-proxy:
     # use different image name than of the production image
     # to avoid name conflict (now we can keep both containers locally)

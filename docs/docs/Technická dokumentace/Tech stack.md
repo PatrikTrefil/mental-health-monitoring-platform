@@ -82,6 +82,17 @@ programátory, kteří budou aplikaci v budoucnu rozšiřovat.
                 projektu a ztížila by se maintainability, jelikož by vznikl
                 prostor pro chyby.
 -   **MongoDB** - používá Formio
+-   **[Prisma](https://www.prisma.io/)** - přístup do databáze úkolů
+    -   Dává typovou bezpečnost
+    -   Zlepšuje vývojářskou zkušenost
+    -   Vytváří abstrakci mezi konkrétním databázovým systémem a kódem aplikace
+    -   Snižuje množství kódu, které musíme napsat my, takže se zmenšuje prostor
+        pro chyby
+        -   Také poskytuje vizuální editor databáze
+            [Prisma Studio](https://www.prisma.io/studio)
+-   **SQLite** - pro seznam úkolů
+    -   nevyžaduje další Docker kontejner
+    -   je jednoduchý na použití
 
 ## Tooling
 
