@@ -6,6 +6,7 @@
 -   configure the following environment variables in `.env` file (if you forget, the app will not start)
     -   `NEXT_PUBLIC_FORMIO_BASE_URL` - URL of the formio server
     -   `FORMIO_SERVER_URL` - URL of the Formio server
+    -   `DATABASE_URL` - URL of the database SQLite file (e.g. `file:./db.sqlite`)
 
 ## Production build
 
@@ -36,3 +37,14 @@ npm run docs
 ```
 
 The generated documentation will be available in `docs` folder.
+
+## Inspect database content
+
+Run the following command:
+
+```
+npx prisma studio
+```
+
+If you want to inspect the database which runs in a Docker container,
+you need to run this command in the container.
