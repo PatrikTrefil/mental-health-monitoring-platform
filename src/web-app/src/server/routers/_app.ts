@@ -49,8 +49,8 @@ export const appRouter = createTRPCRouter({
                 id: z.number(),
             })
         )
-        .mutation((opts) => {
-            return opts.ctx.prisma.task.delete({
+        .mutation(async (opts) => {
+            await opts.ctx.prisma.task.delete({
                 where: {
                     id: opts.input.id,
                 },
