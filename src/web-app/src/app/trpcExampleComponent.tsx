@@ -3,13 +3,25 @@
 import { trpc } from "@/client/trpcClient";
 
 export default function TrpcExampleComponent() {
-    const hello = trpc.helloUser.useQuery();
+    const allTasks = trpc.listTasks.useQuery();
+    const singleTask = trpc.getTask.useQuery({ id: 1 });
 
-    if (!hello.data) return <div>Loading...</div>;
+    const utils = trpc.useContext();
+    const createTask = trpc.createTask.useMutation({
+        onSuccess: () => {
+            utils.listTasks.invalidate();
+        },
+    });
+
+    if (!allTasks.data || !singleTask.data) return <div>Loading...</div>;
 
     return (
         <div>
-            <p>{hello.data.greeting}</p>
+            <p>{allTasks.data.map((task) => task.id)}</p>
+            <p>{singleTask.data.id}</p>
+            <button onClick={() => createTask.mutate({ name: "test" })}>
+                Create task
+            </button>
         </div>
     );
 }
