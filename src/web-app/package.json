@@ -10,7 +10,9 @@
     "postinstall": "npx prisma generate",
     "format:check": "npx prettier --check --ignore-path .gitignore .",
     "format:write": "npx prettier --write --ignore-path .gitignore .",
-    "docs": "npx typedoc"
+    "docs": "npx typedoc",
+    "test:watch": "npx vitest watch",
+    "test": "npx vitest run --coverage"
   },
   "dependencies": {
     "@formio/react": "^5.2.4-rc.1",
@@ -41,10 +43,12 @@
   "devDependencies": {
     "@tanstack/eslint-plugin-query": "^4.29.4",
     "@types/file-saver": "^2.0.5",
+    "@vitest/coverage-c8": "^0.31.4",
     "eslint-config-next": "^13.4.4",
     "eslint-config-prettier": "^8.8.0",
     "prettier": "2.8.7",
     "prisma": "^4.15.0",
-    "typedoc": "^0.24.7"
+    "typedoc": "^0.24.7",
+    "vitest": "^0.31.4"
   }
 }

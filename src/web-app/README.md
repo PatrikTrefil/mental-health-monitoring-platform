@@ -48,3 +48,12 @@ npx prisma studio
 
 If you want to inspect the database which runs in a Docker container,
 you need to run this command in the container.
+
+## Run tests
+
+Set the `DATABASE_URL` environment variable to the test database file path (e.g. `file:./test.db`)
+and run the following command:
+
+```
+npm run test
+```

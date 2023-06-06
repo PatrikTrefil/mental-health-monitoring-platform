@@ -43,7 +43,7 @@ export const appRouter = createTRPCRouter({
     /**
      * Delete task by id
      */
-    deleteTaks: protectedProcedure
+    deleteTask: protectedProcedure
         .input(
             z.object({
                 id: z.number(),

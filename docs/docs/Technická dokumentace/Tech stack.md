@@ -117,3 +117,8 @@ programátory, kteří budou aplikaci v budoucnu rozšiřovat.
 -   **PlantUML**
     -   Původně jsem používal Mermaid.js, ale ukázalo se, že podpora C4 diagramů
         není tak dobrá. PlantUML má skvělou podporu tvorby C4 diagramů.
+-   **Vitest**
+    -   Chtěl jsem použít Jest, ale nebyl jsem schopen jej nakonfigurovat, tak
+        aby běh testu proběhl bez chyb. Chybové hlášky nebyly nápomocné. Vitest
+        však podával užitečné chybové hlásky a velmi rychle jsem jej
+        nakonfiguroval.
