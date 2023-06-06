@@ -93,6 +93,12 @@ programátory, kteří budou aplikaci v budoucnu rozšiřovat.
 -   **SQLite** - pro seznam úkolů
     -   nevyžaduje další Docker kontejner
     -   je jednoduchý na použití
+-   **tRPC** - pro komunikaci mezi klientem a serverem starající se o správu
+    úkolů
+    -   Dává typovou bezpečnost
+    -   Zlepšuje vývojářskou zkušenost
+    -   Neztrácíme interoperabilitu, jelikož pomocí pluginu lze vyrobit i REST
+        API
 
 ## Tooling
 
