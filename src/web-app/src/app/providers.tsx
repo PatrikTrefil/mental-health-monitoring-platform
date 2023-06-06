@@ -1,19 +1,17 @@
 "use client";
 
+import { ClientProvider as TrpcClientProvider } from "@/client/trpcClient";
 import { SSRProvider } from "@/components/shared/client-react-bootstrap";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { SessionProvider } from "next-auth/react";
 
-const queryClient = new QueryClient();
+// react query provider is in the trpc client provider
 
 export function Providers({ children }: { children?: React.ReactNode }) {
     return (
-        <SSRProvider>
-            <SessionProvider>
-                <QueryClientProvider client={queryClient}>
-                    {children}
-                </QueryClientProvider>
-            </SessionProvider>
-        </SSRProvider>
+        <TrpcClientProvider>
+            <SSRProvider>
+                <SessionProvider>{children}</SessionProvider>
+            </SSRProvider>
+        </TrpcClientProvider>
     );
 }
