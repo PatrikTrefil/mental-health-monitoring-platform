@@ -1,0 +1,34 @@
+name: Test web app
+
+on:
+  # Trigger the workflow on push or pull request,
+  # but only for the main branch
+  pull_request:
+    branches:
+      - main
+    paths:
+      - src/web-app/**
+
+defaults:
+  run:
+    working-directory: src/web-app
+
+jobs:
+  run-tests:
+    name: Run tests on web app
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v1
+        with:
+          node-version: 18
+
+      - name: Install Node.js dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm run test
