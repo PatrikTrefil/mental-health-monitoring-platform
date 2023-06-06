@@ -1,8 +1,8 @@
 import { z } from "zod";
-import { procedure, router } from "../trpc";
+import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 
-export const appRouter = router({
-    hello: procedure
+export const appRouter = createTRPCRouter({
+    hello: publicProcedure
         .input(
             z.object({
                 text: z.string(),
@@ -13,6 +13,11 @@ export const appRouter = router({
                 greeting: `hello ${opts.input.text}`,
             };
         }),
+    helloUser: protectedProcedure.query((opts) => {
+        return {
+            greeting: `hello ${opts.ctx.session.user?.data.id}`,
+        };
+    }),
 });
 
 // export type definition of API

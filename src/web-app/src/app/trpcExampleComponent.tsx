@@ -3,7 +3,7 @@
 import { trpc } from "@/client/trpcClient";
 
 export default function TrpcExampleComponent() {
-    const hello = trpc.hello.useQuery({ text: "client" });
+    const hello = trpc.helloUser.useQuery();
 
     if (!hello.data) return <div>Loading...</div>;
 

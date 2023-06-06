@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { prisma } from "./db";
+import { prisma } from "../../../server/db";
 
 const postReqSchema = z.object({
     name: z.string(),
