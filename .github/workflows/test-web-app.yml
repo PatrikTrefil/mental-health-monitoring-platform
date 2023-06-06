@@ -33,5 +33,8 @@ jobs:
       - name: Install Node.js dependencies
         run: npm ci
 
+      - name: Set up database
+        run: npx prisma db push
+
       - name: Run tests
         run: npm run test
