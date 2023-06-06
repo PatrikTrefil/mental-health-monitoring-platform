@@ -9,6 +9,9 @@ on:
     paths:
       - src/web-app/**
 
+env:
+  DATABASE_URL: file:./test.db
+
 defaults:
   run:
     working-directory: src/web-app
