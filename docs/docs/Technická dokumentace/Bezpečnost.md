@@ -12,7 +12,9 @@ zdroje poskytované třetími stranami. Bezpečnostní opatření byla nastavena
 základě
 [doporučení od Mozilla Foundation](https://infosec.mozilla.org/guidelines/web_security).
 
-Každá změna v softwaru prochází bezpečnostní statickou analýzou nástrojem [CodeQL](https://codeql.github.com/).
+Každá změna v softwaru prochází bezpečnostní statickou analýzou nástrojem
+[CodeQL](https://codeql.github.com/).
 
-Probíhá pravidená kontrola závislostí nástrojem [Dependabot](https://github.com/dependabot),
-který upozorňuje na známé bezpečnostní chyby v závislostech.
+Probíhá pravidená kontrola závislostí nástrojem
+[Dependabot](https://github.com/dependabot), který upozorňuje na známé
+bezpečnostní chyby v závislostech.
