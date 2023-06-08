@@ -1,5 +1,3 @@
-import { ToastContainer } from "react-toastify";
-
 import "@/styles/globals.css";
 import "bootstrap/dist/css/bootstrap.css";
 import "formiojs/dist/formio.full.min.css";
@@ -16,15 +14,7 @@ export default function RootLayout({
     return (
         <html lang="cs">
             <body>
-                <Providers>
-                    {children}
-                    <ToastContainer
-                        pauseOnFocusLoss={false}
-                        autoClose={false}
-                        position="bottom-right"
-                        theme="colored"
-                    />
-                </Providers>
+                <Providers>{children}</Providers>
             </body>
         </html>
     );
