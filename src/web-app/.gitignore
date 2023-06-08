@@ -37,3 +37,6 @@ next-env.d.ts
 
 # docs
 docs/
+
+# prisma dev db
+prisma/dev.db
