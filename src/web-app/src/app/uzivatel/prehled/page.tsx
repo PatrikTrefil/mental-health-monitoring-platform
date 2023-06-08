@@ -1,8 +1,7 @@
 import CurrentUserDetails from "@/components/shared/CurrentUserDetails";
-import { FormList } from "@/components/shared/FormList";
 import LogoutButton from "@/components/shared/LogoutButton";
 import { Metadata } from "next";
-import UserFormLine from "./UserFormLine";
+import TaskTable from "./TaskTable";
 
 export const metadata: Metadata = {
     title: "Přehled",
@@ -17,13 +16,7 @@ export default function PrehledPage() {
             <h1>Přehled</h1>
             <CurrentUserDetails />
             <LogoutButton />
-            <h2>Seznam formulářů k vyplnění</h2>
-            <FormList
-                filterOptions={{
-                    tags: "klientPacient",
-                }}
-                FormLine={UserFormLine}
-            />
+            <TaskTable />
         </main>
     );
 }
