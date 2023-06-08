@@ -19,7 +19,8 @@
     -   u každé otázky je možno nastavit podmíněné zobrazení, tj. otázka se
         uživateli zobrazí pokud je splněna podmínka definovaná správcem
         dotazníku při vytvoření.
-    -   [[Ukázkový dotazník]], který by mělo být možné vytvořit v aplikaci.
+    -   [Ukázkový dotazník](./Uk%C3%A1zkov%C3%BD%20dotazn%C3%ADk.md), který by
+        mělo být možné vytvořit v aplikaci.
 -   Správce dotazníků je schopen vytvářet, mazat dotazníky a způsoby vyhodnocení
     (_v dotazníku lze upravit pouze již existující otázky a lze v nich upravit
     obsah otázky a obsah již existujících odpovědí; **nelze** přidat/odebrat
