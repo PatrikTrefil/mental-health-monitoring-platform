@@ -7,8 +7,8 @@ slug: domenovy-model
 ```mermaid
 classDiagram
     class Osoba {
-        +String ID
-        +String heslo
+        ID: String
+        heslo: String
     }
     <<Abstract>> Osoba
 
@@ -43,7 +43,7 @@ classDiagram
     Pacient --|> Plnitel
 
     class DefiniceÚkolu {
-        +String ID
+        ID: String
     }
     <<Abstract>> DefiniceÚkolu
 
@@ -56,10 +56,10 @@ classDiagram
 
 
     class ZadáníÚkolu {
-        +String ID
-        +Date splnitDo
-        +Date zadáno
-        +TimeSpan opakování
+        ID: String
+        splnitDo: Date
+        zadáno: Date
+        opakování: TimeSpan
     }
     %% Vztahy
     ZadáníÚkolu "1" --> "1" DefiniceÚkolu : definováno
@@ -68,8 +68,8 @@ classDiagram
 
 
     class VypracováníÚkolu {
-        +String ID
-        +Date datumVypracování
+        ID: String
+        datumVypracování: Date
     }
     <<Abstract>> VypracováníÚkolu
 
