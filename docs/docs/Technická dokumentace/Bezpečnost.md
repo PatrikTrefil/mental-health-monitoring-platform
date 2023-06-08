@@ -11,3 +11,8 @@ skrze šifrované HTTPS spojení. Aplikace nezískává při načtení v prohlí
 zdroje poskytované třetími stranami. Bezpečnostní opatření byla nastavena na
 základě
 [doporučení od Mozilla Foundation](https://infosec.mozilla.org/guidelines/web_security).
+
+Každá změna v softwaru prochází bezpečnostní statickou analýzou nástrojem [CodeQL](https://codeql.github.com/).
+
+Probíhá pravidená kontrola závislostí nástrojem [Dependabot](https://github.com/dependabot),
+který upozorňuje na známé bezpečnostní chyby v závislostech.
