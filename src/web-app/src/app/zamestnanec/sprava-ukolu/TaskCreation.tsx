@@ -10,7 +10,20 @@ import { Alert, Button, Form, Spinner } from "react-bootstrap";
 import AsyncSelect from "react-select/async";
 import { toast } from "react-toastify";
 
-export default function TaskCreation({ onSettled }: { onSettled: () => void }) {
+/**
+ * Props for {@link TaskCreation}.
+ */
+export interface TaskCreationProps {
+    /**
+     * Callback called when the task is created or the creation is cancelled.
+     */
+    onSettled: () => void;
+}
+
+/**
+ * Component for creating tasks.
+ */
+export default function TaskCreation({ onSettled }: TaskCreationProps) {
     const session = useSession();
 
     // TODO: make client class

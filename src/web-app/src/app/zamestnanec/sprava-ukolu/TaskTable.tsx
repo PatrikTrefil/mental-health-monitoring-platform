@@ -16,7 +16,7 @@ import { Alert, Button, Form, Spinner, Table } from "react-bootstrap";
 import { toast } from "react-toastify";
 
 /**
- * Table of tasks.
+ * Table of tasks for employees (includes tasks of all users).
  */
 export default function TaskTable() {
     const utils = trpc.useContext();

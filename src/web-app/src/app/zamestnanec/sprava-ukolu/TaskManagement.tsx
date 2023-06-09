@@ -5,6 +5,9 @@ import { Button, Modal } from "react-bootstrap";
 import TaskCreation from "./TaskCreation";
 import TaskTable from "./TaskTable";
 
+/**
+ * Component for managing tasks of users.
+ */
 export default function TaskManagement() {
     const [showTaskCreationModal, setShowTaskCreationModal] = useState(false);
 
