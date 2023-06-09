@@ -114,9 +114,10 @@ it("lists my todos as client/patient", async () => {
     }
     // check that all tasks that were created are listed
     {
-        const patientCtx = createInnerTRPCContextMockSession([
-            UserRoleTitles.KLIENT_PACIENT,
-        ], patientId);
+        const patientCtx = createInnerTRPCContextMockSession(
+            [UserRoleTitles.KLIENT_PACIENT],
+            patientId
+        );
         const patientCaller = appRouter.createCaller(patientCtx);
         const patientsTasks = await patientCaller.listTasks();
 

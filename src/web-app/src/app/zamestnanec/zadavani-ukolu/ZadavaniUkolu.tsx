@@ -89,14 +89,13 @@ export default function ZadavaniUkolu() {
     const handleSubmit: FormEventHandler<HTMLFormElement> = (e) => {
         e.preventDefault();
 
-
         // prevent multiple submits
         if (!createTask.isLoading)
             createTask.mutate({
                 name: taskName,
                 description: taskDescription,
                 forUserId: taskUserId,
-                formId: taskFormId
+                formId: taskFormId,
             });
     };
 
