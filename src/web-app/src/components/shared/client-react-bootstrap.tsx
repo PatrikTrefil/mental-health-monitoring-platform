@@ -1,3 +1,3 @@
 "use client";
 
-export { Alert, Button, SSRProvider } from "react-bootstrap";
+export { Alert, Button, Container, SSRProvider } from "react-bootstrap";

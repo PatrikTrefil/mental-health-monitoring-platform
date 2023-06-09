@@ -6,5 +6,10 @@ export const metadata: Metadata = {
 };
 
 export default function SpravaKlientuPacientuPage() {
-    return <ClientPatientTable />;
+    return (
+        <>
+            <h1>Správa klientů/pacientů</h1>
+            <ClientPatientTable />
+        </>
+    );
 }
