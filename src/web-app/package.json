@@ -12,7 +12,8 @@
     "format:write": "npx prettier --write --ignore-path .gitignore .",
     "docs": "npx typedoc",
     "test:watch": "npx vitest watch",
-    "test": "npx vitest run --coverage"
+    "test:coverage": "npx vitest run --coverage",
+    "test": "npx vitest"
   },
   "dependencies": {
     "@formio/react": "^5.2.4-rc.1",

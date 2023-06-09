@@ -23,7 +23,7 @@ services:
       - web-app-next:/app/.next
     environment:
       - NEXT_PUBLIC_FORMIO_BASE_URL=http://${DOMAIN_NAME}:8080/formio/
-      - NEXTAUTH_URL=http://${DOMAIN_NAME}:8080
+      - NEXTAUTH_URL=http://${DOMAIN_NAME}:8080/api/auth
       - NEXTAUTH_SECRET=dev-secret
     ports:
       - 3000:3000
