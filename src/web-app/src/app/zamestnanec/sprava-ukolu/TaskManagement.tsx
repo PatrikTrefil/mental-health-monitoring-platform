@@ -20,8 +20,11 @@ export default function TaskManagement() {
                 Zadat úkol
             </Button>
             <TaskTable />
-            <Modal show={showTaskCreationModal}>
-                <Modal.Header>
+            <Modal
+                show={showTaskCreationModal}
+                onHide={() => setShowTaskCreationModal(false)}
+            >
+                <Modal.Header closeButton>
                     <Modal.Title>Zadání úkolu</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
