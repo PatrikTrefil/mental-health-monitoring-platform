@@ -27,6 +27,9 @@ export default function PrehledPage() {
                 <Button as="a" href="./sprava-klientu-pacientu">
                     Správa klientů/pacientů
                 </Button>
+                <Button as="a" href="./sprava-ukolu">
+                    Správa úkolů
+                </Button>
             </div>
             <div>
                 <h2>Definice formulářů</h2>

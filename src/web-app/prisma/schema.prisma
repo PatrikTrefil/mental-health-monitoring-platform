@@ -11,6 +11,13 @@ datasource db {
 }
 
 model Task {
-    id   Int    @id @default(autoincrement())
-    name String
+    id                  Int      @id @default(autoincrement())
+    name                String
+    description         String?
+    isCompleted         Boolean  @default(false)
+    createdAt           DateTime @default(now())
+    updatedAt           DateTime @updatedAt
+    forUserId           String
+    createdByEmployeeId String
+    formId              String
 }
