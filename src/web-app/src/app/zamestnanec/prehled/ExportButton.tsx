@@ -1,3 +1,5 @@
+"use client";
+
 import { saveAs } from "file-saver";
 import { useSession } from "next-auth/react";
 import { useState } from "react";

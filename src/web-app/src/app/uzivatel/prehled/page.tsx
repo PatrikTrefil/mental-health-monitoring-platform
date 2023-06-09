@@ -1,6 +1,6 @@
-import CurrentUserDetails from "@/components/shared/CurrentUserDetails";
-import LogoutButton from "@/components/shared/LogoutButton";
 import { Metadata } from "next";
+import CurrentUserDetails from "./CurrentUserDetails";
+import LogoutButton from "./LogoutButton";
 import TaskTable from "./TaskTable";
 
 export const metadata: Metadata = {
