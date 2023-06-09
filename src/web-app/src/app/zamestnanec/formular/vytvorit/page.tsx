@@ -6,5 +6,10 @@ export const metadata: Metadata = {
 };
 
 export default function CreateFormPage() {
-    return <ClientCreateFormPage />;
+    return (
+        <>
+            <h1>Vytvořit formulář</h1>
+            <ClientCreateFormPage />
+        </>
+    );
 }

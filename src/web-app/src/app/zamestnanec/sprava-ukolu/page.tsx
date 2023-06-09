@@ -2,7 +2,7 @@ import { Metadata } from "next";
 import TaskManagement from "./TaskManagement";
 
 export const metadata: Metadata = {
-    title: "Zadávání úkolů",
+    title: "Správa úkolů",
 };
 
 /**
@@ -11,6 +11,7 @@ export const metadata: Metadata = {
 export default function SpravaUkoluPage() {
     return (
         <main>
+            <h1>Správa úkolů</h1>
             <TaskManagement />
         </main>
     );

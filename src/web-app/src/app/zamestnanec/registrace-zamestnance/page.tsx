@@ -9,5 +9,10 @@ export const metadata: Metadata = {
  * Page for registering a new employee.
  */
 export default function RegistraceZamestnancePage() {
-    return <RegistrationForm />;
+    return (
+        <>
+            <h1>Registrace zaměstnance</h1>
+            <RegistrationForm />
+        </>
+    );
 }

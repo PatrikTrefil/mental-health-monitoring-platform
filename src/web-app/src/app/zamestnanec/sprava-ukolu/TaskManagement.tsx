@@ -13,15 +13,13 @@ export default function TaskManagement() {
 
     return (
         <>
-            <Button variant="primary" as="a" href="/zamestnanec/prehled">
-                Zpět na přehled
-            </Button>
             <Button
                 variant="primary"
                 onClick={() => setShowTaskCreationModal(true)}
             >
                 Zadat úkol
             </Button>
+            <h2>Seznam úkolů</h2>
             <TaskTable />
             <Modal
                 show={showTaskCreationModal}
