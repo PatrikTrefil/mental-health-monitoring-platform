@@ -7,6 +7,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
 import { FormEventHandler, useCallback, useState } from "react";
 import { Alert, Button, Form, Spinner } from "react-bootstrap";
+import AsyncSelect from "react-select/async";
 import { toast } from "react-toastify";
 
 export default function TaskCreation({ onSettled }: { onSettled: () => void }) {
@@ -83,18 +84,17 @@ export default function TaskCreation({ onSettled }: { onSettled: () => void }) {
 
     const [taskName, setTaskName] = useState("");
     const [taskDescription, setTaskDescription] = useState<string>("");
-    const [taskUserId, setTaskUsers] = useState("");
+    const [taskUserIds, setTaskUserIds] = useState<string[]>([]);
     const [taskFormId, setTaskFormId] = useState("");
 
     const handleSubmit: FormEventHandler<HTMLFormElement> = (e) => {
         e.preventDefault();
 
-        // prevent multiple submits
-        if (!createTask.isLoading)
+        for (const userId of taskUserIds)
             createTask.mutate({
                 name: taskName,
                 description: taskDescription,
-                forUserId: taskUserId,
+                forUserId: userId,
                 formId: taskFormId,
             });
     };
@@ -170,22 +170,27 @@ export default function TaskCreation({ onSettled }: { onSettled: () => void }) {
                 value={taskDescription}
             />
             <Form.Label htmlFor="pro-uzivatele">Pro uživatele</Form.Label>
-            {/* TODO: use multiselect */}
-            <Form.Select
+            <AsyncSelect
                 id="pro-uzivatele"
                 required
-                value={taskUserId}
-                onChange={(e) => setTaskUsers(e.target.value)}
-            >
-                <option disabled hidden value="">
-                    Vyberte uživatele
-                </option>
-                {userList.map((user) => (
-                    <option key={user._id} value={user.data.id}>
-                        {user.data.id}
-                    </option>
-                ))}
-            </Form.Select>
+                loadOptions={async (inputValue: string) => {
+                    const users = await fetchUsers();
+                    return users
+                        .map((user) => ({
+                            value: user.data.id,
+                            label: user.data.id,
+                        }))
+                        .filter((item) => item.label.includes(inputValue));
+                }}
+                defaultOptions={true}
+                isMulti
+                placeholder="Vyberte uživatele"
+                onChange={(item) =>
+                    setTaskUserIds(
+                        Array.from(item.values()).map((item) => item.value)
+                    )
+                }
+            />
             <Form.Label htmlFor="form-id">Formulář k vyplnění</Form.Label>
             <Form.Select
                 id="form-id"
@@ -206,6 +211,7 @@ export default function TaskCreation({ onSettled }: { onSettled: () => void }) {
                 type="submit"
                 value="Vytvořit úkol"
                 className="mt-2"
+                disabled={createTask.isLoading}
             />
         </Form>
     );
