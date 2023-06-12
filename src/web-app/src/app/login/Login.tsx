@@ -1,7 +1,8 @@
 "use client";
 
 import { UserRoleTitles } from "@/types/users";
-import { signIn, useSession } from "next-auth/react";
+import { useMutation } from "@tanstack/react-query";
+import { SignInResponse, signIn, useSession } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { FormEventHandler, useEffect, useState } from "react";
 import { Button, Form } from "react-bootstrap";
@@ -52,20 +53,27 @@ export default function Login() {
         [session.data, router, searchParamsCallbackUrl]
     );
 
+    const { isLoading, mutate: loginMutation } = useMutation({
+        mutationFn: async () => {
+            const result = await signIn("credentials", {
+                ID: id,
+                password,
+                redirect: false,
+            });
+            if (result?.error) throw result.error;
+        },
+        onError: (e: SignInResponse["error"] & { error: string }) => {
+            toast.error(
+                e === "CredentialsSignin"
+                    ? "Nesprávné uživatelské jméno nebo heslo."
+                    : e
+            );
+        },
+    });
+
     const handleSubmit: FormEventHandler<HTMLFormElement> = async (e) => {
         e.preventDefault();
-        const result = await signIn("credentials", {
-            ID: id,
-            password,
-            redirect: false,
-        });
-
-        if (result?.error)
-            toast.error(
-                result.error === "CredentialsSignin"
-                    ? "Nesprávné uživatelské jméno nebo heslo."
-                    : result.error
-            );
+        loginMutation();
     };
 
     return (
@@ -91,8 +99,12 @@ export default function Login() {
                     name="password"
                     id="input-password"
                 />
-                <Button type="submit" className="mt-3 w-100">
-                    Přihlásit se
+                <Button
+                    type="submit"
+                    className="mt-3 w-100"
+                    disabled={isLoading}
+                >
+                    {isLoading ? "Načítání..." : "Přihlásit se"}
                 </Button>
             </Form>
         </>
