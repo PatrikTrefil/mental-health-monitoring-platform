@@ -1,0 +1,21 @@
+name: Build web app
+description: Build web application
+runs:
+  using: composite
+
+  steps:
+    - name: Check out Git repository
+      uses: actions/checkout@v2
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v1
+      with:
+        node-version: 18
+
+    - name: Install Node.js dependencies
+      shell: bash
+      run: npm ci
+
+    - name: Run build
+      shell: bash
+      run: npm run build

@@ -33,8 +33,7 @@ jobs:
         working-directory: src/web-app
 
       - name: Generate next-env.d.ts in web app
-        run: npm run build
-        working-directory: src/web-app
+        uses: ./.github/actions/build-web-app.yml
 
       - name: Install Vercel CLI
         run: npm install --global vercel@latest
