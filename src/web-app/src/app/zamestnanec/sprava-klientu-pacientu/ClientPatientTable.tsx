@@ -144,18 +144,10 @@ export default function ClientPatientTable() {
                         refetch();
                     }}
                     className="mb-1"
+                    disabled={isFetching}
                 >
-                    Aktualizovat
+                    {isFetching ? "Načítání..." : "Aktualizovat"}
                 </Button>
-                {/* Since the last page's data potentially
-                    sticks around between page requests, // we can use
-                    `isFetching` to show a background loading // indicator since
-                    our `status === 'loading'` state won't be triggered */}
-                {isFetching ? (
-                    <Spinner animation="border" role="status" size="sm">
-                        <span className="visually-hidden">Načítání...</span>
-                    </Spinner>
-                ) : null}
             </div>
             <Form.Select
                 className="my-2"
