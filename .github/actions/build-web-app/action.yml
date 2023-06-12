@@ -14,8 +14,10 @@ runs:
 
     - name: Install Node.js dependencies
       shell: bash
+      working-directory: ./src/web-app/
       run: npm ci
 
     - name: Run build
       shell: bash
+      working-directory: ./src/web-app/
       run: npm run build
