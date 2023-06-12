@@ -1,5 +1,5 @@
 import { Container } from "@/components/shared/client-react-bootstrap";
-import Navigationbar from "./Navigationbar";
+import NavigationBarClientPatient from "./NavigationBar";
 
 export default function ZamestnanecLayout({
     children,
@@ -8,7 +8,7 @@ export default function ZamestnanecLayout({
 }) {
     return (
         <>
-            <Navigationbar />
+            <NavigationBarClientPatient />
             <Container className="mt-3">
                 <main>{children}</main>
             </Container>

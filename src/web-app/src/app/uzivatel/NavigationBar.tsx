@@ -5,7 +5,7 @@ import { useSession } from "next-auth/react";
 import { usePathname } from "next/navigation";
 import { Container, Nav, Navbar, Spinner } from "react-bootstrap";
 
-export default function NavigationBar() {
+export default function NavigationBarClientPatient() {
     const { data } = useSession();
 
     const pathname = usePathname();
