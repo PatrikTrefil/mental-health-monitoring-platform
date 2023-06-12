@@ -29,7 +29,7 @@ jobs:
           node-version: 18
 
       - name: Generate next-env.d.ts in web app
-        uses: ./.github/workflows/build-web-app.yml
+        uses: ./.github/actions/build-web-app
 
       - name: Install Vercel CLI
         run: npm install --global vercel@latest

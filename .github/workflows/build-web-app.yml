@@ -10,26 +10,10 @@ on:
       - src/web-app/**
   workflow_call:
 
-defaults:
-  run:
-    working-directory: src/web-app
-
 jobs:
-  run-linters:
+  build-web-app:
     name: Build web app
     runs-on: ubuntu-latest
-
     steps:
-      - name: Check out Git repository
-        uses: actions/checkout@v2
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v1
-        with:
-          node-version: 18
-
-      - name: Install Node.js dependencies
-        run: npm ci
-
-      - name: Run build
-        run: npm run build
+      - name: Build
+        uses: ./.github/actions/build-web-app
