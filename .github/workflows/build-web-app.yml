@@ -8,12 +8,12 @@ on:
       - main
     paths:
       - src/web-app/**
-  workflow_call:
 
 jobs:
   build-web-app:
     name: Build web app
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v2
       - name: Build
         uses: ./.github/actions/build-web-app
