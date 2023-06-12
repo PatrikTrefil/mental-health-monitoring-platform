@@ -28,10 +28,6 @@ jobs:
         with:
           node-version: 18
 
-      - name: Install Node.js dependencies of web app
-        run: npm ci
-        working-directory: src/web-app
-
       - name: Generate next-env.d.ts in web app
         uses: ./.github/workflows/build-web-app.yml
 
