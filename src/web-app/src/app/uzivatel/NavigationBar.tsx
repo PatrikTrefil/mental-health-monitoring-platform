@@ -5,7 +5,7 @@ import { useSession } from "next-auth/react";
 import { usePathname } from "next/navigation";
 import { Container, Nav, Navbar, Spinner } from "react-bootstrap";
 
-export default function NavigationBarEmployee() {
+export default function NavigationBarClientPatient() {
     const { data } = useSession();
 
     const pathname = usePathname();
@@ -24,19 +24,7 @@ export default function NavigationBarEmployee() {
                         activeKey={pathname ?? ""}
                         className="align-items-center gap-3"
                     >
-                        <Nav.Link href="/zamestnanec/prehled">Přehled</Nav.Link>
-                        <Nav.Link href="/zamestnanec/sprava-ukolu">
-                            Správa&nbsp;úkolů
-                        </Nav.Link>
-                        <Nav.Link href="/zamestnanec/formular/vytvorit">
-                            Vytvořit&nbsp;formulář
-                        </Nav.Link>
-                        <Nav.Link href="/zamestnanec/sprava-klientu-pacientu">
-                            Správa&nbsp;klientů/pacientů
-                        </Nav.Link>
-                        <Nav.Link href="/zamestnanec/registrace-zamestnance">
-                            Registrace&nbsp;zaměstnance
-                        </Nav.Link>
+                        <Nav.Link href="/uzivatel/prehled">Přehled</Nav.Link>
                         <Nav.Item>
                             Přihlášen&nbsp;jako:&nbsp;
                             {data?.user.data.id ?? (
