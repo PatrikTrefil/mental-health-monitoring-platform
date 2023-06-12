@@ -1,5 +1,7 @@
 [![Build web app](https://github.com/PatrikTrefil/mental-health-monitoring-platform/actions/workflows/build-web-app.yml/badge.svg)](https://github.com/PatrikTrefil/mental-health-monitoring-platform/actions/workflows/build-web-app.yml)
 [![Docs deployment](https://github.com/PatrikTrefil/mental-health-monitoring-platform/actions/workflows/deployment-production-docs.yml/badge.svg)](https://github.com/PatrikTrefil/mental-health-monitoring-platform/actions/workflows/deployment-production-docs.yml)
+[![CodeQL](https://github.com/PatrikTrefil/mental-health-monitoring-platform/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/PatrikTrefil/mental-health-monitoring-platform/actions/workflows/github-code-scanning/codeql)
+[![Test web app](https://github.com/PatrikTrefil/mental-health-monitoring-platform/actions/workflows/test-web-app.yml/badge.svg)](https://github.com/PatrikTrefil/mental-health-monitoring-platform/actions/workflows/test-web-app.yml)
 
 # Software pro sledování efektivity psychoterapie
 
