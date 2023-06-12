@@ -1,8 +1,9 @@
 "use client";
 
-import { signOut, useSession } from "next-auth/react";
+import SignOutButton from "@/components/shared/SignOutButton";
+import { useSession } from "next-auth/react";
 import { usePathname } from "next/navigation";
-import { Button, Container, Nav, Navbar, Spinner } from "react-bootstrap";
+import { Container, Nav, Navbar, Spinner } from "react-bootstrap";
 
 export default function NavigationBar() {
     const { data } = useSession();
@@ -51,15 +52,10 @@ export default function NavigationBar() {
                             )}
                         </Nav.Item>
                         <Nav.Item>
-                            <Button
+                            <SignOutButton
                                 variant="secondary"
                                 className="mx-2"
-                                onClick={async () => {
-                                    await signOut();
-                                }}
-                            >
-                                Odhlásit&nbsp;se
-                            </Button>
+                            />
                         </Nav.Item>
                     </Nav>
                 </Navbar.Collapse>

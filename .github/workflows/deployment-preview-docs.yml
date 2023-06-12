@@ -11,6 +11,7 @@ on:
     paths:
       - docs/**
       - src/web-app/**
+  workflow_dispatch:
 
 defaults:
   run:
@@ -27,10 +28,6 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: 18
-
-      - name: Install Node.js dependencies of web app
-        run: npm ci
-        working-directory: src/web-app
 
       - name: Generate next-env.d.ts in web app
         uses: ./.github/actions/build-web-app.yml
