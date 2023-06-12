@@ -364,6 +364,6 @@ describe("todo when formio is down", () => {
         );
         await expect(
             caller.createTask(mockInputTask)
-        ).rejects.toMatchInlineSnapshot("[TRPCError: INTERNAL_SERVER_ERROR]");
+        ).rejects.toMatchInlineSnapshot('[TRPCError: formio is down]');
     });
 });
