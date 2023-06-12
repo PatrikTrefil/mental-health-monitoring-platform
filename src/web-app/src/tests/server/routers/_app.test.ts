@@ -1,10 +1,10 @@
-import { loadForm } from "@/client/formioClient";
+import { loadForm, loadUsers } from "@/client/formioClient";
 import { appRouter, type AppRouter } from "@/server/routers/_app";
 import { createInnerTRPCContext } from "@/server/trpc";
 import { Form } from "@/types/form";
 import { UserRoleTitles } from "@/types/users";
 import { type inferProcedureInput } from "@trpc/server";
-import { expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 type CreateTaskInput = inferProcedureInput<AppRouter["createTask"]>;
 const mockInputTask: CreateTaskInput = {
@@ -14,7 +14,32 @@ const mockInputTask: CreateTaskInput = {
     formId: "123",
 };
 
-vi.mock("@/client/formioClient", () => ({ loadForm: vi.fn() }));
+vi.mock("@/client/formioClient", () => ({
+    loadForm: vi.fn(async () => {
+        const mockForm: Awaited<ReturnType<typeof loadForm>> = {
+            _id: "123",
+            name: "test",
+            path: "test",
+            created: "",
+            submissionAccess: [],
+        };
+        return mockForm;
+    }),
+    loadUsers: vi.fn(async () => {
+        const mockUsers: Awaited<ReturnType<typeof loadUsers>> = [
+            {
+                _id: "12324",
+                data: { id: "123" },
+                created: "",
+                owner: "",
+                access: [],
+                form: "",
+                roles: [],
+            },
+        ];
+        return mockUsers;
+    }),
+}));
 
 function createInnerTRPCContextMockSession(
     roleTitles: string[],
@@ -38,108 +63,307 @@ function createInnerTRPCContextMockSession(
     });
 }
 
-it("returns created todo", async () => {
-    const caller = appRouter.createCaller(
-        createInnerTRPCContextMockSession([UserRoleTitles.ZAMESTNANEC])
-    );
-
-    vi.mocked(loadForm).mockImplementation(async () => {
-        const mockForm: Form = {
-            _id: mockInputTask.formId,
-            created: "",
-            name: "name",
-            path: "/path",
-            submissionAccess: [],
-        };
-        return mockForm;
+function createInnerTRPCContextNoSession() {
+    return createInnerTRPCContext({
+        session: null,
     });
-    const createdTask = await caller.createTask(mockInputTask);
+}
 
-    expect(createdTask).toMatchObject({
-        ...mockInputTask,
-        id: expect.any(Number),
-    });
-});
+describe("todo functionality", () => {
+    it("returns created todo as employee", async () => {
+        const caller = appRouter.createCaller(
+            createInnerTRPCContextMockSession([UserRoleTitles.ZAMESTNANEC])
+        );
 
-it("lists all todos as employee", async () => {
-    const ctx = createInnerTRPCContextMockSession([UserRoleTitles.ZAMESTNANEC]);
-    const caller = appRouter.createCaller(ctx);
-
-    const numberOfTasks = 10;
-    // create tasks to list
-    for (let i = 0; i < numberOfTasks; i++) {
-        await caller.createTask({
-            ...mockInputTask,
-            name: `test ${i}`,
+        vi.mocked(loadForm).mockImplementationOnce(async () => {
+            const mockForm: Form = {
+                _id: mockInputTask.formId,
+                created: "",
+                name: "name",
+                path: "/path",
+                submissionAccess: [],
+            };
+            return mockForm;
         });
-    }
+        const createdTask = await caller.createTask(mockInputTask);
 
-    const tasks = await caller.listTasks();
-
-    // check that all tasks are present in the returned list
-    for (let i = 0; i < numberOfTasks; i++) {
-        expect(tasks).toContainEqual({
+        expect(createdTask).toMatchObject({
             ...mockInputTask,
-            name: `test ${i}`,
             id: expect.any(Number),
-            isCompleted: false,
-            updatedAt: expect.any(Date),
-            createdByEmployeeId: ctx.session?.user.data.id,
-            createdAt: expect.any(Date),
         });
-    }
-});
+    });
 
-it("lists my todos as client/patient", async () => {
-    const numberOfTasks = 10;
-    const patientId = "12345";
-    const createdTasks = [];
-    // create tasks for patient
-    {
+    it("get existing todo as patient", async () => {
         const employeeCtx = createInnerTRPCContextMockSession([
             UserRoleTitles.ZAMESTNANEC,
         ]);
         const employeeCaller = appRouter.createCaller(employeeCtx);
 
+        const createdTask = await employeeCaller.createTask(mockInputTask);
+
+        const clientCtx = createInnerTRPCContextMockSession([
+            UserRoleTitles.KLIENT_PACIENT,
+        ]);
+        const clientCaller = appRouter.createCaller(clientCtx);
+
+        const receivedTask = await clientCaller.getTask({ id: createdTask.id });
+
+        expect(receivedTask).toMatchObject({
+            ...mockInputTask,
+            id: expect.any(Number),
+        });
+    });
+
+    it("throws when getting non-existing todo as employee", async () => {
+        const caller = appRouter.createCaller(
+            createInnerTRPCContextMockSession([UserRoleTitles.ZAMESTNANEC])
+        );
+        const todoId = 123;
+        // delete if already exists
+        try {
+            await caller.deleteTask({ id: todoId });
+        } catch (e) {}
+
+        expect(() => caller.getTask({ id: todoId })).rejects.toThrowError();
+    });
+
+    it("list of all todos contains created todos as employee", async () => {
+        const ctx = createInnerTRPCContextMockSession([
+            UserRoleTitles.ZAMESTNANEC,
+        ]);
+        const caller = appRouter.createCaller(ctx);
+
+        const numberOfTasks = 10;
         // create tasks to list
         for (let i = 0; i < numberOfTasks; i++) {
-            createdTasks.push(
-                await employeeCaller.createTask({
-                    ...mockInputTask,
-                    name: `test ${i}`,
-                    forUserId: patientId,
-                })
-            );
+            await caller.createTask({
+                ...mockInputTask,
+                name: `test ${i}`,
+            });
         }
-    }
-    // check that all tasks that were created are listed
-    {
-        const patientCtx = createInnerTRPCContextMockSession(
-            [UserRoleTitles.KLIENT_PACIENT],
-            patientId
-        );
-        const patientCaller = appRouter.createCaller(patientCtx);
-        const patientsTasks = await patientCaller.listTasks();
+
+        const tasks = await caller.listTasks();
 
         // check that all tasks are present in the returned list
         for (let i = 0; i < numberOfTasks; i++) {
-            expect(patientsTasks).toContainEqual(createdTasks[i]);
+            expect(tasks).toContainEqual({
+                ...mockInputTask,
+                name: `test ${i}`,
+                id: expect.any(Number),
+                isCompleted: false,
+                updatedAt: expect.any(Date),
+                createdByEmployeeId: ctx.session?.user.data.id,
+                createdAt: expect.any(Date),
+            });
         }
-    }
-});
-
-it("deletes todo", async () => {
-    const caller = appRouter.createCaller(
-        createInnerTRPCContextMockSession([UserRoleTitles.ZAMESTNANEC])
-    );
-
-    const createdTask = await caller.createTask(mockInputTask);
-
-    await caller.deleteTask({
-        id: createdTask.id,
     });
 
-    const result = await caller.getTask({ id: createdTask.id });
+    it("lists my todos as client/patient", async () => {
+        const numberOfTasks = 10;
+        const patientId = "12345";
+        const createdTasks = [];
+        // create tasks for patient
+        {
+            const employeeCtx = createInnerTRPCContextMockSession([
+                UserRoleTitles.ZAMESTNANEC,
+            ]);
+            const employeeCaller = appRouter.createCaller(employeeCtx);
 
-    expect(result).toBeNull();
+            // create tasks to list
+            for (let i = 0; i < numberOfTasks; i++) {
+                vi.mocked(loadUsers).mockImplementationOnce(async () => {
+                    const mockUsers = [
+                        {
+                            _id: "12345",
+                            data: { id: patientId },
+                            created: "",
+                            owner: "",
+                            access: [],
+                            form: "",
+                            roles: [],
+                        },
+                    ];
+                    return mockUsers;
+                });
+                createdTasks.push(
+                    await employeeCaller.createTask({
+                        ...mockInputTask,
+                        name: `test ${i}`,
+                        forUserId: patientId,
+                    })
+                );
+            }
+        }
+        // check that all tasks that were created are listed
+        {
+            const patientCtx = createInnerTRPCContextMockSession(
+                [UserRoleTitles.KLIENT_PACIENT],
+                patientId
+            );
+            const patientCaller = appRouter.createCaller(patientCtx);
+            const patientsTasks = await patientCaller.listTasks();
+
+            // check that all tasks are present in the returned list
+            for (let i = 0; i < numberOfTasks; i++) {
+                expect(patientsTasks).toContainEqual(createdTasks[i]);
+            }
+        }
+    });
+
+    it("deletes an existing todo as employee", async () => {
+        const caller = appRouter.createCaller(
+            createInnerTRPCContextMockSession([UserRoleTitles.ZAMESTNANEC])
+        );
+
+        const createdTask = await caller.createTask(mockInputTask);
+
+        await caller.deleteTask({
+            id: createdTask.id,
+        });
+
+        expect(
+            caller.getTask({ id: createdTask.id })
+        ).rejects.toMatchInlineSnapshot("[TRPCError: NOT_FOUND]");
+    });
+
+    it("throws not found when deleting a non-existing todo as employee", async () => {
+        const caller = appRouter.createCaller(
+            createInnerTRPCContextMockSession([UserRoleTitles.ZAMESTNANEC])
+        );
+
+        // delete if already exists
+        try {
+            await caller.deleteTask({
+                id: 20,
+            });
+        } catch (e) {}
+
+        await expect(
+            caller.deleteTask({
+                id: 20,
+            })
+        ).rejects.toMatchInlineSnapshot("[TRPCError: NOT_FOUND]");
+    });
+
+    it("throws when creating a todo for non-existing form", async () => {
+        const caller = appRouter.createCaller(
+            createInnerTRPCContextMockSession([UserRoleTitles.ZAMESTNANEC])
+        );
+        vi.mocked(loadForm).mockImplementationOnce(async () => null);
+        expect(caller.createTask(mockInputTask)).rejects.toMatchInlineSnapshot(
+            "[TRPCError: Form with given formId does not exist]"
+        );
+    });
+
+    it("throws when creating a todo for non-existing user", async () => {
+        const caller = appRouter.createCaller(
+            createInnerTRPCContextMockSession([UserRoleTitles.ZAMESTNANEC])
+        );
+        vi.mocked(loadUsers).mockImplementationOnce(async () => []);
+        expect(caller.createTask(mockInputTask)).rejects.toMatchInlineSnapshot(
+            "[TRPCError: User with given forUserId does not exist]"
+        );
+    });
+});
+
+describe("todo permissions", () => {
+    it("throws when deleting a todo as a client/patient", async () => {
+        const employeeCaller = appRouter.createCaller(
+            createInnerTRPCContextMockSession([UserRoleTitles.ZAMESTNANEC])
+        );
+        const createdTask = await employeeCaller.createTask(mockInputTask);
+        const clientCaller = appRouter.createCaller(
+            createInnerTRPCContextMockSession([UserRoleTitles.KLIENT_PACIENT])
+        );
+        await expect(
+            clientCaller.deleteTask({
+                id: createdTask.id,
+            })
+        ).rejects.toMatchInlineSnapshot("[TRPCError: FORBIDDEN]");
+    });
+
+    it("throws when creating a todo as a client/patient", async () => {
+        const clientCaller = appRouter.createCaller(
+            createInnerTRPCContextMockSession([UserRoleTitles.KLIENT_PACIENT])
+        );
+        await expect(
+            clientCaller.createTask(mockInputTask)
+        ).rejects.toMatchInlineSnapshot("[TRPCError: FORBIDDEN]");
+    });
+
+    it("throws when listing todos as unauthenticated", async () => {
+        const caller = appRouter.createCaller(
+            createInnerTRPCContextNoSession()
+        );
+        await expect(caller.listTasks()).rejects.toMatchInlineSnapshot(
+            "[TRPCError: UNAUTHORIZED]"
+        );
+    });
+
+    it("throws when getting a todo as unauthenticated", async () => {
+        const caller = appRouter.createCaller(
+            createInnerTRPCContextNoSession()
+        );
+        await expect(caller.getTask({ id: 20 })).rejects.toMatchInlineSnapshot(
+            "[TRPCError: UNAUTHORIZED]"
+        );
+    });
+
+    it("throws when getting todo not assigned to client/patient", async () => {
+        const employeeCaller = appRouter.createCaller(
+            createInnerTRPCContextMockSession([UserRoleTitles.ZAMESTNANEC])
+        );
+        vi.mocked(loadUsers).mockImplementationOnce(async () => {
+            const mockUsers = [
+                {
+                    _id: "12345",
+                    data: { id: "12345" },
+                    created: "",
+                    owner: "",
+                    access: [],
+                    form: "",
+                    roles: [],
+                },
+            ];
+            return mockUsers;
+        });
+        const createdTask = await employeeCaller.createTask({
+            ...mockInputTask,
+            forUserId: "12345",
+        });
+        const clientCaller = appRouter.createCaller(
+            createInnerTRPCContextMockSession(
+                [UserRoleTitles.KLIENT_PACIENT],
+                "123"
+            )
+        );
+        await expect(() =>
+            clientCaller.getTask({ id: createdTask.id })
+        ).rejects.toMatchInlineSnapshot("[TRPCError: FORBIDDEN]");
+    });
+});
+
+describe("todo when formio is down", () => {
+    const throwFn = async () => {
+        throw new Error("formio is down");
+    };
+    it("throws when creating a todo when loadForm fails", async () => {
+        vi.mocked(loadForm).mockImplementationOnce(throwFn);
+        const caller = appRouter.createCaller(
+            createInnerTRPCContextMockSession([UserRoleTitles.ZAMESTNANEC])
+        );
+        await expect(
+            caller.createTask(mockInputTask)
+        ).rejects.toMatchInlineSnapshot("[TRPCError: INTERNAL_SERVER_ERROR]");
+    });
+
+    it("throws when creating a todo when loadUsers fails", async () => {
+        vi.mocked(loadUsers).mockImplementationOnce(throwFn);
+        const caller = appRouter.createCaller(
+            createInnerTRPCContextMockSession([UserRoleTitles.ZAMESTNANEC])
+        );
+        await expect(
+            caller.createTask(mockInputTask)
+        ).rejects.toMatchInlineSnapshot("[TRPCError: formio is down]");
+    });
 });
