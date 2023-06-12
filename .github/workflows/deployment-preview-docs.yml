@@ -11,7 +11,7 @@ on:
     paths:
       - docs/**
       - src/web-app/**
-  workflow_call:
+  workflow_dispatch:
 
 defaults:
   run:
