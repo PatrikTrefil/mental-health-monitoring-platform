@@ -1,0 +1,7 @@
+{
+  "cSpell.words": ["formio"],
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.organizeImports": true
+  }
+}
