@@ -20,7 +20,7 @@ export default function ClientPreviewFormPage({ formId }: { formId: string }) {
     return (
         <>
             <DynamicFormWithAuth
-                absoluteSrc={`${process.env.NEXT_PUBLIC_FORMIO_BASE_URL}/form/${formId}`}
+                relativeFormPath={`/form/${formId}`}
                 onSubmit={() => {
                     setShowModal(true);
                 }}

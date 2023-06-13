@@ -1,5 +1,6 @@
 "use client";
 
+import { deleteUser, loadUsers } from "@/client/formioClient";
 import SimplePagination from "@/components/shared/SimplePagination";
 import DynamicFormWithAuth from "@/components/shared/formio/DynamicFormWithAuth";
 import { UserFormSubmission } from "@/types/userFormSubmission";
@@ -12,7 +13,7 @@ import {
     useReactTable,
 } from "@tanstack/react-table";
 import { useSession } from "next-auth/react";
-import { useCallback, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Alert, Button, Form, Modal, Spinner, Table } from "react-bootstrap";
 import { toast } from "react-toastify";
 
@@ -22,41 +23,6 @@ import { toast } from "react-toastify";
 export default function ClientPatientTable() {
     const queryClient = useQueryClient();
     const session = useSession();
-
-    const deleteUser = useCallback(
-        async (userSubmissionId: string) => {
-            console.debug("Deleting user ...", { userSubmissionId });
-
-            try {
-                if (!session.data?.user.formioToken) {
-                    console.error("No token in session.");
-                    return;
-                }
-
-                const response = await fetch(
-                    `${process.env.NEXT_PUBLIC_FORMIO_BASE_URL}klientpacient/submission/${userSubmissionId}`,
-                    {
-                        method: "DELETE",
-                        headers: {
-                            "x-jwt-token": session.data.user.formioToken,
-                        },
-                    }
-                );
-                if (!response.ok) {
-                    throw new Error(
-                        `Failed to delete user with status code ${response.status}`
-                    );
-                }
-            } catch (e) {
-                console.error("Failed to delete user.", { userSubmissionId });
-                toast.error("Smazání účtu selhalo.");
-                return;
-            }
-            console.debug("User deleted.", { userSubmissionId });
-            await queryClient.invalidateQueries(["users"]);
-        },
-        [queryClient, session.data]
-    );
 
     const columnHelper = createColumnHelper<UserFormSubmission>();
     const columns = useMemo(
@@ -75,37 +41,43 @@ export default function ClientPatientTable() {
                 cell: (props) => (
                     <Button
                         variant="danger"
-                        onClick={() => deleteUser(props.row.original._id)}
+                        onClick={async () => {
+                            const userSubmissionId = props.row.original._id;
+                            console.debug("Deleting user ...", {
+                                userSubmissionId,
+                            });
+                            try {
+                                deleteUser(
+                                    session.data!.user.formioToken,
+                                    userSubmissionId
+                                );
+                            } catch (e) {
+                                console.error("Failed to delete user.", {
+                                    userSubmissionId,
+                                    error: e,
+                                });
+                                toast.error("Smazání účtu selhalo.");
+                                return;
+                            }
+                            console.debug("User deleted.", {
+                                userSubmissionId,
+                            });
+                            await queryClient.invalidateQueries(["users"]);
+                        }}
                     >
                         Smazat
                     </Button>
                 ),
             }),
         ],
-        [columnHelper, deleteUser]
+        [columnHelper, queryClient, session.data]
     );
 
     const [showCreateUserModal, setShowCreateUserModal] = useState(false);
 
-    const fetchUsers = useCallback(async () => {
-        if (!session.data?.user.formioToken)
-            throw new Error("No token in session");
-
-        const response = await fetch(
-            `${process.env.NEXT_PUBLIC_FORMIO_BASE_URL}klientpacient/submission`,
-            {
-                headers: {
-                    "x-jwt-token": session.data.user.formioToken,
-                },
-            }
-        );
-
-        return (await response.json()) as UserFormSubmission[];
-    }, [session.data?.user.formioToken]);
-
     const { isLoading, isError, error, data, isFetching, refetch } = useQuery({
-        queryKey: ["users"],
-        queryFn: () => fetchUsers(),
+        queryKey: ["users", session.data],
+        queryFn: () => loadUsers(session.data!.user.formioToken),
         enabled: !!session.data?.user.formioToken,
     });
 
@@ -215,7 +187,7 @@ export default function ClientPatientTable() {
                 </Modal.Header>
                 <Modal.Body>
                     <DynamicFormWithAuth
-                        absoluteSrc={`${process.env.NEXT_PUBLIC_FORMIO_BASE_URL}klientpacient/register`}
+                        relativeFormPath={`/klientpacient/register`}
                         onSubmitDone={() => {
                             setShowCreateUserModal(false);
                             queryClient.invalidateQueries(["users"]);

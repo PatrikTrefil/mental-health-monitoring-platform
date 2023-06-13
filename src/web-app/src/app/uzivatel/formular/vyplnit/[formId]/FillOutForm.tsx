@@ -12,7 +12,7 @@ export default function FillOutForm({ formId }: { formId: string }) {
 
     return (
         <DynamicFormWithAuth
-            absoluteSrc={`${process.env.NEXT_PUBLIC_FORMIO_BASE_URL}/form/${formId}`}
+            relativeFormPath={`/form/${formId}`}
             onSubmitDone={async (data: unknown) => {
                 toast.success("Formulář byl úspěšně odeslán");
                 router.push("/uzivatel/prehled");

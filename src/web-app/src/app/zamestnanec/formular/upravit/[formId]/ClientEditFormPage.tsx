@@ -1,4 +1,5 @@
 "use client";
+import { loadFormById } from "@/client/formioClient";
 import DynamicFormBuilder from "@/components/shared/formio/DynamicFormBuilder";
 import DynamicFormEdit from "@/components/shared/formio/DynamicFormEdit";
 import { CreateFormio } from "@/lib/formiojsWrapper";
@@ -53,20 +54,19 @@ export default function ClientEditFormPage({ formId }: { formId: string }) {
         data: form,
         isLoading,
         isError,
-    } = useQuery({
+        error: errorMsg,
+    } = useQuery<Form, String, Form, string[]>({
         enabled: !!data?.user.formioToken && !isInitialized,
-        // eslint-disable-next-line @tanstack/query/exhaustive-deps
         queryKey: ["form", formId],
         queryFn: async () => {
-            const response = await fetch(
-                `${process.env.NEXT_PUBLIC_FORMIO_BASE_URL}/form/${formId}`,
-                {
-                    headers: {
-                        "x-jwt-token": data!.user.formioToken,
-                    },
-                }
-            );
-            const result = (await response.json()) as Form;
+            let result: Awaited<ReturnType<typeof loadFormById>>;
+            try {
+                result = await loadFormById(formId, data!.user.formioToken);
+            } catch (e) {
+                console.error("Failed to load form", e);
+                throw "Požadavek na server selhal.";
+            }
+            if (result === null) throw "Formulář s předaným ID neexistuje.";
             setIsInitialized(true);
             return result;
         },
@@ -75,7 +75,10 @@ export default function ClientEditFormPage({ formId }: { formId: string }) {
     if (isError)
         return (
             <>
-                <Alert variant="danger">Načítání formuláře selhalo</Alert>
+                <Alert variant="danger">
+                    <Alert.Heading>Načítání formuláře selhalo</Alert.Heading>
+                    {errorMsg}
+                </Alert>
                 <div className="d-flex flex-wrap gap-2">
                     <Button onClick={() => router.refresh()}>
                         Znovu načíst stránku
