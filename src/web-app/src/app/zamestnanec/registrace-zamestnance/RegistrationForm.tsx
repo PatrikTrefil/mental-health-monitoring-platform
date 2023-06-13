@@ -9,7 +9,7 @@ export default function RegistrationForm() {
 
     return (
         <DynamicFormWithAuth
-            absoluteSrc={`${process.env.NEXT_PUBLIC_FORMIO_BASE_URL}/zamestnanec/register`}
+            relativeFormPath={`/zamestnanec/register`}
             onSubmitDone={() => {
                 toast.success("Zaměstnanec byl úspěšně zaregistrován");
                 router.push("/zamestnanec/prehled");

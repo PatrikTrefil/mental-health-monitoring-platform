@@ -1,4 +1,4 @@
-import { loadForm, loadUsers } from "@/client/formioClient";
+import { loadFormById, loadUsers } from "@/client/formioClient";
 import { UserRoleTitles } from "@/types/users";
 import { Prisma } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
@@ -74,9 +74,11 @@ export const appRouter = createTRPCRouter({
             )
                 throw new TRPCError({ code: "FORBIDDEN" });
 
-            let loadedForm: Awaited<ReturnType<typeof loadForm>> | undefined;
+            let loadedForm:
+                | Awaited<ReturnType<typeof loadFormById>>
+                | undefined;
             try {
-                loadedForm = await loadForm(
+                loadedForm = await loadFormById(
                     opts.input.formId,
                     opts.ctx.session.user.formioToken
                 );

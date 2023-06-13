@@ -1,4 +1,4 @@
-import { loadForm, loadUsers } from "@/client/formioClient";
+import { loadFormById, loadUsers } from "@/client/formioClient";
 import { appRouter, type AppRouter } from "@/server/routers/_app";
 import { createInnerTRPCContext } from "@/server/trpc";
 import { Form } from "@/types/form";
@@ -15,8 +15,8 @@ const mockInputTask: CreateTaskInput = {
 };
 
 vi.mock("@/client/formioClient", () => ({
-    loadForm: vi.fn(async () => {
-        const mockForm: Awaited<ReturnType<typeof loadForm>> = {
+    loadFormById: vi.fn(async () => {
+        const mockForm: Awaited<ReturnType<typeof loadFormById>> = {
             _id: "123",
             name: "test",
             path: "test",
@@ -75,7 +75,7 @@ describe("todo functionality", () => {
             createInnerTRPCContextMockSession([UserRoleTitles.ZAMESTNANEC])
         );
 
-        vi.mocked(loadForm).mockImplementationOnce(async () => {
+        vi.mocked(loadFormById).mockImplementationOnce(async () => {
             const mockForm: Form = {
                 _id: mockInputTask.formId,
                 created: "",
@@ -249,7 +249,7 @@ describe("todo functionality", () => {
         const caller = appRouter.createCaller(
             createInnerTRPCContextMockSession([UserRoleTitles.ZAMESTNANEC])
         );
-        vi.mocked(loadForm).mockImplementationOnce(async () => null);
+        vi.mocked(loadFormById).mockImplementationOnce(async () => null);
         expect(caller.createTask(mockInputTask)).rejects.toMatchInlineSnapshot(
             "[TRPCError: Form with given formId does not exist]"
         );
@@ -348,7 +348,7 @@ describe("todo when formio is down", () => {
         throw new Error("formio is down");
     };
     it("throws when creating a todo when loadForm fails", async () => {
-        vi.mocked(loadForm).mockImplementationOnce(throwFn);
+        vi.mocked(loadFormById).mockImplementationOnce(throwFn);
         const caller = appRouter.createCaller(
             createInnerTRPCContextMockSession([UserRoleTitles.ZAMESTNANEC])
         );

@@ -1,8 +1,8 @@
 "use client";
 
+import { createForm, loadRoles } from "@/client/formioClient";
 import DynamicFormBuilder from "@/components/shared/formio/DynamicFormBuilder";
 import DynamicFormEdit from "@/components/shared/formio/DynamicFormEdit";
-import { Role } from "@/types/role";
 import { UserRoleTitles } from "@/types/users";
 import { useQuery } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
@@ -45,21 +45,9 @@ export default function ClientCreateFormPage() {
         CreationStatus.NOT_SUBMITTED
     );
     const session = useSession();
-    const fetchRoles = async () => {
-        const response = await fetch(
-            `${process.env.NEXT_PUBLIC_FORMIO_BASE_URL}role`,
-            {
-                headers: {
-                    "x-jwt-token": session.data!.user.formioToken, // token won't be null, because the query is disabled when it is
-                },
-            }
-        );
-        const roles = (await response.json()) as Role[];
-        return roles;
-    };
     const { isLoading, isError, error, data } = useQuery({
-        queryKey: ["roles"],
-        queryFn: fetchRoles,
+        queryKey: ["roles", session.data],
+        queryFn: async () => loadRoles(session.data!.user.formioToken),
         keepPreviousData: true,
         enabled: !!session.data?.user.formioToken,
     });
@@ -91,21 +79,16 @@ export default function ClientCreateFormPage() {
                 <DynamicFormEdit
                     saveText="Vytvořit formulář"
                     saveForm={async (formSchema: unknown) => {
-                        const response = await fetch(
-                            `${process.env.NEXT_PUBLIC_FORMIO_BASE_URL}/form`,
-                            {
-                                method: "POST",
-                                headers: {
-                                    "Content-Type": "application/json",
-                                    "x-jwt-token":
-                                        session.data!.user.formioToken,
-                                },
-                                body: JSON.stringify(formSchema),
-                            }
-                        );
-
-                        if (!response.ok)
+                        try {
+                            await createForm(
+                                session.data!.user.formioToken,
+                                formSchema
+                            );
+                        } catch (e) {
+                            if (e instanceof Error) console.error(e.message);
                             setCreationStatus(CreationStatus.CREATION_FAILED);
+                            return;
+                        }
 
                         setCreationStatus(CreationStatus.CREATION_SUCCEEDED);
                     }}

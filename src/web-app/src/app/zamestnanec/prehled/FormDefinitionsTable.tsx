@@ -1,6 +1,7 @@
 "use client";
 
 import ExportButton from "@/app/zamestnanec/prehled/ExportButton";
+import { deleteForm, loadForms } from "@/client/formioClient";
 import SimplePagination from "@/components/shared/SimplePagination";
 import { Form as FormDefinition } from "@/types/form";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -12,34 +13,13 @@ import {
     useReactTable,
 } from "@tanstack/react-table";
 import { useSession } from "next-auth/react";
-import { useCallback, useMemo } from "react";
+import { useMemo } from "react";
 import { Alert, Button, Form, Spinner, Table } from "react-bootstrap";
+import { toast } from "react-toastify";
 
 export default function FormDefinitionsTable() {
     const queryClient = useQueryClient();
     const session = useSession();
-
-    const deleteForm = useCallback(
-        async (formPath: string) => {
-            const response = await fetch(
-                `${process.env.NEXT_PUBLIC_FORMIO_BASE_URL}${formPath}`,
-                {
-                    method: "DELETE",
-                    headers: {
-                        "x-jwt-token": session.data!.user.formioToken,
-                    },
-                }
-            );
-            if (!response.ok) {
-                // TODO: handle error
-                console.error("Failed to delete form", {
-                    status: response.status,
-                });
-            }
-            await queryClient.invalidateQueries(["forms"]);
-        },
-        [queryClient, session.data]
-    );
 
     const columnHelper = createColumnHelper<FormDefinition>();
     const columns = useMemo(
@@ -70,7 +50,21 @@ export default function FormDefinitionsTable() {
                             Upravit
                         </Button>
                         <Button
-                            onClick={() => deleteForm(props.row.original.path)}
+                            disabled={!session.data?.user.formioToken}
+                            onClick={async () => {
+                                try {
+                                    await deleteForm(
+                                        session.data!.user.formioToken,
+                                        props.row.original.path
+                                    );
+                                } catch (e) {
+                                    console.error(e);
+                                    toast.error("Smazání formuláře selhalo");
+                                    return;
+                                }
+                                toast.success("Formulář byl smazán");
+                                await queryClient.invalidateQueries(["forms"]);
+                            }}
                             variant="danger"
                         >
                             Smazat
@@ -80,26 +74,13 @@ export default function FormDefinitionsTable() {
                 ),
             }),
         ],
-        [columnHelper, deleteForm]
+        [columnHelper, queryClient, session.data]
     );
 
-    const fetchForms = useCallback(async () => {
-        const url = new URL(`${process.env.NEXT_PUBLIC_FORMIO_BASE_URL}form/`);
-        url.searchParams.set("type", "form");
-        url.searchParams.set("tags", "klientPacient");
-
-        const response = await fetch(url, {
-            headers: {
-                "x-jwt-token": session.data!.user.formioToken, // token won't be null, because the query is disabled when it is
-            },
-        });
-
-        return (await response.json()) as FormDefinition[];
-    }, [session.data]);
-
     const { isLoading, isError, error, data, isFetching, refetch } = useQuery({
-        queryKey: ["forms"],
-        queryFn: () => fetchForms(),
+        queryKey: ["forms", session.data],
+        queryFn: () =>
+            loadForms(session.data!.user.formioToken, ["klientPacient"]),
         enabled: !!session.data?.user.formioToken,
     });
 

@@ -1,16 +1,17 @@
-import { Form } from "@/types/form";
+import { loadFormByPath, submitForm } from "@/client/formioClient";
 import { FormProps } from "@formio/react/lib/components/Form";
 import { useQuery } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
 import { useState } from "react";
 import { Alert, Spinner } from "react-bootstrap";
+import { toast } from "react-toastify";
 import DynamicForm from "./DynamicForm";
 
 /**
  * A dynamic form that uses the user's formio token to authenticate.
  * @param formProps most of the props are passed to the Form component from `@react/formio`
  * but there are a few changes. The `src` prop and the `form` prop are removed.
- * The new `absoluteSrc` prop will be used to manually fetch the form from the formio API and the result
+ * The new `relativeFormPath` prop will be used to manually fetch the form from the formio API and the result
  * will be passed to the Form component using the `form` prop. The `onSubmitDone` prop is required,
  * to force notification of the user and it is run after the form is successfully submitted. The `onSubmitFail`
  * prop is required, to force notification of the user and it is run after the form is unsuccessfully submitted.
@@ -21,7 +22,7 @@ import DynamicForm from "./DynamicForm";
  */
 export default function DynamicFormWithAuth(
     formProps: Omit<FormProps, "form"> & {
-        absoluteSrc: string;
+        relativeFormPath: string;
         onSubmitFail?: (error?: string) => void;
     }
 ) {
@@ -33,16 +34,14 @@ export default function DynamicFormWithAuth(
         data: form,
         error,
     } = useQuery({
-        // eslint-disable-next-line @tanstack/query/exhaustive-deps
-        queryKey: ["form", formProps.absoluteSrc],
+        queryKey: ["form", formProps.relativeFormPath, data],
         queryFn: async () => {
-            const response = await fetch(formProps.absoluteSrc, {
-                headers: {
-                    "x-jwt-token": data!.user.formioToken,
-                },
-            });
+            const result = await loadFormByPath(
+                formProps.relativeFormPath,
+                data!.user.formioToken
+            );
             setIsInitialized(true);
-            return (await response.json()) as Form;
+            return result;
         },
         enabled: !!data?.user.formioToken && !isInitialized,
     });
@@ -62,21 +61,15 @@ export default function DynamicFormWithAuth(
     }
 
     const defaultSubmit = async (submission: unknown) => {
-        const response = await fetch(
-            `${process.env.NEXT_PUBLIC_FORMIO_BASE_URL}${form.path}`,
-            {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "x-jwt-token": data!.user.formioToken,
-                },
-                body: JSON.stringify(submission),
+        if (!data?.user.formioToken)
+            toast.error("Odeslání formuláře selhalo, zkuste to znovu");
+        else {
+            try {
+                await submitForm(data.user.formioToken, form.path, submission);
+            } catch (e) {
+                console.error(e);
+                toast.error("Odeslání formuláře selhalo, zkuste to znovu");
             }
-        );
-        if (!response.ok) {
-            throw new Error(
-                `Failed to submit form with status code ${response.status}`
-            );
         }
     };
 

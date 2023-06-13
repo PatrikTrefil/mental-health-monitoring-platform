@@ -1,11 +1,10 @@
 "use client";
 
+import { loadForms, loadUsers } from "@/client/formioClient";
 import { trpc } from "@/client/trpcClient";
-import { Form as FormioForm } from "@/types/form";
-import { UserFormSubmission } from "@/types/userFormSubmission";
 import { useQuery } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
-import { FormEventHandler, useCallback, useState } from "react";
+import { FormEventHandler, useState } from "react";
 import { Alert, Button, Form, Spinner } from "react-bootstrap";
 import AsyncSelect from "react-select/async";
 import { toast } from "react-toastify";
@@ -26,23 +25,6 @@ export interface TaskCreationProps {
 export default function TaskCreation({ onSettled }: TaskCreationProps) {
     const session = useSession();
 
-    // TODO: make client class
-    const fetchUsers = useCallback(async () => {
-        if (!session.data?.user.formioToken)
-            throw new Error("No token in session");
-
-        const response = await fetch(
-            `${process.env.NEXT_PUBLIC_FORMIO_BASE_URL}klientpacient/submission`,
-            {
-                headers: {
-                    "x-jwt-token": session.data.user.formioToken,
-                },
-            }
-        );
-
-        return (await response.json()) as UserFormSubmission[];
-    }, [session.data?.user.formioToken]);
-
     const {
         isLoading: isLoadingUsers,
         isError: isErrorUsers,
@@ -50,24 +32,10 @@ export default function TaskCreation({ onSettled }: TaskCreationProps) {
         data: userList,
         refetch: refetchUsers,
     } = useQuery({
-        queryKey: ["users"],
-        queryFn: () => fetchUsers(),
+        queryKey: ["users", session.data],
+        queryFn: () => loadUsers(session.data!.user.formioToken),
         enabled: !!session.data?.user.formioToken,
     });
-
-    const fetchForms = useCallback(async () => {
-        const url = new URL(`${process.env.NEXT_PUBLIC_FORMIO_BASE_URL}form/`);
-        url.searchParams.set("type", "form");
-        url.searchParams.set("tags", "klientPacient");
-
-        const response = await fetch(url, {
-            headers: {
-                "x-jwt-token": session.data!.user.formioToken, // token won't be null, because the query is disabled when it is
-            },
-        });
-
-        return (await response.json()) as FormioForm[];
-    }, [session.data]);
 
     const {
         isLoading: isLoadingForms,
@@ -76,8 +44,9 @@ export default function TaskCreation({ onSettled }: TaskCreationProps) {
         data: forms,
         refetch: refetchForms,
     } = useQuery({
-        queryKey: ["forms"],
-        queryFn: () => fetchForms(),
+        queryKey: ["forms", session.data],
+        queryFn: () =>
+            loadForms(session.data!.user.formioToken, ["klientPacient"]),
         keepPreviousData: true,
         enabled: !!session.data?.user.formioToken,
     });
@@ -187,7 +156,11 @@ export default function TaskCreation({ onSettled }: TaskCreationProps) {
                 id="pro-uzivatele"
                 required
                 loadOptions={async (inputValue: string) => {
-                    const users = await fetchUsers();
+                    if (!session.data?.user.formioToken) return [];
+
+                    const users = await loadUsers(
+                        session.data.user.formioToken
+                    );
                     return users
                         .map((user) => ({
                             value: user.data.id,
