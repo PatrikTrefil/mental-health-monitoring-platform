@@ -28,9 +28,6 @@ export default function NavigationBarEmployee() {
                         <Nav.Link href="/zamestnanec/sprava-ukolu">
                             Správa&nbsp;úkolů
                         </Nav.Link>
-                        <Nav.Link href="/zamestnanec/formular/vytvorit">
-                            Vytvořit&nbsp;formulář
-                        </Nav.Link>
                         <Nav.Link href="/zamestnanec/sprava-klientu-pacientu">
                             Správa&nbsp;klientů/pacientů
                         </Nav.Link>

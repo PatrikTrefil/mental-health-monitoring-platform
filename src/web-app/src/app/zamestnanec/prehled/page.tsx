@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import FormDefinitionsTable from "./FormDefinitionsTable";
+import FormManagement from "./FormManagement";
 
 export const metadata: Metadata = {
     title: "Přehled",
@@ -12,10 +12,7 @@ export default function PrehledPage() {
     return (
         <main>
             <h1>Přehled</h1>
-            <div>
-                <h2>Definice formulářů</h2>
-                <FormDefinitionsTable />
-            </div>
+            <FormManagement />
         </main>
     );
 }
