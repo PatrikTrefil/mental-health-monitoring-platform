@@ -1,3 +1,5 @@
+"use client";
+
 import { loadFormByPath, submitForm } from "@/client/formioClient";
 import { FormProps } from "@formio/react/lib/components/Form";
 import { useQuery } from "@tanstack/react-query";
