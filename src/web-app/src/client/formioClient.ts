@@ -232,3 +232,45 @@ export async function loadForms(formioToken: string, tags: string[]) {
 
     return (await response.json()) as Form[];
 }
+
+/**
+ * Load employees from formio.
+ * @param formioToken JWT token for formio
+ * @throws {TypeError} if the fetch or conversion to json fails
+ */
+export async function loadEmployees(formioToken: string) {
+    const response = await fetch(`${getFormioUrl()}/zamestnanec/submission`, {
+        headers: {
+            "x-jwt-token": formioToken,
+        },
+    });
+
+    return (await response.json()) as UserFormSubmission[];
+}
+
+/**
+ * Delete employee from formio.
+ * @param formioToken JWT token for formio
+ * @param userSubmissionId id of the user submission to delete
+ * @throws {Error} if formio returns a non-ok status
+ * @throws {TypeError} if the fetch fails
+ */
+export async function deleteEmployee(
+    formioToken: string,
+    userSubmissionId: string
+) {
+    const response = await fetch(
+        `${getFormioUrl()}/zamestnanec/submission/${userSubmissionId}`,
+        {
+            method: "DELETE",
+            headers: {
+                "x-jwt-token": formioToken,
+            },
+        }
+    );
+    if (!response.ok) {
+        throw new Error(
+            `Failed to delete user with status code ${response.status}`
+        );
+    }
+}

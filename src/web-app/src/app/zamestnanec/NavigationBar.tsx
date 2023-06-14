@@ -34,8 +34,8 @@ export default function NavigationBarEmployee() {
                         <Nav.Link href="/zamestnanec/sprava-klientu-pacientu">
                             Správa&nbsp;klientů/pacientů
                         </Nav.Link>
-                        <Nav.Link href="/zamestnanec/registrace-zamestnance">
-                            Registrace&nbsp;zaměstnance
+                        <Nav.Link href="/zamestnanec/sprava-zamestnancu">
+                            Správa&nbsp;zaměstnanců
                         </Nav.Link>
                         <Nav.Item>
                             Přihlášen&nbsp;jako:&nbsp;
