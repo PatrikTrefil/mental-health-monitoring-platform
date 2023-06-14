@@ -63,11 +63,14 @@ export default function Login() {
             if (result?.error) throw result.error;
         },
         onError: (e: SignInResponse["error"] & { error: string }) => {
-            toast.error(
-                e === "CredentialsSignin"
-                    ? "Nesprávné uživatelské jméno nebo heslo."
-                    : e
-            );
+            let msg: string;
+            if (e === "CredentialsSignin")
+                msg = "Nesprávné uživatelské jméno nebo heslo.";
+            else {
+                console.error("Failed to sign in", e);
+                msg = "Nastala neočekávaná chyba.";
+            }
+            toast.error(msg);
         },
     });
 
