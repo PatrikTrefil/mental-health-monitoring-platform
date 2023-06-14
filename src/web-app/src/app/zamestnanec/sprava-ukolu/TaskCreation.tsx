@@ -195,7 +195,7 @@ export default function TaskCreation({ onSettled }: TaskCreationProps) {
             </Form.Select>
             <Form.Control
                 type="submit"
-                value="Vytvořit úkol"
+                value={createTask.isLoading ? "Vytváření..." : "Vytvořit úkol"}
                 className="mt-2"
                 disabled={createTask.isLoading}
             />
