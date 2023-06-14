@@ -3,11 +3,10 @@
 import { createForm, loadRoles } from "@/client/formioClient";
 import DynamicFormBuilder from "@/components/shared/formio/DynamicFormBuilder";
 import DynamicFormEdit from "@/components/shared/formio/DynamicFormEdit";
+import { useSmartFetch } from "@/hooks/useSmartFetch";
 import { UserRoleTitles } from "@/types/users";
-import { useQuery } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
 import { Alert } from "react-bootstrap";
 import Spinner from "react-bootstrap/Spinner";
 import { toast } from "react-toastify";
@@ -18,19 +17,9 @@ import { toast } from "react-toastify";
 export default function CreateForm() {
     const session = useSession();
 
-    // The roles are used only to initialize the form builder,
-    // we do not need to keep them updated.
-    const [areRolesLoaded, setAreRolesLoaded] = useState(false);
-
-    const { isLoading, isError, error, data, refetch } = useQuery({
-        queryKey: ["roles", session.data],
-        queryFn: async () => {
-            const result = loadRoles(session.data!.user.formioToken);
-            setAreRolesLoaded(true);
-            return result;
-        },
-        keepPreviousData: true,
-        enabled: !!session.data?.user.formioToken && !areRolesLoaded,
+    const { isLoading, isError, error, data } = useSmartFetch({
+        queryFn: async () => loadRoles(session.data!.user.formioToken),
+        enabled: !!session.data?.user.formioToken,
     });
     const router = useRouter();
     const errorResult = <Alert variant="danger">Něco se pokazilo.</Alert>;

@@ -2,9 +2,9 @@
 import { loadFormById } from "@/client/formioClient";
 import DynamicFormBuilder from "@/components/shared/formio/DynamicFormBuilder";
 import DynamicFormEdit from "@/components/shared/formio/DynamicFormEdit";
+import { useSmartFetch } from "@/hooks/useSmartFetch";
 import { CreateFormio } from "@/lib/formiojsWrapper";
 import { Form } from "@/types/form";
-import { useQuery } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -44,9 +44,6 @@ export default function ClientEditFormPage({ formId }: { formId: string }) {
     const [editStatus, setEditStatus] = useState<EditStatus>(
         EditStatus.NOT_SUBMITTED
     );
-    // used to prevent re-fetching form data
-    // if the data was refetched, it would reset the form and delete the user's changes
-    const [isInitialized, setIsInitialized] = useState(false);
 
     const { data } = useSession();
 
@@ -55,9 +52,8 @@ export default function ClientEditFormPage({ formId }: { formId: string }) {
         isLoading,
         isError,
         error: errorMsg,
-    } = useQuery<Form, String, Form, string[]>({
-        enabled: !!data?.user.formioToken && !isInitialized,
-        queryKey: ["form", formId],
+    } = useSmartFetch<Form, string>({
+        enabled: !!data?.user.formioToken,
         queryFn: async () => {
             let result: Awaited<ReturnType<typeof loadFormById>>;
             try {
@@ -67,7 +63,6 @@ export default function ClientEditFormPage({ formId }: { formId: string }) {
                 throw "Požadavek na server selhal.";
             }
             if (result === null) throw "Formulář s předaným ID neexistuje.";
-            setIsInitialized(true);
             return result;
         },
     });

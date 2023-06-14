@@ -2,11 +2,10 @@
 
 import { loadFormByPath, submitForm } from "@/client/formioClient";
 import { FormProps } from "@formio/react/lib/components/Form";
-import { useQuery } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
-import { useState } from "react";
 import { Alert, Spinner } from "react-bootstrap";
 import { toast } from "react-toastify";
+import { useSmartFetch } from "../../../hooks/useSmartFetch";
 import DynamicForm from "./DynamicForm";
 
 /**
@@ -28,24 +27,22 @@ export default function DynamicFormWithAuth(
         onSubmitFail?: (error?: string) => void;
     }
 ) {
-    const [isInitialized, setIsInitialized] = useState(false);
     const { data } = useSession();
     const {
         isLoading,
         isError,
-        data: form,
         error,
-    } = useQuery({
-        queryKey: ["form", formProps.relativeFormPath, data],
-        queryFn: async () => {
-            const result = await loadFormByPath(
+        data: form,
+    } = useSmartFetch({
+        queryFn: () => {
+            const result = loadFormByPath(
                 formProps.relativeFormPath,
                 data!.user.formioToken
             );
-            setIsInitialized(true);
+            if (result === null) throw new Error("Form not found");
             return result;
         },
-        enabled: !!data?.user.formioToken && !isInitialized,
+        enabled: !!data?.user.formioToken,
     });
 
     if (isLoading)
