@@ -1,9 +1,8 @@
 "use client";
-import { loadFormById } from "@/client/formioClient";
+import { loadFormById, updateForm } from "@/client/formioClient";
 import DynamicFormBuilder from "@/components/shared/formio/DynamicFormBuilder";
 import DynamicFormEdit from "@/components/shared/formio/DynamicFormEdit";
 import { useSmartFetch } from "@/hooks/useSmartFetch";
-import { CreateFormio } from "@/lib/formiojsWrapper";
 import { Form } from "@/types/form";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
@@ -96,13 +95,10 @@ export default function ClientEditFormPage({ formId }: { formId: string }) {
         <>
             <DynamicFormEdit
                 saveText="Uložit formulář"
-                saveForm={async (formSchema: unknown) => {
+                saveForm={async (formSchema: Form) => {
                     try {
                         if (data)
-                            await saveFormToServer(
-                                formSchema,
-                                data.user.formioToken
-                            );
+                            await updateForm(formSchema, data.user.formioToken);
                         else throw new Error("Token not available");
                     } catch (e) {
                         setEditStatus(EditStatus.EDIT_FAILED);
@@ -144,18 +140,4 @@ export default function ClientEditFormPage({ formId }: { formId: string }) {
             </Modal>
         </>
     );
-}
-
-/**
- * Save form schema to server.
- * @param formSchema Form schema to save to server
- * @throws Error if saving fails
- */
-async function saveFormToServer(formSchema: unknown, formioToken: string) {
-    const client = await CreateFormio(process.env.NEXT_PUBLIC_FORMIO_BASE_URL);
-    await client.saveForm(formSchema, {
-        headers: {
-            "x-jwt-token": formioToken,
-        },
-    });
 }

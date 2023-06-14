@@ -274,3 +274,25 @@ export async function deleteEmployee(
         );
     }
 }
+
+/**
+ * Create form in formio.
+ * @param formSchema Form schema to save to server
+ * @throws {TypeError} if the fetch fails
+ * @throws {Error} if response status is not ok
+ */
+export async function updateForm(formSchema: Form, formioToken: string) {
+    const response = await fetch(`${getFormioUrl()}/form/${formSchema._id}`, {
+        method: "PUT",
+        headers: {
+            "Content-Type": "application/json",
+            "x-jwt-token": formioToken,
+        },
+        body: JSON.stringify(formSchema),
+    });
+
+    if (!response.ok)
+        throw new Error(
+            `Failed to save form with status code ${response.status}`
+        );
+}
