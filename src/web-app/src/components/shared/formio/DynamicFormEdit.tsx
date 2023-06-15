@@ -1,3 +1,5 @@
+"use client";
+
 import { FormioComponentLoader } from "@/lib/formiojsWrapper";
 
 /**
