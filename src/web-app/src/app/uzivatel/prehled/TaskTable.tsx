@@ -30,6 +30,25 @@ export default function TaskTable() {
                 header: "Popis",
                 cell: (props) => props.row.original.description ?? "Bez popisu",
             }),
+            columnHelper.accessor("state", {
+                header: "Stav",
+                cell: (props) => {
+                    switch (props.row.original.state) {
+                        case TaskState.READY:
+                            return "Nedokončeno";
+                        case TaskState.PARTIALLY_COMPLETED:
+                            return "Částečně dokončeno";
+                        case TaskState.COMPLETED:
+                            return "Dokončeno";
+                        default:
+                            console.error(
+                                "Unknown task state: ",
+                                props.row.original.state
+                            );
+                            return "Neznámý stav";
+                    }
+                },
+            }),
             columnHelper.display({
                 id: "actions",
                 header: "Akce",

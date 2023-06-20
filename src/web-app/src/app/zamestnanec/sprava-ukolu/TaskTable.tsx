@@ -2,6 +2,7 @@
 
 import { trpc } from "@/client/trpcClient";
 import SimplePagination from "@/components/shared/SimplePagination";
+import TaskState from "@/constants/taskState";
 import { AppRouter } from "@/server/routers/_app";
 import {
     createColumnHelper,
@@ -50,10 +51,24 @@ export default function TaskTable() {
                 header: "Vytvořeno dne",
                 cell: (props) => props.row.original.createdAt.toLocaleString(),
             }),
-            columnHelper.accessor("isCompleted", {
-                header: "Dokončeno",
-                cell: (props) =>
-                    props.row.original.isCompleted ? "Ano" : "Ne",
+            columnHelper.accessor("state", {
+                header: "Stav",
+                cell: (props) => {
+                    switch (props.row.original.state) {
+                        case TaskState.READY:
+                            return "Nedokončeno";
+                        case TaskState.PARTIALLY_COMPLETED:
+                            return "Částečně dokončeno";
+                        case TaskState.COMPLETED:
+                            return "Dokončeno";
+                        default:
+                            console.error(
+                                "Unknown task state: ",
+                                props.row.original.state
+                            );
+                            return "Neznámý stav";
+                    }
+                },
             }),
             columnHelper.accessor("updatedAt", {
                 header: "Aktualizováno dne",
