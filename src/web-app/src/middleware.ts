@@ -19,7 +19,7 @@ export async function middleware(
         if (nextAuthMiddleware instanceof Promise)
             throw new Error("nextAuthMiddleware is a promise");
         // everything else is handled by next auth
-        nextAuthMiddleware(req, event);
+        return await nextAuthMiddleware(req, event);
     }
 }
 
