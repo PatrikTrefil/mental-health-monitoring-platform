@@ -1,11 +1,42 @@
 import { UserRoleTitles } from "@/types/users";
 import { NextRequestWithAuth, withAuth } from "next-auth/middleware";
-import { NextResponse } from "next/server";
+import { NextFetchEvent, NextRequest, NextResponse } from "next/server";
 import {
     fetchRoleList,
     getCurrentUser,
     loginAdmin,
 } from "./client/formioClient";
+
+export async function middleware(
+    req: NextRequestWithAuth,
+    event: NextFetchEvent
+) {
+    if (req.nextUrl.pathname.startsWith("/api/"))
+        return await apiMiddleware(req);
+    else {
+        // this check is here only to handle TS error
+        // this should never happen
+        if (nextAuthMiddleware instanceof Promise)
+            throw new Error("nextAuthMiddleware is a promise");
+        // everything else is handled by next auth
+        nextAuthMiddleware(req, event);
+    }
+}
+
+export const config = {
+    matcher: ["/uzivatel/:path*", "/zamestnanec/:path*", "/api/:path*"],
+};
+
+const nextAuthMiddleware = withAuth(
+    async function middleware(req: NextRequestWithAuth) {
+        return webpageMiddleware(req);
+    },
+    {
+        callbacks: {
+            authorized: ({ token }) => !!token,
+        },
+    }
+);
 
 /**
  * Middleware for checking if user has sufficient privileges to access a webpage.
@@ -38,8 +69,9 @@ function webpageMiddleware(req: NextRequestWithAuth) {
  *
  * This middleware does not use next auth. It only expects the formio token to be in the header.
  */
-async function apiMiddleware(req: NextRequestWithAuth) {
+async function apiMiddleware(req: NextRequest) {
     if (req.nextUrl.pathname.startsWith("/api/ukol")) {
+        console.log("ahldf");
         const formioToken = req.headers.get("x-jwt-token");
         if (!formioToken)
             return new NextResponse(
@@ -65,22 +97,3 @@ async function apiMiddleware(req: NextRequestWithAuth) {
         }
     }
 }
-
-export default withAuth(
-    async function middleware(req: NextRequestWithAuth) {
-        if (req.nextUrl.pathname.startsWith("/api/")) {
-            return await apiMiddleware(req);
-        } else {
-            return webpageMiddleware(req);
-        }
-    },
-    {
-        callbacks: {
-            authorized: ({ token }) => !!token,
-        },
-    }
-);
-
-export const config = {
-    matcher: ["/uzivatel/:path*", "/zamestnanec/:path*", "/api/:path*"],
-};
