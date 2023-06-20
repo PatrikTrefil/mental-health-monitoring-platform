@@ -5,7 +5,10 @@ import { type Session } from "next-auth";
 import superjson from "superjson";
 import { getServerAuthSession } from "./auth";
 
-type CreateContextOptions = {
+/**
+ * Options of {@link createInnerTRPCContext}
+ */
+export type CreateContextOptions = {
     session: Session | null;
 };
 
