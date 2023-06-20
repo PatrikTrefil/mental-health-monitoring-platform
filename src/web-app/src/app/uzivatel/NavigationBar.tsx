@@ -13,7 +13,7 @@ export default function NavigationBarClientPatient() {
     return (
         <Navbar bg="primary" variant="dark" collapseOnSelect expand="xxl">
             <Container>
-                <Navbar.Brand href="/zamestnanec/prehled">NUDZ</Navbar.Brand>
+                <Navbar.Brand href="/uzivatel/prehled">NUDZ</Navbar.Brand>
                 <Navbar.Toggle
                     data-bs-target="#navbar-scroll"
                     data-bs-toggle="collapse"
