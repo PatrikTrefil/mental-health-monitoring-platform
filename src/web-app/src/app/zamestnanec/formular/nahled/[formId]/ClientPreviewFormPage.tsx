@@ -21,7 +21,7 @@ export default function ClientPreviewFormPage({ formId }: { formId: string }) {
         <>
             <DynamicFormWithAuth
                 relativeFormPath={`/form/${formId}`}
-                onSubmit={() => {
+                onSubmit={(_s, _fP) => {
                     setShowModal(true);
                 }}
             />

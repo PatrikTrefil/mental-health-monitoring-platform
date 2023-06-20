@@ -25,6 +25,7 @@ services:
       - NEXT_PUBLIC_FORMIO_BASE_URL=http://${DOMAIN_NAME}:8080/formio/
       - NEXTAUTH_URL=http://${DOMAIN_NAME}:8080/api/auth
       - NEXTAUTH_SECRET=dev-secret
+      - NEXT_PUBLIC_INTERNAL_NEXT_SERVER_URL=http://web-app:3000
     ports:
       - 3000:3000
       - 5555:5555 # prisma studio's default port (prisma studio has to be started manually)

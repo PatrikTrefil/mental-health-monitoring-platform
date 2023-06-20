@@ -15,4 +15,5 @@ export const envVarSchema = z.object({
     FORMIO_ROOT_EMAIL: z.string().email(),
     FORMIO_ROOT_PASSWORD: z.string(),
     DATABASE_URL: z.string().url(),
+    NEXT_PUBLIC_INTERNAL_NEXT_SERVER_URL: z.string().url(),
 });

@@ -5,9 +5,12 @@
  * there were some bugs and it does not work on the server.
  * @module formioClient
  */
-import { Form } from "@/types/form";
+import { Action } from "@/types/action";
+import { Form, FormSchema } from "@/types/forms";
 import { Role } from "@/types/role";
+import { Submission } from "@/types/submission";
 import { UserFormSubmission } from "@/types/userFormSubmission";
+import { User } from "@/types/users";
 
 /**
  * Find out if the code is running on the server.
@@ -113,8 +116,9 @@ export async function deleteUser(
  * @param formSchema schema of the form to submit
  * @throws {Error} if formio returns a non-ok status
  * @throws {TypeError} if the fetch fails
+ * @returns created form
  */
-export async function createForm(formioToken: string, formSchema: unknown) {
+export async function createForm(formioToken: string, formSchema: FormSchema) {
     const response = await fetch(`${getFormioUrl()}/form`, {
         method: "POST",
         headers: {
@@ -123,10 +127,8 @@ export async function createForm(formioToken: string, formSchema: unknown) {
         },
         body: JSON.stringify(formSchema),
     });
-    if (!response.ok)
-        throw new Error(
-            `Form submission failed with status ${response.status}`
-        );
+    if (!response.ok) throw new Error((await response.json())?.message);
+    return (await response.json()) as Form;
 }
 
 /**
@@ -297,6 +299,73 @@ export async function updateForm(formSchema: Form, formioToken: string) {
         );
 }
 
+/**
+ * Create action attached to a form in formio.
+ * @param formId id of the form to create action for
+ * @param action definition of the action to create
+ * @param formioToken JWT token for formio
+ */
+export async function createAction<TSettings>(
+    formId: string,
+    action: Action<TSettings>,
+    formioToken: string
+) {
+    const response = await fetch(`${getFormioUrl()}/form/${formId}/action`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "x-jwt-token": formioToken,
+        },
+        body: JSON.stringify(action),
+    });
+    if (!response.ok)
+        throw new Error(
+            `Failed to create action with status code ${response.status}`
+        );
+}
+
+/**
+ * Load submissions from formio.
+ * @param formPath path of the form to load submissions from
+ * @param submissionId id of the submission to load
+ * @param formioToken JWT token for formio
+ * @throws {TypeError} if the fetch fails
+ * @throws {Error} if response status is not ok
+ */
+export async function loadSubmission(
+    formPath: string,
+    submissionId: string,
+    formioToken: string
+) {
+    const response = await fetch(
+        `${getFormioUrl()}/${formPath}/submission/${submissionId}`,
+        {
+            headers: {
+                "x-jwt-token": formioToken,
+                "Content-Type": "application/json",
+            },
+        }
+    );
+    if (!response.ok)
+        throw new Error(
+            `Failed to load submission with status code ${response.status}`
+        );
+    return (await response.json()) as Submission;
+}
+
+/**
+ * Get current formio user
+ * @param formioToken JWT token for formio
+ * @throws {TypeError} if the fetch fails or the response is not valid json
+ */
+export async function getCurrentUser(formioToken: string) {
+    const response = await fetch(`${getFormioUrl()}/current`, {
+        headers: {
+            "x-jwt-token": formioToken,
+        },
+    });
+    return (await response.json()) as User;
+}
 /**
  * Fetches the list of roles from the server.
  * @param adminToken JWT token with admin privileges

@@ -1,6 +1,7 @@
 "use client";
 
 import { loadFormByPath, submitForm } from "@/client/formioClient";
+import { Submission } from "@/types/submission";
 import { FormProps } from "@formio/react/lib/components/Form";
 import { useSession } from "next-auth/react";
 import { Alert, Spinner } from "react-bootstrap";
@@ -22,9 +23,13 @@ import DynamicForm from "./DynamicForm";
  * @see DynamicForm
  */
 export default function DynamicFormWithAuth(
-    formProps: Omit<FormProps, "form"> & {
+    formProps: Omit<FormProps, "form" | "onSubmit"> & {
         relativeFormPath: string;
         onSubmitFail?: (error?: string) => void;
+        onSubmit?: (
+            submission: Submission,
+            formPath: string
+        ) => void | Promise<void>;
     }
 ) {
     const { data } = useSession();
@@ -76,9 +81,10 @@ export default function DynamicFormWithAuth(
         <DynamicForm
             form={form}
             {...formProps}
-            onSubmit={async (submission: unknown) => {
+            onSubmit={async (submission: Submission) => {
                 try {
-                    if (formProps.onSubmit) await formProps.onSubmit();
+                    if (formProps.onSubmit)
+                        await formProps.onSubmit(submission, form.path);
                     else await defaultSubmit(submission);
                 } catch (e) {
                     if (formProps.onSubmitFail) {
