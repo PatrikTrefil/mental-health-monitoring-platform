@@ -50,7 +50,7 @@ Rel(webApp, manazerUzivatelu, "Spravuje uživatele a autorizuje akce", "HTTPS")
 Rel(spravaFormularu, formulareDb, "Ukládá data", "MongoDB Wire Protocol")
 Rel(spravaFormularu, manazerUzivatelu, "Autorizuje akce")
 Rel(spravaUkolu, manazerUzivatelu, "Autorizuje akce", "HTTPS")
-Rel(manazerUzivatelu, uzivateleDb, "Ukládá data")
+BiRel(spravaFormularu, spravaUkolu, "Synchronizují stavy", "HTTPS")
 
 Rel(monitoringWeb, monitoringServer, "Čte data")
 

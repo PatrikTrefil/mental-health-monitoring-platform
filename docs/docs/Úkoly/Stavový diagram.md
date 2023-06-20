@@ -2,6 +2,9 @@
 slug: stavovy-diagram
 ---
 
+Tento diagram neodpovídá tomu, co je aktuálně implementováno. Podpora pro časové
+omezení plnění úkolů a opakování úkolu bude přidána v budoucnu.
+
 ```plantuml
 @startuml
 
