@@ -14,7 +14,10 @@ export type User = {
     _id: string;
     form: string;
     owner: string;
-    roles: UserRoleTitle[];
+    /**
+     * Role IDs
+     */
+    roles: string[];
     data: {
         id: string;
     };
