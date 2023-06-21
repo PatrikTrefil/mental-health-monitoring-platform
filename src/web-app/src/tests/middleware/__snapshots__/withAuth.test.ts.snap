@@ -1,0 +1,13 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`accessing 'Klient/Pacient' page > should be possible if the user is an Klient/Pacient 1`] = `307`;
+
+exports[`accessing 'Klient/Pacient' page > should not be possible if no token is provided 1`] = `307`;
+
+exports[`accessing 'Klient/Pacient' page > should not be possible if the user is not an Klient/Pacient 1`] = `307`;
+
+exports[`accessing 'Zamestnanec' page > should be possible if the user is an Zamestnanec 1`] = `307`;
+
+exports[`accessing 'Zamestnanec' page > should not be possible if no token is provided 1`] = `307`;
+
+exports[`accessing 'Zamestnanec' page > should not be possible if the user is not an Zamestnanec 1`] = `307`;

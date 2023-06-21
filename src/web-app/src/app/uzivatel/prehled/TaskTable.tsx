@@ -1,6 +1,7 @@
 "use client";
 import { trpc } from "@/client/trpcClient";
 import SimplePagination from "@/components/shared/SimplePagination";
+import TaskState from "@/constants/taskState";
 import { Task } from "@prisma/client";
 import {
     createColumnHelper,
@@ -9,12 +10,10 @@ import {
     getPaginationRowModel,
     useReactTable,
 } from "@tanstack/react-table";
-import { useRouter } from "next/navigation";
 import { useMemo } from "react";
 import { Alert, Button, Form, Spinner, Table } from "react-bootstrap";
 
 export default function TaskTable() {
-    const router = useRouter();
     const columnHelper = createColumnHelper<Task>();
     const columns = useMemo(
         () => [
@@ -30,24 +29,41 @@ export default function TaskTable() {
                 header: "Popis",
                 cell: (props) => props.row.original.description ?? "Bez popisu",
             }),
+            columnHelper.accessor("state", {
+                header: "Stav",
+                cell: (props) => {
+                    switch (props.row.original.state) {
+                        case TaskState.READY:
+                            return "Nedokončeno";
+                        case TaskState.PARTIALLY_COMPLETED:
+                            return "Částečně dokončeno";
+                        case TaskState.COMPLETED:
+                            return "Dokončeno";
+                        default:
+                            console.error(
+                                "Unknown task state: ",
+                                props.row.original.state
+                            );
+                            return "Neznámý stav";
+                    }
+                },
+            }),
             columnHelper.display({
                 id: "actions",
                 header: "Akce",
                 cell: (props) => (
                     <Button
                         variant="primary"
-                        onClick={() =>
-                            router.push(
-                                `/uzivatel/formular/vyplnit/${props.row.original.formId}`
-                            )
-                        }
+                        as="a"
+                        href={`/uzivatel/formular/vyplnit/${props.row.original.formId}?taskId=${props.row.original.id}`}
+                        disabled={props.row.original.state !== TaskState.READY}
                     >
                         Splnit
                     </Button>
                 ),
             }),
         ],
-        [columnHelper, router]
+        [columnHelper]
     );
 
     const { isLoading, isError, error, data, isFetching, refetch } =

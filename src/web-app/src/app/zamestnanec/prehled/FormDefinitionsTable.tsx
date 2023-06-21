@@ -3,7 +3,7 @@
 import ExportButton from "@/app/zamestnanec/prehled/ExportButton";
 import { deleteForm, loadForms } from "@/client/formioClient";
 import SimplePagination from "@/components/shared/SimplePagination";
-import { Form as FormDefinition } from "@/types/form";
+import { Form as FormDefinition } from "@/types/forms";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
     createColumnHelper,

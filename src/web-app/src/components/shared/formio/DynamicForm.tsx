@@ -1,6 +1,7 @@
 "use client";
 
 import { FormioComponentLoader } from "@/lib/formiojsWrapper";
+import DynamicFormWithAuth from "./DynamicFormWithAuth";
 
 /**
  * This component is used to dynamically load the Formio Form component.

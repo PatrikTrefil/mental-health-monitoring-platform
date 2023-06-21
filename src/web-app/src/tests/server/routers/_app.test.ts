@@ -1,13 +1,14 @@
 import { loadFormById, loadUsers } from "@/client/formioClient";
+import TaskState from "@/constants/taskState";
 import { appRouter, type AppRouter } from "@/server/routers/_app";
 import { createInnerTRPCContext } from "@/server/trpc";
-import { Form } from "@/types/form";
+import { Form } from "@/types/forms";
 import { UserRoleTitles } from "@/types/users";
 import { type inferProcedureInput } from "@trpc/server";
 import { describe, expect, it, vi } from "vitest";
 
 type CreateTaskInput = inferProcedureInput<AppRouter["createTask"]>;
-const mockInputTask: CreateTaskInput = {
+const mockInputTask: CreateTaskInput & { description: string } = {
     name: "test",
     forUserId: "123",
     description: "test",
@@ -22,6 +23,7 @@ vi.mock("@/client/formioClient", () => ({
             path: "test",
             created: "",
             submissionAccess: [],
+            components: [],
         };
         return mockForm;
     }),
@@ -35,6 +37,7 @@ vi.mock("@/client/formioClient", () => ({
                 access: [],
                 form: "",
                 roles: [],
+                metadata: {},
             },
         ];
         return mockUsers;
@@ -57,6 +60,7 @@ function createInnerTRPCContextMockSession(
                 form: "",
                 roleTitles,
                 formioToken: "",
+                metadata: {},
             },
             expires: "1",
         },
@@ -82,6 +86,7 @@ describe("todo functionality", () => {
                 name: "name",
                 path: "/path",
                 submissionAccess: [],
+                components: [],
             };
             return mockForm;
         });
@@ -89,7 +94,7 @@ describe("todo functionality", () => {
 
         expect(createdTask).toMatchObject({
             ...mockInputTask,
-            id: expect.any(Number),
+            id: expect.any(String),
         });
     });
 
@@ -110,7 +115,7 @@ describe("todo functionality", () => {
 
         expect(receivedTask).toMatchObject({
             ...mockInputTask,
-            id: expect.any(Number),
+            id: expect.any(String),
         });
     });
 
@@ -118,7 +123,7 @@ describe("todo functionality", () => {
         const caller = appRouter.createCaller(
             createInnerTRPCContextMockSession([UserRoleTitles.ZAMESTNANEC])
         );
-        const todoId = 123;
+        const todoId = "123";
         // delete if already exists
         try {
             await caller.deleteTask({ id: todoId });
@@ -144,17 +149,23 @@ describe("todo functionality", () => {
 
         const tasks = await caller.listTasks();
 
+        if (!ctx.session?.user.data.id) throw new Error("Session is null");
+
         // check that all tasks are present in the returned list
         for (let i = 0; i < numberOfTasks; i++) {
-            expect(tasks).toContainEqual({
+            const expectedTask: Awaited<
+                ReturnType<typeof caller.listTasks>
+            >[number] = {
                 ...mockInputTask,
                 name: `test ${i}`,
-                id: expect.any(Number),
-                isCompleted: false,
+                id: expect.any(String),
                 updatedAt: expect.any(Date),
-                createdByEmployeeId: ctx.session?.user.data.id,
+                createdByEmployeeId: ctx.session.user.data.id,
                 createdAt: expect.any(Date),
-            });
+                state: TaskState.READY,
+                submissionId: null,
+            };
+            expect(tasks).toContainEqual(expectedTask);
         }
     });
 
@@ -181,6 +192,7 @@ describe("todo functionality", () => {
                             access: [],
                             form: "",
                             roles: [],
+                            metadata: {},
                         },
                     ];
                     return mockUsers;
@@ -234,13 +246,13 @@ describe("todo functionality", () => {
         // delete if already exists
         try {
             await caller.deleteTask({
-                id: 20,
+                id: "20",
             });
         } catch (e) {}
 
         await expect(
             caller.deleteTask({
-                id: 20,
+                id: "20",
             })
         ).rejects.toMatchInlineSnapshot("[TRPCError: NOT_FOUND]");
     });
@@ -304,9 +316,9 @@ describe("todo permissions", () => {
         const caller = appRouter.createCaller(
             createInnerTRPCContextNoSession()
         );
-        await expect(caller.getTask({ id: 20 })).rejects.toMatchInlineSnapshot(
-            "[TRPCError: UNAUTHORIZED]"
-        );
+        await expect(
+            caller.getTask({ id: "20" })
+        ).rejects.toMatchInlineSnapshot("[TRPCError: UNAUTHORIZED]");
     });
 
     it("throws when getting todo not assigned to client/patient", async () => {
@@ -323,6 +335,7 @@ describe("todo permissions", () => {
                     access: [],
                     form: "",
                     roles: [],
+                    metadata: {},
                 },
             ];
             return mockUsers;

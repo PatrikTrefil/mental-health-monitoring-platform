@@ -1,35 +1,17 @@
-import { UserRoleTitles } from "@/types/users";
-import { NextRequestWithAuth, withAuth } from "next-auth/middleware";
-import { NextResponse } from "next/server";
+import { stackMiddlewares as chainMiddlewares } from "./middleware/stackMiddleware";
+import { MiddlewareWrapper } from "./middleware/types";
+import withAuth from "./middleware/withAuth";
+import withLogging from "./middleware/withLogging";
 
-export default withAuth(
-    function middleware(req: NextRequestWithAuth) {
-        // if accessing /zamestnanec/*, check if user has role ZAMESTNANEC
-        // if accessing /uzivatel/*, check if user has role KLIENT_PACIENT
-        const hasSufficientPrivileges =
-            (req.nextUrl.pathname.startsWith("/zamestnanec/") &&
-                req.nextauth.token?.user?.roleTitles.includes(
-                    UserRoleTitles.ZAMESTNANEC
-                )) ||
-            (req.nextUrl.pathname.startsWith("/uzivatel/") &&
-                req.nextauth.token?.user?.roleTitles.includes(
-                    UserRoleTitles.KLIENT_PACIENT
-                ));
+// To implement middleware chaining we are going to use decorators (higher order functions)
+// https://reacthustle.com/blog/how-to-chain-multiple-middleware-functions-in-nextjs
 
-        if (!hasSufficientPrivileges) {
-            const url_403 = req.nextUrl.clone();
-            url_403.pathname = "/403";
-            url_403.searchParams.set("callbackUrl", req.nextUrl.toString());
-            return NextResponse.rewrite(url_403);
-        }
-    },
-    {
-        callbacks: {
-            authorized: ({ token }) => !!token,
-        },
-    }
-);
+// TODO: test that auth works
+
+const middlewares: MiddlewareWrapper[] = [withAuth, withLogging];
+
+export default chainMiddlewares(middlewares);
 
 export const config = {
-    matcher: ["/uzivatel/:path*", "/zamestnanec/:path*"],
+    matcher: ["/uzivatel/:path*", "/zamestnanec/:path*", "/api/:path*"],
 };

@@ -11,13 +11,18 @@ datasource db {
 }
 
 model Task {
-    id                  Int      @id @default(autoincrement())
+    id                  String   @id @default(uuid())
     name                String
     description         String?
-    isCompleted         Boolean  @default(false)
+    // Valid states are "CREATED", "PARTIALLY_COMPLETED" and "COMPLETED"
+    // Prisma does not polyfill enums for sqlite, so we use a string instead
+    // SQLite has checks, but those are not supported yet
+    // https://github.com/prisma/prisma/issues/3388
+    state               String   @default("READY")
     createdAt           DateTime @default(now())
     updatedAt           DateTime @updatedAt
     forUserId           String
     createdByEmployeeId String
     formId              String
+    submissionId        String?
 }

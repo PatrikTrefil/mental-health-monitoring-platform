@@ -63,6 +63,7 @@ Rel(webApp, spravaUkolu, "Používá")
 Rel(webApp, manazerUzivatelu, "Spravuje uživatele a autorizuje akce")
 Rel(spravaFormularu, formulareDb, "Ukládá data")
 Rel(spravaFormularu, manazerUzivatelu, "Autorizuje akce")
+BiRel(spravaFormularu, spravaUkolu, "Synchronizují stavy")
 Rel(spravaUkolu, manazerUzivatelu, "Autorizuje akce")
 Rel(manazerUzivatelu, uzivateleDb, "Ukládá data")
 
