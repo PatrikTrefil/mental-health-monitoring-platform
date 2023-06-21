@@ -5,7 +5,7 @@ import DynamicFormBuilder from "@/components/shared/formio/DynamicFormBuilder";
 import DynamicFormEdit from "@/components/shared/formio/DynamicFormEdit";
 import { useSmartFetch } from "@/hooks/useSmartFetch";
 import { WebhookAction } from "@/types/action";
-import { Form, FormSchema } from "@/types/forms";
+import { Component, Form, FormSchema } from "@/types/forms";
 import { UserRoleTitles } from "@/types/users";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
@@ -52,11 +52,11 @@ export default function CreateForm() {
             return errorResult;
         }
 
-        const taskIdComponent = {
+        const taskIdComponent: Component = {
             input: true,
             tableView: true,
             key: "taskId",
-            label: "Task ID",
+            label: "ID úkolu",
             protected: false,
             unique: true,
             persistent: true,

@@ -70,6 +70,12 @@ export default function FormDefinitionsTable() {
                             Smazat
                         </Button>
                         <ExportButton formId={props.row.original._id} />
+                        <Button
+                            as="a"
+                            href={`/zamestnanec/formular/vysledky/${props.row.original._id}`}
+                        >
+                            Výsledky
+                        </Button>
                     </div>
                 ),
             }),
