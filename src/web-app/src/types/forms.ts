@@ -1,9 +1,25 @@
 export type FormSchema = {
     name: string;
+    title: string;
     path: string;
     created: string;
     submissionAccess: { type: string; roles: string[] }[];
-    components: { [key: string]: unknown }[];
+    components: Component[];
+};
+
+export type Component = {
+    [key: string]: unknown;
+    label: string;
+    key: string;
+    type:
+        | "button"
+        | "checkbox"
+        | "textarea"
+        | "radio"
+        | "selectboxes"
+        | "number"
+        | "textfield"
+        | "hidden";
 };
 
 export type Form = FormSchema & {
