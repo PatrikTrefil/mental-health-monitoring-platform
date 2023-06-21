@@ -375,14 +375,11 @@ export async function getCurrentUser(formioToken: string) {
  */
 export async function fetchRoleList(adminToken: string) {
     console.log("Fetching role list...");
-    const roleListResponse = await fetch(
-        `${process.env.FORMIO_SERVER_URL}/role`,
-        {
-            headers: {
-                "x-jwt-token": adminToken,
-            },
-        }
-    );
+    const roleListResponse = await fetch(`${getFormioUrl()}/role`, {
+        headers: {
+            "x-jwt-token": adminToken,
+        },
+    });
     console.log("Role list fetched.", {
         status: roleListResponse.status,
     });
@@ -405,21 +402,18 @@ export async function fetchRoleList(adminToken: string) {
  */
 export async function loginAdmin(email: string, password: string) {
     console.log("Making admin login request...");
-    const adminLoginResponse = await fetch(
-        `${process.env.FORMIO_SERVER_URL}/user/login`,
-        {
-            body: JSON.stringify({
-                data: {
-                    email,
-                    password,
-                },
-            }),
-            headers: {
-                "Content-type": "application/json; charset=utf-8",
+    const adminLoginResponse = await fetch(`${getFormioUrl()}/user/login`, {
+        body: JSON.stringify({
+            data: {
+                email,
+                password,
             },
-            method: "POST",
-        }
-    );
+        }),
+        headers: {
+            "Content-type": "application/json; charset=utf-8",
+        },
+        method: "POST",
+    });
     console.log("Admin login request done.", {
         status: adminLoginResponse.status,
     });
@@ -441,14 +435,11 @@ export async function loginAdmin(email: string, password: string) {
  */
 export async function refreshToken(currentToken: string) {
     console.log("Refreshing token...");
-    const refreshResponse = await fetch(
-        `${process.env.FORMIO_SERVER_URL}/current`,
-        {
-            headers: {
-                "x-jwt-token": currentToken,
-            },
-        }
-    );
+    const refreshResponse = await fetch(`${getFormioUrl()}/current`, {
+        headers: {
+            "x-jwt-token": currentToken,
+        },
+    });
     if (!refreshResponse.ok) throw new RequestError(refreshResponse.status);
     const newToken = refreshResponse.headers.get("x-jwt-token");
     if (!newToken) throw new Error("No token received");
@@ -465,21 +456,18 @@ export async function refreshToken(currentToken: string) {
  */
 export async function loginUser(id: string, password: string) {
     console.log("Making login request...");
-    const loginResponse = await fetch(
-        `${process.env.FORMIO_SERVER_URL}/login`,
-        {
-            body: JSON.stringify({
-                data: {
-                    id,
-                    password,
-                },
-            }),
-            headers: {
-                "Content-type": "application/json; charset=utf-8",
+    const loginResponse = await fetch(`${getFormioUrl()}/login`, {
+        body: JSON.stringify({
+            data: {
+                id,
+                password,
             },
-            method: "POST",
-        }
-    );
+        }),
+        headers: {
+            "Content-type": "application/json; charset=utf-8",
+        },
+        method: "POST",
+    });
     console.log("Login request done.", {
         status: loginResponse.status,
     });
