@@ -56,7 +56,7 @@ export default function CreateForm() {
             input: true,
             tableView: true,
             key: "taskId",
-            label: "Task ID",
+            label: "ID úkolu",
             protected: false,
             unique: true,
             persistent: true,
