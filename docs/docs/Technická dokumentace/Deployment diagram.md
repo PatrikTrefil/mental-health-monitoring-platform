@@ -9,7 +9,7 @@ slug: deployment-diagram
 
 Deployment_Node(comp, "Počítač uživatele"){
     Deployment_Node(browser, "Webový prohlížeč", "Google Chrome, Mozilla Firefox, Apple Safari nebo Microsoft Edge") {
-        Container(webApp, "Webová aplikace", "Next.js")
+        Container(webApp, "Webová aplikace", "Next.js, TypeScript")
     }
 }
 
@@ -30,14 +30,14 @@ Deployment_Node(server, "Server", "Ubuntu, CPU: 2 jádra, RAM: 4 GB") {
         }
         Deployment_Node(spravceUkolu_docker, "Docker container", "Docker Engine") {
             ContainerDb(ukolyDb, "Databáze úkolů",  "SQLite")
-            Deployment_Node(express, "Express.js") {
+            Deployment_Node(express, "Next.js") {
                 Container(spravaUkolu, "Správa úkolů", "TypeScript")
             }
         }
         Deployment_Node(formio_docker, "Docker container", "Docker Engine") {
             Deployment_Node(formio, "Formio") {
-                Container(manazerUzivatelu, "Manažer uživatelů a autentifikace")
-                Container(spravaFormularu, "Správa formulářů")
+                Container(manazerUzivatelu, "Manažer uživatelů a autentifikace", "JavaScript")
+                Container(spravaFormularu, "Správa formulářů", "JavaScript")
             }
         }
     }
