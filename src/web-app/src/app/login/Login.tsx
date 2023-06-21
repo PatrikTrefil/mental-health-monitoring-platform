@@ -6,6 +6,7 @@ import { SignInResponse, signIn, useSession } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { FormEventHandler, useEffect, useState } from "react";
 import { Button, Form } from "react-bootstrap";
+import { getCookieConsentValue } from "react-cookie-consent";
 import { toast } from "react-toastify";
 
 /**
@@ -30,7 +31,7 @@ export default function Login() {
 
     useEffect(
         function redirectIfLoggedIn() {
-            if (session?.data) {
+            if (session?.data && getCookieConsentValue()) {
                 if (searchParamsCallbackUrl)
                     router.push(searchParamsCallbackUrl);
                 else if (
@@ -55,6 +56,10 @@ export default function Login() {
 
     const { isLoading, mutate: loginMutation } = useMutation({
         mutationFn: async () => {
+            if (!getCookieConsentValue()) {
+                toast.error("Musíte přijmout cookies pro přihlášení.");
+                return;
+            }
             const result = await signIn("credentials", {
                 ID: id,
                 password,
