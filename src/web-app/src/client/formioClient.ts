@@ -506,3 +506,35 @@ export class RequestError extends Error {
         this.statusCode = status;
     }
 }
+
+/**
+ * Get submissions of a form
+ * @param formId id of the form to load submissions from
+ * @param formioToken JWT token for formio
+ * @returns list of submissions
+ * @throws {TypeError} if the fetch fails
+ * @throws {RequestError} if the response status is not ok
+ */
+export async function loadSubmissions(formId: string, formioToken: string) {
+    console.log("Fetching submissions of form...", {
+        formId,
+    });
+    const submissionsResponse = await fetch(
+        `${getFormioUrl()}/${formId}/submission`,
+        {
+            headers: {
+                "x-jwt-token": formioToken,
+            },
+        }
+    );
+    console.log("Submissions of form fetched.", {
+        status: submissionsResponse.status,
+        formId,
+    });
+    if (!submissionsResponse.ok)
+        throw new RequestError(submissionsResponse.status);
+
+    const submissions = (await submissionsResponse.json()) as Submission[];
+
+    return submissions;
+}
