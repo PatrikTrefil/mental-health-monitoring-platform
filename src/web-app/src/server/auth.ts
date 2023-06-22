@@ -15,6 +15,7 @@ declare module "next-auth" {
     interface User extends UserFormSubmission {
         roleTitles: string[];
         formioToken: string;
+        formioTokenExpiration: number;
     }
     interface Session {
         user: UserFormSubmission &
@@ -31,9 +32,15 @@ declare module "next-auth/jwt" {
             DefaultSession["user"] & {
                 roleTitles: string[];
                 formioToken: string;
+                formioTokenExpiration: number;
             };
     }
 }
+
+/**
+ * In miliseconds
+ */
+const formioTokenExpirationTime = 5 * 60 * 1000; // 5 minutes (default in formio)
 
 export const authOptions: AuthOptions = {
     // Configure one or more authentication providers
@@ -81,6 +88,8 @@ export const authOptions: AuthOptions = {
                         ...user,
                         formioToken,
                         roleTitles,
+                        formioTokenExpiration:
+                            Date.now() + formioTokenExpirationTime,
                     };
                 } catch (e) {
                     console.error("Error: ", e); // log on server
@@ -109,8 +118,13 @@ export const authOptions: AuthOptions = {
             } else {
                 if (!token.user) throw new Error("No user in token");
                 // update the formio token (may throw)
-                const newToken = await refreshToken(token.user.formioToken);
-                token.user.formioToken = newToken;
+                if (
+                    Date.now() - token.user.formioTokenExpiration >
+                    3 * 60 * 1000 // 3 minutes have passed
+                ) {
+                    const newToken = await refreshToken(token.user.formioToken);
+                    token.user.formioToken = newToken;
+                }
             }
 
             return token;
