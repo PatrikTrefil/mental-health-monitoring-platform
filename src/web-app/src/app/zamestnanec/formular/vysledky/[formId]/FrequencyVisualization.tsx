@@ -2,21 +2,15 @@
 
 import { useMemo, useState } from "react";
 import { Alert, Button, Form, Modal } from "react-bootstrap";
-import DataVisualization from "./DataVisualization";
+import DataVisualization, { ChartType, ChartTypes } from "./DataVisualization";
+import { LabeledDataValue } from "./ResultTable";
 import stringifyResult from "./stringifyResult";
-
-export const ChartTypes = {
-    bar: "Sloupcový graf",
-    pie: "Koláčový graf",
-} as const;
-
-export type ChartType = (typeof ChartTypes)[keyof typeof ChartTypes];
 
 export default function FrequencyVisualization({
     data,
     labelKeyMap,
 }: {
-    data: { [key: string]: { value: unknown; label: string } }[];
+    data: { [key: string]: LabeledDataValue }[];
     labelKeyMap: { [key: string]: string };
 }) {
     const [isVisualizationModalShowing, setIsVisualizationModalShowing] =
@@ -33,8 +27,8 @@ export default function FrequencyVisualization({
     const valueFrequencies = useMemo(() => {
         if (!fieldToVisualize) return new Map<string, number>();
 
-        const values = data.map((d) =>
-            stringifyResult(d[fieldToVisualize].value)
+        const values = data.map((dataEntry) =>
+            stringifyResult(dataEntry[fieldToVisualize].value)
         );
         return calculateFrequencies(values);
     }, [data, fieldToVisualize]);

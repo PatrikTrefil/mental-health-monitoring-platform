@@ -1,25 +1,33 @@
-export default function stringifyResult(value: unknown): string {
-    if (value === null || value === undefined) {
+import { LabeledDataValue } from "./ResultTable";
+
+/**
+ * Converts value to human readable string
+ * @param labeledValue value of labeled data value to be stringified
+ */
+export default function stringifyResult(
+    labeledValue: LabeledDataValue["value"]
+): string {
+    if (labeledValue === null || labeledValue === undefined) {
         return "Nevyplněno";
     }
 
-    if (typeof value === "string") {
-        return value;
+    if (typeof labeledValue === "string") {
+        return labeledValue;
     }
 
-    if (typeof value === "number") {
-        return value.toString();
+    if (typeof labeledValue === "number") {
+        return labeledValue.toString();
     }
 
-    if (typeof value === "boolean") {
-        return value ? "Ano" : "Ne";
+    if (typeof labeledValue === "boolean") {
+        return labeledValue ? "Ano" : "Ne";
     }
 
-    if (typeof value === "object") {
-        if (Array.isArray(value)) {
-            return value
+    if (typeof labeledValue === "object") {
+        if (Array.isArray(labeledValue)) {
+            return labeledValue
                 .map((item) => {
-                    if ("label" in item && "value" in item) {
+                    if (item.value) {
                         return `${item.label}: ${stringifyResult(item.value)}`;
                     } else {
                         return "Nevyplněno";

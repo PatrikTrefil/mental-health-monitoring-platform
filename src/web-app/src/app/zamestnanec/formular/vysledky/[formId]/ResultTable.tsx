@@ -209,7 +209,7 @@ export default function ResultTable({ formId }: { formId: string }) {
     );
 }
 
-type LabeledDataValue = {
+export type LabeledDataValue = {
     value:
         | Exclude<DataValue, SelectBoxDataValue>
         | {

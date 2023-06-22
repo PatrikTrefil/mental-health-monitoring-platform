@@ -9,7 +9,13 @@ import {
     XAxis,
     YAxis,
 } from "recharts";
-import { ChartType, ChartTypes } from "./FrequencyVisualization";
+
+export type ChartType = (typeof ChartTypes)[keyof typeof ChartTypes];
+
+export const ChartTypes = {
+    bar: "Sloupcový graf",
+    pie: "Koláčový graf",
+} as const;
 
 export default function DataVisualization({
     data,
