@@ -8,7 +8,7 @@ import {
 import SimplePagination from "@/components/shared/SimplePagination";
 import { useSmartFetch } from "@/hooks/useSmartFetch";
 import { Form as FormFormio } from "@/types/forms";
-import { Submission } from "@/types/submission";
+import { DataValue, SelectBoxDataValue, Submission } from "@/types/submission";
 import {
     createColumnHelper,
     flexRender,
@@ -17,7 +17,7 @@ import {
     useReactTable,
 } from "@tanstack/react-table";
 import { useSession } from "next-auth/react";
-import { useEffect, useMemo } from "react";
+import { useMemo } from "react";
 import { Alert, Form, Spinner, Table } from "react-bootstrap";
 import FrequencyVisualization from "./FrequencyVisualization";
 import stringifyResult from "./stringifyResult";
@@ -28,6 +28,7 @@ import stringifyResult from "./stringifyResult";
 export default function ResultTable({ formId }: { formId: string }) {
     const { data } = useSession();
 
+    // We need to load users to display their names in table
     const {
         data: users,
         isError: isErrorUsers,
@@ -37,6 +38,7 @@ export default function ResultTable({ formId }: { formId: string }) {
         enabled: !!data,
     });
 
+    // We need the form object to get path of the form to load submissions
     const {
         data: form,
         isError: isErrorForm,
@@ -63,52 +65,7 @@ export default function ResultTable({ formId }: { formId: string }) {
                 form!.path,
                 data!.user.formioToken
             );
-            const labeledSubmissions = submissions.map((submission) => {
-                return {
-                    ...submission,
-                    data: Object.fromEntries(
-                        form!.components.map((c) => {
-                            if (c.type === "selectboxes") {
-                                return [
-                                    c.key,
-                                    {
-                                        value: (
-                                            c?.values as {
-                                                value: string;
-                                                label: string;
-                                            }[]
-                                        ).map((v) => {
-                                            if (submission.data[c.key])
-                                                return {
-                                                    value: (
-                                                        submission.data[
-                                                            c.key
-                                                        ] as any
-                                                    )[v.value],
-                                                    label: v.label,
-                                                };
-                                            else
-                                                return {
-                                                    value: null,
-                                                    label: v.label,
-                                                };
-                                        }),
-                                        label: c.label,
-                                    },
-                                ];
-                            }
-                            return [
-                                c.key,
-                                {
-                                    value: submission.data[c.key],
-                                    label: c.label,
-                                },
-                            ];
-                        })
-                    ),
-                };
-            });
-            return labeledSubmissions;
+            return addHumanReadableLabelsToSubmissionData(submissions, form!);
         },
         enabled: !!data && !!form,
     });
@@ -149,14 +106,6 @@ export default function ResultTable({ formId }: { formId: string }) {
             }
         return cols;
     }, [columnHelper, form, users]);
-
-    useEffect(() => {
-        console.log(submissions);
-    }, [submissions]);
-
-    useEffect(() => {
-        console.log(form);
-    }, [form]);
 
     const table = useReactTable({
         columns,
@@ -258,4 +207,71 @@ export default function ResultTable({ formId }: { formId: string }) {
             </div>
         </>
     );
+}
+
+type LabeledDataValue = {
+    value:
+        | Exclude<DataValue, SelectBoxDataValue>
+        | {
+              value: boolean | null;
+              label: string;
+          }[];
+    label: string;
+};
+
+/**
+ * Add human readable labels to every data entry of every submission
+ * @param submissions submissions to add labels to
+ * @param form form to get labels from
+ * @returns submissions where every data entry has a label
+ */
+function addHumanReadableLabelsToSubmissionData(
+    submissions: Submission[],
+    form: FormFormio
+): (Omit<Submission, "data"> & {
+    data: { [key: string]: LabeledDataValue };
+})[] {
+    return submissions.map((submission) => {
+        const labeledData = form!.components.map<[string, LabeledDataValue]>(
+            (c) => {
+                let dataValue: LabeledDataValue;
+                // assign label to the whole selectbox and
+                // assign labels to every value of selectbox
+                if (c.type === "selectboxes") {
+                    dataValue = {
+                        value: c.values.map((v) => {
+                            if (submission.data[c.key])
+                                return {
+                                    value: (
+                                        submission.data[
+                                            c.key
+                                        ] as SelectBoxDataValue
+                                    )[v.value]!,
+                                    label: v.label,
+                                };
+                            else
+                                return {
+                                    value: null,
+                                    label: v.label,
+                                };
+                        }),
+                        label: c.label,
+                    };
+                } else {
+                    dataValue = {
+                        value: submission.data[c.key] as Exclude<
+                            DataValue,
+                            SelectBoxDataValue
+                        >,
+                        label: c.label,
+                    };
+                }
+                return [c.key, dataValue];
+            }
+        );
+        return {
+            ...submission,
+            data: Object.fromEntries(labeledData),
+        };
+    });
 }

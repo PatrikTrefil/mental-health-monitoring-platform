@@ -7,20 +7,27 @@ export type FormSchema = {
     components: Component[];
 };
 
-export type Component = {
-    [key: string]: unknown;
+export type Component = StringResultComponent | SelectBoxesComponent;
+
+type ComponentBase = {
     label: string;
     key: string;
+};
+
+type StringResultComponent = ComponentBase & {
     type:
         | "button"
         | "checkbox"
         | "textarea"
         | "radio"
-        | "selectboxes"
         | "number"
         | "textfield"
         | "hidden";
-    values?: { label: string; value: string }[];
+};
+
+type SelectBoxesComponent = ComponentBase & {
+    type: "selectboxes";
+    values: { label: string; value: string }[];
 };
 
 export type Form = FormSchema & {
