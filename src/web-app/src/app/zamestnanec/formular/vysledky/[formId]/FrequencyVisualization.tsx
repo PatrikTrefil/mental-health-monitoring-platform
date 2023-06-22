@@ -6,6 +6,11 @@ import DataVisualization, { ChartType, ChartTypes } from "./DataVisualization";
 import { LabeledDataValue } from "./ResultTable";
 import stringifyResult from "./stringifyResult";
 
+/**
+ * Shows a button that opens a modal with a visualization of the frequency of values.
+ * The user may select any field from the data to visualize. The user may select from
+ * different chart types.
+ */
 export default function FrequencyVisualization({
     data,
     labelKeyMap,
