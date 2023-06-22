@@ -19,6 +19,8 @@ import {
 import { useSession } from "next-auth/react";
 import { useEffect, useMemo } from "react";
 import { Alert, Form, Spinner, Table } from "react-bootstrap";
+import FrequencyVisualization from "./FrequencyVisualization";
+import stringifyResult from "./stringifyResult";
 
 /**
  * Display table with results from form with given formId
@@ -56,11 +58,63 @@ export default function ResultTable({ formId }: { formId: string }) {
         error: errorSubmissions,
         isLoading: isLoadingSubmissions,
     } = useSmartFetch({
-        queryFn: () => loadSubmissions(form!.path, data!.user.formioToken),
+        queryFn: async () => {
+            const submissions = await loadSubmissions(
+                form!.path,
+                data!.user.formioToken
+            );
+            const labeledSubmissions = submissions.map((submission) => {
+                return {
+                    ...submission,
+                    data: Object.fromEntries(
+                        form!.components.map((c) => {
+                            if (c.type === "selectboxes") {
+                                return [
+                                    c.key,
+                                    {
+                                        value: (
+                                            c?.values as {
+                                                value: string;
+                                                label: string;
+                                            }[]
+                                        ).map((v) => {
+                                            if (submission.data[c.key])
+                                                return {
+                                                    value: (
+                                                        submission.data[
+                                                            c.key
+                                                        ] as any
+                                                    )[v.value],
+                                                    label: v.label,
+                                                };
+                                            else
+                                                return {
+                                                    value: null,
+                                                    label: v.label,
+                                                };
+                                        }),
+                                        label: c.label,
+                                    },
+                                ];
+                            }
+                            return [
+                                c.key,
+                                {
+                                    value: submission.data[c.key],
+                                    label: c.label,
+                                },
+                            ];
+                        })
+                    ),
+                };
+            });
+            return labeledSubmissions;
+        },
         enabled: !!data && !!form,
     });
 
-    const columnHelper = createColumnHelper<Submission>();
+    const columnHelper =
+        createColumnHelper<Exclude<typeof submissions, null>[number]>();
     const columns = useMemo(() => {
         const cols = [
             columnHelper.accessor("owner", {
@@ -79,26 +133,17 @@ export default function ResultTable({ formId }: { formId: string }) {
             for (const comp of form.components) {
                 // ignore submit button
                 if (comp.type === "button") continue;
-                const cfg: Parameters<typeof columnHelper.accessor>[1] = {
-                    header: comp.label,
-                };
-
-                if (comp.type === "selectboxes")
-                    cfg.cell = (props) => {
-                        const data = props.row.original.data;
-                        const selectBoxResult = data[
-                            comp.key as keyof typeof data
-                        ] as Record<string, boolean>;
-                        // stringify selectbox result
-                        return Object.entries(selectBoxResult)
-                            .map(([k, v]) => `${k}: ${v ? "Ano" : "Ne"}`)
-                            .join(", ");
-                    };
 
                 cols.push(
                     columnHelper.accessor(
                         `data.${comp.key}` as keyof Submission,
-                        cfg
+                        {
+                            header: comp.label,
+                            cell: (props) =>
+                                stringifyResult(
+                                    props.row.original.data[comp.key].value
+                                ),
+                        }
                     )
                 );
             }
@@ -144,6 +189,17 @@ export default function ResultTable({ formId }: { formId: string }) {
 
     return (
         <>
+            <FrequencyVisualization
+                data={submissions.map((s) => s.data)}
+                labelKeyMap={Object.fromEntries(
+                    form.components
+                        .filter(
+                            (c) => c.type !== "button" && c.key !== "taskId"
+                        )
+                        .map((c) => [c.key, c.label])
+                )}
+            />
+
             <p>Název formuláře: {form.title}</p>
             <Form.Select
                 className="my-2"

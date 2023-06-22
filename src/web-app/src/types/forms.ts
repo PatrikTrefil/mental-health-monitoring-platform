@@ -20,6 +20,7 @@ export type Component = {
         | "number"
         | "textfield"
         | "hidden";
+    values?: { label: string; value: string }[];
 };
 
 export type Form = FormSchema & {
