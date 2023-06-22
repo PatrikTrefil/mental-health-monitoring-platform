@@ -9,7 +9,9 @@ RUN mkdir -p /app
 WORKDIR /app
 
 # Install dependencies
-COPY package*.json /app
+COPY package*.json .
+COPY prisma/schema.prisma .
+
 RUN npm ci
 
 # This line is necessary, because the server (npm run dev)
