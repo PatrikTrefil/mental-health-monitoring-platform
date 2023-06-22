@@ -30,7 +30,7 @@ export default function stringifyResult(
                     if (item.value) {
                         return `${item.label}: ${stringifyResult(item.value)}`;
                     } else {
-                        return "Nevyplněno";
+                        return `${item.label}: Nevyplněno`;
                     }
                 })
                 .join(", ");
