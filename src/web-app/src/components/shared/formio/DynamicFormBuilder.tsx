@@ -7,10 +7,15 @@ import { FormioComponentLoader } from "@/lib/formiojsWrapper";
  * Use this for all forms, because the "@formio/react" library does not support
  * server-side rendering.
  */
-const DynamicFormBuilder = FormioComponentLoader(() =>
-    import("@formio/react").then((mod) => {
-        return mod.FormBuilder;
-    })
-);
+export default function DynamicFormBuilder({
+    loading,
+    ...props
+}: { loading?: JSX.Element } & any) {
+    const Component = FormioComponentLoader(() => {
+        return import("@formio/react").then((mod) => {
+            return mod.FormBuilder;
+        });
+    }, loading);
 
-export default DynamicFormBuilder;
+    return <Component {...props} />;
+}

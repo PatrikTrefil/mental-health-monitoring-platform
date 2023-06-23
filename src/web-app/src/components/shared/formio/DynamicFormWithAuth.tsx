@@ -30,6 +30,10 @@ export default function DynamicFormWithAuth(
             submission: Submission,
             formPath: string
         ) => void | Promise<void>;
+        /**
+         * An element to be displayed while the form is loading.
+         */
+        loadingNode?: JSX.Element;
     }
 ) {
     const { data } = useSession();
@@ -52,11 +56,13 @@ export default function DynamicFormWithAuth(
 
     if (isLoading)
         return (
-            <div className="position-absolute top-50 start-50 translate-middle">
-                <Spinner animation="border" role="status">
-                    <span className="visually-hidden">Načítání...</span>
-                </Spinner>
-            </div>
+            formProps.loadingNode ?? (
+                <div className="position-absolute top-50 start-50 translate-middle">
+                    <Spinner animation="border" role="status">
+                        <span className="visually-hidden">Načítání...</span>
+                    </Spinner>
+                </div>
+            )
         );
 
     if (isError) {
@@ -79,6 +85,7 @@ export default function DynamicFormWithAuth(
 
     return (
         <DynamicForm
+            loading={formProps.loadingNode}
             form={form}
             {...formProps}
             onSubmit={async (submission: Submission) => {

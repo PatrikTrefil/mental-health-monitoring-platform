@@ -19,7 +19,17 @@ export async function CreateFormio(url: string, options?: Object | undefined) {
     return formio;
 }
 
-export function FormioComponentLoader<T>(loader: () => LoaderComponent<T>) {
+/**
+ * Loader which takes care of setting the base URL of the Formio library automatically.
+ *
+ * @param loader loader of the formio component
+ * @param loading element to display while the component is loading
+ * @returns the dynamically loaded component
+ */
+export function FormioComponentLoader<T>(
+    loader: () => LoaderComponent<T>,
+    loading?: JSX.Element
+) {
     return dynamic(
         async () => {
             const { Formio } = await import("formiojs");
@@ -31,13 +41,14 @@ export function FormioComponentLoader<T>(loader: () => LoaderComponent<T>) {
         },
         {
             ssr: false,
-            loading: () => (
-                <div className="position-absolute top-50 start-50 translate-middle">
-                    <Spinner animation="border" role="status">
-                        <span className="visually-hidden">Načítání...</span>
-                    </Spinner>
-                </div>
-            ),
+            loading: () =>
+                loading ?? (
+                    <div className="position-absolute top-50 start-50 translate-middle">
+                        <Spinner animation="border" role="status">
+                            <span className="visually-hidden">Načítání...</span>
+                        </Spinner>
+                    </div>
+                ),
         }
     );
 }
