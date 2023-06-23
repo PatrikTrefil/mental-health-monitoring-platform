@@ -526,3 +526,50 @@ export async function loadSubmissions(formId: string, formioToken: string) {
 
     return submissions;
 }
+
+/**
+ * Update user's account (submission)
+ * @param submmisionId id of the submission to update
+ * @param data new data to update the submission with
+ * @param formioToken JWT token for formio
+ * @returns udpated submission
+ */
+export async function updateUser(
+    submisionId: string,
+    data: { id: string; password: string },
+    formioToken: string
+) {
+    return udpateSubmission("/klientpacient", submisionId, data, formioToken);
+}
+
+/**
+ * Update submission in formio
+ * @param formPath path of the form of which to update the submission
+ * @param submissionId id of the submission to update
+ * @param data data to update the submission with
+ * @param formioToken JWT token for formio
+ * @returns updated submission
+ */
+export async function udpateSubmission(
+    formPath: string,
+    submissionId: string,
+    data: unknown,
+    formioToken: string
+) {
+    const response = await fetch(
+        `${getFormioUrl()}/${formPath}/submission/${submissionId}`,
+        {
+            method: "PUT",
+            headers: {
+                "x-jwt-token": formioToken,
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                _id: submissionId,
+                data,
+            }),
+        }
+    );
+    if (!response.ok) throw new RequestError(response.status);
+    return (await response.json()) as Submission;
+}

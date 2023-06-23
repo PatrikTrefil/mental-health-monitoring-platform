@@ -16,6 +16,7 @@ import { useSession } from "next-auth/react";
 import { useMemo, useState } from "react";
 import { Alert, Button, Form, Modal, Spinner, Table } from "react-bootstrap";
 import { toast } from "react-toastify";
+import EditClientPatient from "./EditClientPatient";
 
 /**
  * Page for managing users.
@@ -23,6 +24,11 @@ import { toast } from "react-toastify";
 export default function ClientPatientTable() {
     const queryClient = useQueryClient();
     const session = useSession();
+
+    const [userToEdit, setUserToEdit] = useState<{
+        submissionId: string;
+        id: string;
+    }>();
 
     const columnHelper = createColumnHelper<UserFormSubmission>();
     const columns = useMemo(
@@ -39,34 +45,47 @@ export default function ClientPatientTable() {
                 id: "actions",
                 header: "Akce",
                 cell: (props) => (
-                    <Button
-                        variant="danger"
-                        onClick={async () => {
-                            const userSubmissionId = props.row.original._id;
-                            console.debug("Deleting user ...", {
-                                userSubmissionId,
-                            });
-                            try {
-                                deleteUser(
-                                    session.data!.user.formioToken,
-                                    userSubmissionId
-                                );
-                            } catch (e) {
-                                console.error("Failed to delete user.", {
-                                    userSubmissionId,
-                                    error: e,
-                                });
-                                toast.error("Smazání účtu selhalo.");
-                                return;
+                    <div className="d-flex gap-2">
+                        <Button
+                            variant="primary"
+                            onClick={() =>
+                                setUserToEdit({
+                                    submissionId: props.row.original._id,
+                                    id: props.row.original.data.id,
+                                })
                             }
-                            console.debug("User deleted.", {
-                                userSubmissionId,
-                            });
-                            await queryClient.invalidateQueries(["users"]);
-                        }}
-                    >
-                        Smazat
-                    </Button>
+                        >
+                            Upravit
+                        </Button>
+                        <Button
+                            variant="danger"
+                            onClick={async () => {
+                                const userSubmissionId = props.row.original._id;
+                                console.debug("Deleting user ...", {
+                                    userSubmissionId,
+                                });
+                                try {
+                                    deleteUser(
+                                        session.data!.user.formioToken,
+                                        userSubmissionId
+                                    );
+                                } catch (e) {
+                                    console.error("Failed to delete user.", {
+                                        userSubmissionId,
+                                        error: e,
+                                    });
+                                    toast.error("Smazání účtu selhalo.");
+                                    return;
+                                }
+                                console.debug("User deleted.", {
+                                    userSubmissionId,
+                                });
+                                await queryClient.invalidateQueries(["users"]);
+                            }}
+                        >
+                            Smazat
+                        </Button>
+                    </div>
                 ),
             }),
         ],
@@ -197,6 +216,19 @@ export default function ClientPatientTable() {
                             toast.error("Registrování uživatele selhalo.");
                         }}
                     />
+                </Modal.Body>
+            </Modal>
+            <Modal show={!!userToEdit} onHide={() => setUserToEdit(undefined)}>
+                <Modal.Header closeButton>
+                    <Modal.Title>Úprava účtu pacienta/klienta</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    {!!userToEdit && (
+                        <EditClientPatient
+                            submissionId={userToEdit.submissionId}
+                            userId={userToEdit.id}
+                        />
+                    )}
                 </Modal.Body>
             </Modal>
         </>

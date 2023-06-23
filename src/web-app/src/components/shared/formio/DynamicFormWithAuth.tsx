@@ -1,7 +1,7 @@
 "use client";
 
 import { loadFormByPath, submitForm } from "@/client/formioClient";
-import { Submission } from "@/types/submission";
+import { DataValue, Submission } from "@/types/submission";
 import { FormProps } from "@formio/react/lib/components/Form";
 import { useSession } from "next-auth/react";
 import { Alert, Spinner } from "react-bootstrap";
@@ -30,6 +30,18 @@ export default function DynamicFormWithAuth(
             submission: Submission,
             formPath: string
         ) => void | Promise<void>;
+        /**
+         * Default values for components, which are attached after the form is loaded from the
+         * server and before it is rendered. These values override the default values from the form.
+         *
+         * This can be useful if you want to prefill the form with some data.
+         * This prefill won't trigger validation (no validation errors will be shown)
+         */
+        defaultValues?: Record<string, DataValue>;
+        /**
+         * An element to be displayed while the form is loading.
+         */
+        loadingNode?: JSX.Element;
     }
 ) {
     const { data } = useSession();
@@ -39,12 +51,18 @@ export default function DynamicFormWithAuth(
         error,
         data: form,
     } = useSmartFetch({
-        queryFn: () => {
-            const result = loadFormByPath(
+        queryFn: async () => {
+            const result = await loadFormByPath(
                 formProps.relativeFormPath,
                 data!.user.formioToken
             );
             if (result === null) throw new Error("Form not found");
+            for (const [k, v] of Object.entries(
+                formProps.defaultValues ?? {}
+            )) {
+                const c = result.components.find((c) => c.key === k);
+                if (c) c.defaultValue = v;
+            }
             return result;
         },
         enabled: !!data?.user.formioToken,
@@ -52,11 +70,13 @@ export default function DynamicFormWithAuth(
 
     if (isLoading)
         return (
-            <div className="position-absolute top-50 start-50 translate-middle">
-                <Spinner animation="border" role="status">
-                    <span className="visually-hidden">Načítání...</span>
-                </Spinner>
-            </div>
+            formProps.loadingNode ?? (
+                <div className="position-absolute top-50 start-50 translate-middle">
+                    <Spinner animation="border" role="status">
+                        <span className="visually-hidden">Načítání...</span>
+                    </Spinner>
+                </div>
+            )
         );
 
     if (isError) {
@@ -79,6 +99,7 @@ export default function DynamicFormWithAuth(
 
     return (
         <DynamicForm
+            loading={formProps.loadingNode}
             form={form}
             {...formProps}
             onSubmit={async (submission: Submission) => {

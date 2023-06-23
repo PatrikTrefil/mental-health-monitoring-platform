@@ -1,6 +1,7 @@
 "use client";
 
 import { FormioComponentLoader } from "@/lib/formiojsWrapper";
+import { FormProps } from "@formio/react/lib/components/Form";
 import DynamicFormWithAuth from "./DynamicFormWithAuth";
 
 /**
@@ -11,10 +12,18 @@ import DynamicFormWithAuth from "./DynamicFormWithAuth";
  * Prefer using the {@link DynamicFormWithAuth} component to take care of the
  * authentication (required to load the form).
  */
-const DynamicForm = FormioComponentLoader(() =>
-    import("@formio/react").then((mod) => {
+export default function DynamicForm({
+    loading,
+    ...props
+}: {
+    /**
+     * The element to display while the component is loading.
+     */
+    loading?: JSX.Element;
+} & FormProps) {
+    const Component = FormioComponentLoader(async () => {
+        const mod = await import("@formio/react");
         return mod.Form;
-    })
-);
-
-export default DynamicForm;
+    }, loading);
+    return <Component {...props} />;
+}

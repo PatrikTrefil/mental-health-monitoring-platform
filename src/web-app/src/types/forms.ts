@@ -1,3 +1,5 @@
+import { DataValue } from "./submission";
+
 export type FormSchema = {
     name: string;
     title: string;
@@ -15,6 +17,7 @@ export type Component =
 type ComponentBase = {
     label: string;
     key: string;
+    defaultValue?: DataValue;
 };
 
 type HiddenComponent = ComponentBase & {
