@@ -3,7 +3,7 @@ import {
     getCurrentUser,
     loginAdmin,
 } from "@/client/formioClient";
-import { UserRoleTitles } from "@/types/users";
+import { UserRoleTitle, UserRoleTitles } from "@/types/users";
 import withAuthNextAuth, { NextRequestWithAuth } from "next-auth/middleware";
 import { NextRequest, NextResponse } from "next/server";
 import { MiddlewareWrapper } from "./types";
@@ -47,24 +47,32 @@ const nextAuthMiddleware = withAuthNextAuth(
  * This is not used for API routes.
  */
 function webpageMiddleware(req: NextRequestWithAuth) {
-    // if accessing /zamestnanec/*, check if user has role ZAMESTNANEC
-    // if accessing /uzivatel/*, check if user has role KLIENT_PACIENT
-    const hasSufficientPrivileges =
-        (req.nextUrl.pathname.startsWith("/zamestnanec/") &&
-            req.nextauth.token?.user?.roleTitles.includes(
-                UserRoleTitles.ZAMESTNANEC
-            )) ||
-        (req.nextUrl.pathname.startsWith("/uzivatel/") &&
-            req.nextauth.token?.user?.roleTitles.includes(
-                UserRoleTitles.KLIENT_PACIENT
-            ));
-
-    if (!hasSufficientPrivileges) {
+    if (
+        req.nextauth?.token?.user &&
+        !hasEnoughPrivilegesForWebpage(
+            req.nextUrl.pathname,
+            req.nextauth.token.user.roleTitles
+        )
+    ) {
         const url_403 = req.nextUrl.clone();
         url_403.pathname = "/403";
         url_403.searchParams.set("callbackUrl", req.nextUrl.toString());
         return NextResponse.rewrite(url_403);
     }
+}
+
+function hasEnoughPrivilegesForWebpage(
+    webpagePathname: string,
+    roleTitles: UserRoleTitle[]
+) {
+    if (webpagePathname.startsWith("/zamestnanec/"))
+        return (
+            roleTitles.includes(UserRoleTitles.SPRAVCE_DOTAZNIKU) ||
+            roleTitles.includes(UserRoleTitles.ZADAVATEL_DOTAZNIKU)
+        );
+
+    if (webpagePathname.startsWith("/uzivatel/"))
+        return roleTitles.includes(UserRoleTitles.KLIENT_PACIENT);
 }
 
 /**

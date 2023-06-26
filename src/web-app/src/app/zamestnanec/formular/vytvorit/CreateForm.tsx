@@ -44,10 +44,14 @@ export default function CreateForm() {
         const klientPacientRoleId = data?.find(
             (role) => role.title === UserRoleTitles.KLIENT_PACIENT
         )?._id;
-        const zamestnanecRoleId = data?.find(
-            (role) => role.title === UserRoleTitles.ZAMESTNANEC
+        const spravceDotaznikuRoleId = data?.find(
+            (role) => role.title === UserRoleTitles.SPRAVCE_DOTAZNIKU
         )?._id;
-        if (!klientPacientRoleId || !zamestnanecRoleId) {
+        const zadavatelDotaznikuRoleId = data?.find(
+            (role) => role.title === UserRoleTitles.ZADAVATEL_DOTAZNIKU
+        )?._id;
+
+        if (!klientPacientRoleId || !spravceDotaznikuRoleId) {
             console.error("Roles of client/patient or employee not found.");
             return errorResult;
         }
@@ -77,7 +81,11 @@ export default function CreateForm() {
             access: [
                 {
                     type: "read_all",
-                    roles: [zamestnanecRoleId, klientPacientRoleId],
+                    roles: [
+                        spravceDotaznikuRoleId,
+                        klientPacientRoleId,
+                        zadavatelDotaznikuRoleId,
+                    ],
                 },
             ],
             submissionAccess: [
@@ -88,6 +96,10 @@ export default function CreateForm() {
                 {
                     type: "read_own",
                     roles: [klientPacientRoleId],
+                },
+                {
+                    type: "read_all",
+                    roles: [zadavatelDotaznikuRoleId],
                 },
             ],
             tags: ["klientPacient"],

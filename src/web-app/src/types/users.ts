@@ -4,11 +4,17 @@
 export const UserRoleTitles = {
     ADMIN: "Administrator",
     KLIENT_PACIENT: "Klient/Pacient",
-    ZAMESTNANEC: "Zamestnanec",
+    SPRAVCE_DOTAZNIKU: "Správce dotazníků",
+    ZADAVATEL_DOTAZNIKU: "Zadavatel dotazníků",
 } as const;
 
 export type UserRoleTitle =
     (typeof UserRoleTitles)[keyof typeof UserRoleTitles];
+
+export const UserRolePrefixes = {
+    SPRAVCE_DOTAZNIKU: "SD",
+    ZADAVATEL_DOTAZNIKU: "ZD",
+} as const;
 
 export type User = {
     _id: string;

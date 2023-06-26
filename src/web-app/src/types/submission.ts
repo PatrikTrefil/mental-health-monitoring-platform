@@ -1,10 +1,9 @@
-export type Submission = {
+export interface Submission {
     _id: string;
     form: string;
     owner: string;
     data: {
         [key: string]: DataValue | undefined;
-        taskId: string;
     };
     metadata: {
         [key: string]: unknown;
@@ -13,7 +12,7 @@ export type Submission = {
      * ISO 8601 date string
      */
     created: string;
-};
+}
 
 export type DataValue =
     | undefined
@@ -26,3 +25,9 @@ export type DataValue =
 export type SelectBoxDataValue = {
     [key: string]: boolean | undefined;
 };
+
+export interface ClientPatientSubmission extends Submission {
+    data: {
+        taskId: string;
+    } & Submission["data"];
+}
