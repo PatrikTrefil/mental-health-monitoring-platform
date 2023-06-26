@@ -21,6 +21,7 @@ import { signOut, useSession } from "next-auth/react";
 import { useMemo, useState } from "react";
 import { Alert, Button, Form, Modal, Spinner, Table } from "react-bootstrap";
 import { toast } from "react-toastify";
+import EditEmployee from "./EditEmployee";
 
 /**
  * Page for managing employee accounts.
@@ -28,6 +29,12 @@ import { toast } from "react-toastify";
 export default function EmployeeTable() {
     const queryClient = useQueryClient();
     const session = useSession();
+
+    const [userToEdit, setUserToEdit] = useState<{
+        submissionId: string;
+        formPath: string;
+        employeeId: string;
+    }>();
 
     const columnHelper = createColumnHelper<UserFormSubmission>();
     const columns = useMemo(
@@ -64,6 +71,7 @@ export default function EmployeeTable() {
                 cell: (props) => {
                     const isOwnAccount =
                         props.row.original._id === session?.data?.user._id;
+                    let deleteButton: React.ReactNode | null;
                     if (
                         session?.data?.user.data.id.startsWith(
                             UserRolePrefixes.SPRAVCE_DOTAZNIKU
@@ -75,7 +83,7 @@ export default function EmployeeTable() {
                                 UserRolePrefixes.ZADAVATEL_DOTAZNIKU
                             ))
                     )
-                        return (
+                        deleteButton = (
                             <Button
                                 variant="danger"
                                 onClick={async () => {
@@ -130,6 +138,39 @@ export default function EmployeeTable() {
                                 Smazat {isOwnAccount && "vlastní účet"}
                             </Button>
                         );
+                    return (
+                        <div className="d-flex gap-2">
+                            {deleteButton}
+                            <Button
+                                onClick={() => {
+                                    let formPath: string;
+                                    if (
+                                        props.row.original.data.id.startsWith(
+                                            "SD"
+                                        )
+                                    )
+                                        formPath =
+                                            "/spravce-dotazniku/register";
+                                    else if (
+                                        props.row.original.data.id.startsWith(
+                                            "ZD"
+                                        )
+                                    )
+                                        formPath =
+                                            "/zadavatel-dotazniku/register";
+                                    else throw new Error("Unknown user prefix");
+
+                                    setUserToEdit({
+                                        submissionId: props.row.original._id,
+                                        employeeId: props.row.original.data.id,
+                                        formPath,
+                                    });
+                                }}
+                            >
+                                Upravit {isOwnAccount && "vlastní účet"}
+                            </Button>
+                        </div>
+                    );
                 },
             }),
         ],
@@ -311,6 +352,14 @@ export default function EmployeeTable() {
                         }}
                         defaultValues={{ id: "ZD-" }}
                     />
+                </Modal.Body>
+            </Modal>
+            <Modal show={!!userToEdit} onHide={() => setUserToEdit(undefined)}>
+                <Modal.Header closeButton>
+                    <Modal.Title>Úprava zaměstnance</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    {userToEdit && <EditEmployee {...userToEdit} />}
                 </Modal.Body>
             </Modal>
         </>
