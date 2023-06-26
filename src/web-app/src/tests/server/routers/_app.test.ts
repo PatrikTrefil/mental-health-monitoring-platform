@@ -387,7 +387,9 @@ describe("todo when formio is down", () => {
         );
         await expect(
             caller.createTask(mockInputTask)
-        ).rejects.toMatchInlineSnapshot('[TRPCError: Checking of form existence failed]');
+        ).rejects.toMatchInlineSnapshot(
+            "[TRPCError: Checking of form existence failed]"
+        );
     });
 
     it("throws when creating a todo when loadUsers fails", async () => {
