@@ -583,7 +583,7 @@ export async function updateUser(
     data: { id: string; password: string },
     formioToken: string
 ) {
-    return udpateSubmission("/klientpacient", submisionId, data, formioToken);
+    return updateSubmission("/klientpacient", submisionId, data, formioToken);
 }
 
 /**
@@ -594,7 +594,7 @@ export async function updateUser(
  * @param formioToken JWT token for formio
  * @returns updated submission
  */
-export async function udpateSubmission(
+export async function updateSubmission(
     formPath: string,
     submissionId: string,
     data: unknown,
