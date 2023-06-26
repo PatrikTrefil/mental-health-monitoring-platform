@@ -36,7 +36,10 @@ export default function Login() {
                     router.push(searchParamsCallbackUrl);
                 else if (
                     session.data.user.roleTitles.includes(
-                        UserRoleTitles.ZAMESTNANEC
+                        UserRoleTitles.SPRAVCE_DOTAZNIKU
+                    ) ||
+                    session.data.user.roleTitles.includes(
+                        UserRoleTitles.ZADAVATEL_DOTAZNIKU
                     )
                 ) {
                     router.push(employeeDefaultCallback);

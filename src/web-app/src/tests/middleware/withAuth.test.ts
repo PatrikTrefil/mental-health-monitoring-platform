@@ -54,7 +54,11 @@ describe.each<TestInput>([
         pathToTest: "http://localhost/uzivatel/prehled",
     },
     {
-        roleTitleToTest: UserRoleTitles.ZAMESTNANEC,
+        roleTitleToTest: UserRoleTitles.SPRAVCE_DOTAZNIKU,
+        pathToTest: "http://localhost/zamestnanec/prehled",
+    },
+    {
+        roleTitleToTest: UserRoleTitles.ZADAVATEL_DOTAZNIKU,
         pathToTest: "http://localhost/zamestnanec/prehled",
     },
 ])(
@@ -85,6 +89,7 @@ describe.each<TestInput>([
                         metadata: {},
                         owner: "",
                         roles: ["foo"],
+                        formioTokenExpiration: 10,
                     },
                 },
             };
@@ -107,6 +112,7 @@ describe.each<TestInput>([
                         metadata: {},
                         owner: "",
                         roles: ["kdjf"],
+                        formioTokenExpiration: 10,
                     },
                 },
             };

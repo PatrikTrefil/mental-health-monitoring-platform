@@ -6,6 +6,18 @@ exports[`accessing 'Klient/Pacient' page > should not be possible if no token is
 
 exports[`accessing 'Klient/Pacient' page > should not be possible if the user is not an Klient/Pacient 1`] = `307`;
 
+exports[`accessing 'Správce dotazníků' page > should be possible if the user is an Správce dotazníků 1`] = `307`;
+
+exports[`accessing 'Správce dotazníků' page > should not be possible if no token is provided 1`] = `307`;
+
+exports[`accessing 'Správce dotazníků' page > should not be possible if the user is not an Správce dotazníků 1`] = `307`;
+
+exports[`accessing 'Zadavatel dotazníků' page > should be possible if the user is an Zadavatel dotazníků 1`] = `307`;
+
+exports[`accessing 'Zadavatel dotazníků' page > should not be possible if no token is provided 1`] = `307`;
+
+exports[`accessing 'Zadavatel dotazníků' page > should not be possible if the user is not an Zadavatel dotazníků 1`] = `307`;
+
 exports[`accessing 'Zamestnanec' page > should be possible if the user is an Zamestnanec 1`] = `307`;
 
 exports[`accessing 'Zamestnanec' page > should not be possible if no token is provided 1`] = `307`;

@@ -241,28 +241,72 @@ export async function loadForms(formioToken: string, tags: string[]) {
  * @throws {TypeError} if the fetch or conversion to json fails
  */
 export async function loadEmployees(formioToken: string) {
-    const response = await fetch(`${getFormioUrl()}/zamestnanec/submission`, {
-        headers: {
-            "x-jwt-token": formioToken,
-        },
-    });
+    const spravceDotaznikuResponse = await fetch(
+        `${getFormioUrl()}/zamestnanec/spravce-dotazniku/submission`,
+        {
+            headers: {
+                "x-jwt-token": formioToken,
+            },
+        }
+    );
 
-    return (await response.json()) as UserFormSubmission[];
+    const zadavatelDotaznikuResponse = await fetch(
+        `${getFormioUrl()}/zamestnanec/zadavatel-dotazniku/submission`,
+        {
+            headers: {
+                "x-jwt-token": formioToken,
+            },
+        }
+    );
+
+    const spravciDotazniku =
+        (await spravceDotaznikuResponse.json()) as UserFormSubmission[];
+    const zadavateleDotazniku =
+        (await zadavatelDotaznikuResponse.json()) as UserFormSubmission[];
+
+    return spravciDotazniku.concat(zadavateleDotazniku);
 }
 
 /**
- * Delete employee from formio.
+ * Delete an employee that is from the spravce dotazniku resource from formio.
  * @param formioToken JWT token for formio
  * @param userSubmissionId id of the user submission to delete
  * @throws {Error} if formio returns a non-ok status
  * @throws {TypeError} if the fetch fails
  */
-export async function deleteEmployee(
+export async function deleteSpravceDotazniku(
     formioToken: string,
     userSubmissionId: string
 ) {
     const response = await fetch(
-        `${getFormioUrl()}/zamestnanec/submission/${userSubmissionId}`,
+        `${getFormioUrl()}/zamestnanec/spravce-dotazniku/submission/${userSubmissionId}`,
+        {
+            method: "DELETE",
+            headers: {
+                "x-jwt-token": formioToken,
+            },
+        }
+    );
+    if (!response.ok) {
+        throw new Error(
+            `Failed to delete user with status code ${response.status}`
+        );
+    }
+}
+
+/**
+ * Delete employee that is from the zadavatel dotazniku resource from formio.
+ * @param formioToken JWT token for formio
+ * @param userSubmissionId id of the user submission to delete
+ * @throws {Error} if formio returns a non-ok status
+ * @throws {TypeError} if the fetch fails
+ */
+export async function deleteZadavatelDotazniku(
+    formioToken: string,
+    userSubmissionId: string
+) {
+    const response = await fetch(
+        `${getFormioUrl()}/zamestnanec/zadavatel-dotazniku/submission/${userSubmissionId}`,
         {
             method: "DELETE",
             headers: {

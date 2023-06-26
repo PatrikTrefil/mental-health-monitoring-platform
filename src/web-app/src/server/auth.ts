@@ -6,21 +6,23 @@ import {
     refreshToken,
 } from "@/client/formioClient";
 import { UserFormSubmission } from "@/types/userFormSubmission";
+import { UserRoleTitle, UserRoleTitles } from "@/types/users";
 import { type GetServerSidePropsContext } from "next";
 import { AuthOptions, DefaultSession, getServerSession } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
+import { z } from "zod";
 
 // make auto-completion work for useSession
 declare module "next-auth" {
     interface User extends UserFormSubmission {
-        roleTitles: string[];
+        roleTitles: UserRoleTitle[];
         formioToken: string;
         formioTokenExpiration: number;
     }
     interface Session {
         user: UserFormSubmission &
             DefaultSession["user"] & {
-                roleTitles: string[];
+                roleTitles: UserRoleTitle[];
                 formioToken: string;
             };
     }
@@ -30,7 +32,7 @@ declare module "next-auth/jwt" {
     interface JWT {
         user?: UserFormSubmission &
             DefaultSession["user"] & {
-                roleTitles: string[];
+                roleTitles: UserRoleTitle[];
                 formioToken: string;
                 formioTokenExpiration: number;
             };
@@ -78,8 +80,7 @@ export const authOptions: AuthOptions = {
                         const title = roleList.find(
                             (role) => role._id === roleId
                         )?.title;
-                        if (!title) throw new Error(`Role ${roleId} not found`);
-                        return title;
+                        return z.nativeEnum(UserRoleTitles).parse(title);
                     });
 
                     console.debug("Sending response...");

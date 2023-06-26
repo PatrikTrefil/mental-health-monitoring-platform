@@ -19,6 +19,7 @@ vi.mock("@/client/formioClient", () => ({
     loadFormById: vi.fn(async () => {
         const mockForm: Awaited<ReturnType<typeof loadFormById>> = {
             _id: "123",
+            title: "",
             name: "test",
             path: "test",
             created: "",
@@ -76,12 +77,15 @@ function createInnerTRPCContextNoSession() {
 describe("todo functionality", () => {
     it("returns created todo as employee", async () => {
         const caller = appRouter.createCaller(
-            createInnerTRPCContextMockSession([UserRoleTitles.ZAMESTNANEC])
+            createInnerTRPCContextMockSession([
+                UserRoleTitles.ZADAVATEL_DOTAZNIKU,
+            ])
         );
 
         vi.mocked(loadFormById).mockImplementationOnce(async () => {
             const mockForm: Form = {
                 _id: mockInputTask.formId,
+                title: "",
                 created: "",
                 name: "name",
                 path: "/path",
@@ -100,7 +104,7 @@ describe("todo functionality", () => {
 
     it("get existing todo as patient", async () => {
         const employeeCtx = createInnerTRPCContextMockSession([
-            UserRoleTitles.ZAMESTNANEC,
+            UserRoleTitles.ZADAVATEL_DOTAZNIKU,
         ]);
         const employeeCaller = appRouter.createCaller(employeeCtx);
 
@@ -121,7 +125,9 @@ describe("todo functionality", () => {
 
     it("throws when getting non-existing todo as employee", async () => {
         const caller = appRouter.createCaller(
-            createInnerTRPCContextMockSession([UserRoleTitles.ZAMESTNANEC])
+            createInnerTRPCContextMockSession([
+                UserRoleTitles.ZADAVATEL_DOTAZNIKU,
+            ])
         );
         const todoId = "123";
         // delete if already exists
@@ -134,7 +140,7 @@ describe("todo functionality", () => {
 
     it("list of all todos contains created todos as employee", async () => {
         const ctx = createInnerTRPCContextMockSession([
-            UserRoleTitles.ZAMESTNANEC,
+            UserRoleTitles.ZADAVATEL_DOTAZNIKU,
         ]);
         const caller = appRouter.createCaller(ctx);
 
@@ -176,7 +182,7 @@ describe("todo functionality", () => {
         // create tasks for patient
         {
             const employeeCtx = createInnerTRPCContextMockSession([
-                UserRoleTitles.ZAMESTNANEC,
+                UserRoleTitles.ZADAVATEL_DOTAZNIKU,
             ]);
             const employeeCaller = appRouter.createCaller(employeeCtx);
 
@@ -224,7 +230,9 @@ describe("todo functionality", () => {
 
     it("deletes an existing todo as employee", async () => {
         const caller = appRouter.createCaller(
-            createInnerTRPCContextMockSession([UserRoleTitles.ZAMESTNANEC])
+            createInnerTRPCContextMockSession([
+                UserRoleTitles.ZADAVATEL_DOTAZNIKU,
+            ])
         );
 
         const createdTask = await caller.createTask(mockInputTask);
@@ -240,7 +248,9 @@ describe("todo functionality", () => {
 
     it("throws not found when deleting a non-existing todo as employee", async () => {
         const caller = appRouter.createCaller(
-            createInnerTRPCContextMockSession([UserRoleTitles.ZAMESTNANEC])
+            createInnerTRPCContextMockSession([
+                UserRoleTitles.ZADAVATEL_DOTAZNIKU,
+            ])
         );
 
         // delete if already exists
@@ -259,7 +269,9 @@ describe("todo functionality", () => {
 
     it("throws when creating a todo for non-existing form", async () => {
         const caller = appRouter.createCaller(
-            createInnerTRPCContextMockSession([UserRoleTitles.ZAMESTNANEC])
+            createInnerTRPCContextMockSession([
+                UserRoleTitles.ZADAVATEL_DOTAZNIKU,
+            ])
         );
         vi.mocked(loadFormById).mockImplementationOnce(async () => null);
         expect(caller.createTask(mockInputTask)).rejects.toMatchInlineSnapshot(
@@ -269,7 +281,9 @@ describe("todo functionality", () => {
 
     it("throws when creating a todo for non-existing user", async () => {
         const caller = appRouter.createCaller(
-            createInnerTRPCContextMockSession([UserRoleTitles.ZAMESTNANEC])
+            createInnerTRPCContextMockSession([
+                UserRoleTitles.ZADAVATEL_DOTAZNIKU,
+            ])
         );
         vi.mocked(loadUsers).mockImplementationOnce(async () => []);
         expect(caller.createTask(mockInputTask)).rejects.toMatchInlineSnapshot(
@@ -281,7 +295,9 @@ describe("todo functionality", () => {
 describe("todo permissions", () => {
     it("throws when deleting a todo as a client/patient", async () => {
         const employeeCaller = appRouter.createCaller(
-            createInnerTRPCContextMockSession([UserRoleTitles.ZAMESTNANEC])
+            createInnerTRPCContextMockSession([
+                UserRoleTitles.ZADAVATEL_DOTAZNIKU,
+            ])
         );
         const createdTask = await employeeCaller.createTask(mockInputTask);
         const clientCaller = appRouter.createCaller(
@@ -323,7 +339,9 @@ describe("todo permissions", () => {
 
     it("throws when getting todo not assigned to client/patient", async () => {
         const employeeCaller = appRouter.createCaller(
-            createInnerTRPCContextMockSession([UserRoleTitles.ZAMESTNANEC])
+            createInnerTRPCContextMockSession([
+                UserRoleTitles.ZADAVATEL_DOTAZNIKU,
+            ])
         );
         vi.mocked(loadUsers).mockImplementationOnce(async () => {
             const mockUsers = [
@@ -363,17 +381,23 @@ describe("todo when formio is down", () => {
     it("throws when creating a todo when loadForm fails", async () => {
         vi.mocked(loadFormById).mockImplementationOnce(throwFn);
         const caller = appRouter.createCaller(
-            createInnerTRPCContextMockSession([UserRoleTitles.ZAMESTNANEC])
+            createInnerTRPCContextMockSession([
+                UserRoleTitles.ZADAVATEL_DOTAZNIKU,
+            ])
         );
         await expect(
             caller.createTask(mockInputTask)
-        ).rejects.toMatchInlineSnapshot("[TRPCError: INTERNAL_SERVER_ERROR]");
+        ).rejects.toMatchInlineSnapshot(
+            "[TRPCError: Checking of form existence failed]"
+        );
     });
 
     it("throws when creating a todo when loadUsers fails", async () => {
         vi.mocked(loadUsers).mockImplementationOnce(throwFn);
         const caller = appRouter.createCaller(
-            createInnerTRPCContextMockSession([UserRoleTitles.ZAMESTNANEC])
+            createInnerTRPCContextMockSession([
+                UserRoleTitles.ZADAVATEL_DOTAZNIKU,
+            ])
         );
         await expect(
             caller.createTask(mockInputTask)

@@ -12,7 +12,7 @@ export const appRouter = createTRPCRouter({
      */
     listTasks: protectedProcedure.query((opts) => {
         const userRoleTitles = opts.ctx.session.user.roleTitles;
-        if (userRoleTitles.includes(UserRoleTitles.ZAMESTNANEC)) {
+        if (userRoleTitles.includes(UserRoleTitles.ZADAVATEL_DOTAZNIKU)) {
             return opts.ctx.prisma.task.findMany();
         } else if (userRoleTitles.includes(UserRoleTitles.KLIENT_PACIENT)) {
             return opts.ctx.prisma.task.findMany({
@@ -45,7 +45,7 @@ export const appRouter = createTRPCRouter({
 
             if (
                 result.forUserId !== opts.ctx.session.user.data.id &&
-                !userRoleTitles.includes(UserRoleTitles.ZAMESTNANEC)
+                !userRoleTitles.includes(UserRoleTitles.ZADAVATEL_DOTAZNIKU)
             ) {
                 throw new TRPCError({ code: "FORBIDDEN" });
             }
@@ -69,7 +69,7 @@ export const appRouter = createTRPCRouter({
         .mutation(async (opts) => {
             if (
                 !opts.ctx.session.user.roleTitles.includes(
-                    UserRoleTitles.ZAMESTNANEC
+                    UserRoleTitles.ZADAVATEL_DOTAZNIKU
                 )
             )
                 throw new TRPCError({ code: "FORBIDDEN" });
@@ -83,8 +83,10 @@ export const appRouter = createTRPCRouter({
                     opts.ctx.session.user.formioToken
                 );
             } catch (e) {
+                console.error(e);
                 throw new TRPCError({
                     code: "INTERNAL_SERVER_ERROR",
+                    message: "Checking of form existence failed",
                 });
             }
 
@@ -129,7 +131,7 @@ export const appRouter = createTRPCRouter({
         .mutation(async (opts) => {
             if (
                 !opts.ctx.session.user.roleTitles.includes(
-                    UserRoleTitles.ZAMESTNANEC
+                    UserRoleTitles.ZADAVATEL_DOTAZNIKU
                 )
             )
                 throw new TRPCError({ code: "FORBIDDEN" });
