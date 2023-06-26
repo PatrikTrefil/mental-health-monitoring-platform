@@ -99,6 +99,7 @@ export default function Login() {
                     type="text"
                     name="id"
                     id="input-id"
+                    autoComplete="username"
                 />
                 <Form.Label htmlFor="input-password">Heslo</Form.Label>
                 <Form.Control
@@ -109,6 +110,7 @@ export default function Login() {
                     value={password}
                     name="password"
                     id="input-password"
+                    autoComplete="current-password"
                 />
                 <Button
                     type="submit"
