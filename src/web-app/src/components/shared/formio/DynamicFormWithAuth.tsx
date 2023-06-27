@@ -1,12 +1,14 @@
 "use client";
 
 import { loadFormByPath, submitForm } from "@/client/formioClient";
+import { useSmartFetch } from "@/hooks/useSmartFetch";
+import { Form } from "@/types/forms";
 import { DataValue, Submission } from "@/types/submission";
 import { FormProps } from "@formio/react/lib/components/Form";
 import { useSession } from "next-auth/react";
+import { useState } from "react";
 import { Alert, Spinner } from "react-bootstrap";
 import { toast } from "react-toastify";
-import { useSmartFetch } from "../../../hooks/useSmartFetch";
 import DynamicForm from "./DynamicForm";
 
 /**
@@ -42,9 +44,11 @@ export default function DynamicFormWithAuth(
          * An element to be displayed while the form is loading.
          */
         loadingNode?: JSX.Element;
+        modifyFormBeforeRender?: (form: Form) => void;
     }
 ) {
     const { data } = useSession();
+    const [isFormQueryEnabled, setIsFormQueryEnabled] = useState(true);
     const {
         isLoading,
         isError,
@@ -52,20 +56,27 @@ export default function DynamicFormWithAuth(
         data: form,
     } = useSmartFetch({
         queryFn: async () => {
+            const token = data?.user.formioToken;
+            if (!token) throw new Error("User not logged in");
+
             const result = await loadFormByPath(
                 formProps.relativeFormPath,
-                data!.user.formioToken
+                token
             );
+
+            if (formProps.defaultValues)
+                for (const [k, v] of Object.entries(formProps.defaultValues)) {
+                    const c = result.components.find((c) => c.key === k);
+                    if (c) c.defaultValue = v;
+                }
+            if (formProps.modifyFormBeforeRender)
+                formProps.modifyFormBeforeRender(result);
+
             if (result === null) throw new Error("Form not found");
-            for (const [k, v] of Object.entries(
-                formProps.defaultValues ?? {}
-            )) {
-                const c = result.components.find((c) => c.key === k);
-                if (c) c.defaultValue = v;
-            }
+
             return result;
         },
-        enabled: !!data?.user.formioToken,
+        enabled: !!data?.user.formioToken && isFormQueryEnabled,
     });
 
     if (isLoading)
@@ -117,6 +128,10 @@ export default function DynamicFormWithAuth(
                 }
 
                 if (formProps.onSubmitDone) formProps.onSubmitDone();
+            }}
+            onChange={() => {
+                setIsFormQueryEnabled(false);
+                formProps.onChange?.();
             }}
         />
     );
