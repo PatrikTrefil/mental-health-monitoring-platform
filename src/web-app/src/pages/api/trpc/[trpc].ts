@@ -1,4 +1,4 @@
-import { appRouter } from "@/server/routers/_app";
+import { appRouter } from "@/server/routers/root";
 import { createTRPCContext } from "@/server/trpc";
 import { createNextApiHandler } from "@trpc/server/adapters/next";
 

@@ -53,10 +53,10 @@ export default function TaskCreation({ onSettled }: TaskCreationProps) {
 
     const utils = trpc.useContext();
 
-    const createTask = trpc.createTask.useMutation({
+    const createTask = trpc.task.createTask.useMutation({
         onSuccess: () => {
             toast.success("Úkol byl úspěšně vytvořen.");
-            utils.listTasks.invalidate();
+            utils.task.listTasks.invalidate();
         },
         onError: () => {
             toast.error("Nepodařilo se vytvořit úkol.");

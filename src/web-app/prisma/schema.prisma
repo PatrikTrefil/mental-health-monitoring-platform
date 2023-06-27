@@ -11,18 +11,36 @@ datasource db {
 }
 
 model Task {
+    /// Artificial ID of the task
     id                  String   @id @default(uuid())
+    /// Name of the task
     name                String
+    /// Description of the task
     description         String?
-    // Valid states are "CREATED", "PARTIALLY_COMPLETED" and "COMPLETED"
-    // Prisma does not polyfill enums for sqlite, so we use a string instead
-    // SQLite has checks, but those are not supported yet
-    // https://github.com/prisma/prisma/issues/3388
+    /// Valid states are "CREATED", "PARTIALLY_COMPLETED" and "COMPLETED"
+    /// Prisma does not polyfill enums for sqlite, so we use a string instead
+    /// SQLite has checks, but those are not supported yet
+    /// https://github.com/prisma/prisma/issues/3388
     state               String   @default("READY")
     createdAt           DateTime @default(now())
     updatedAt           DateTime @updatedAt
+    /// ID of the user who is expected to complete the task
     forUserId           String
+    /// ID of the user (employee) who created the task
     createdByEmployeeId String
+    /// ID of the form to be filled out
     formId              String
+    /// ID of the submission that was used to complete this task
     submissionId        String?
+}
+
+model Draft {
+    /// ID of the form to which the draft belongs
+    formId String
+    /// ID of the user who created the draft
+    userId String
+    /// JSON data of the form
+    data   String
+
+    @@id([formId, userId])
 }

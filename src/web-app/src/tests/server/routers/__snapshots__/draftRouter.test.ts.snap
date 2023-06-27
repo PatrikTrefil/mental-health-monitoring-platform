@@ -1,0 +1,57 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`as $1 it > should not be possible to create a draft 1`] = `[TRPCError: FORBIDDEN]`;
+
+exports[`as $1 it > should not be possible to create a draft 2`] = `[TRPCError: FORBIDDEN]`;
+
+exports[`as $1 it > should not be possible to create a draft 3`] = `[TRPCError: FORBIDDEN]`;
+
+exports[`as $1 it > should not be possible to create a draft 4`] = `[TRPCError: FORBIDDEN]`;
+
+exports[`as $1 it > should not be possible to get a draft 1`] = `[TRPCError: FORBIDDEN]`;
+
+exports[`as $1 it > should not be possible to get a draft 2`] = `[TRPCError: FORBIDDEN]`;
+
+exports[`as $1 it > should not be possible to get a draft 3`] = `[TRPCError: FORBIDDEN]`;
+
+exports[`as $1 it > should not be possible to get a draft 4`] = `[TRPCError: FORBIDDEN]`;
+
+exports[`as $1 it > should not be possible to update a draft 1`] = `[TRPCError: FORBIDDEN]`;
+
+exports[`as $1 it > should not be possible to update a draft 2`] = `[TRPCError: FORBIDDEN]`;
+
+exports[`as $1 it > should not be possible to update a draft 3`] = `[TRPCError: FORBIDDEN]`;
+
+exports[`as $1 it > should not be possible to update a draft 4`] = `[TRPCError: FORBIDDEN]`;
+
+exports[`as a Klient/Pacient it > should be possible to create a draft 1`] = `
+{
+  "data": "{}",
+  "formId": "some-form-id",
+  "userId": "123",
+}
+`;
+
+exports[`as a Klient/Pacient it > should be possible to edit my draft 1`] = `
+{
+  "data": "{\\"new\\":\\"data\\"}",
+  "formId": "some-form-id",
+  "userId": "123",
+}
+`;
+
+exports[`as a Klient/Pacient it > should throw when passing a non-stringifiable JSON value 1`] = `
+[TRPCError: [
+  {
+    "message": "Data can not be stringified to JSON",
+    "code": "custom",
+    "path": [
+      "data"
+    ]
+  }
+]]
+`;
+
+exports[`as a Klient/Pacient it > throws when deleting a non-existing draft 1`] = `[TRPCError: NOT_FOUND]`;
+
+exports[`as a Klient/Pacient it > throws when getting a non-existing draft 1`] = `[TRPCError: NOT_FOUND]`;
