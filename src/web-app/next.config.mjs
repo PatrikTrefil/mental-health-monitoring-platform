@@ -6,9 +6,16 @@ import {
 
 /* HACK: setting `worker-src blob:` is dangerous (formio should fix this,
    see issue https://github.com/formio/formio.js/issues/5146) */
+// HACK: The `script-src` contains `unsafe-inline`. I could not
+// find a way of implementing strict CSP with Next.js
+// https://github.com/vercel/next.js/issues/23993
+// https://github.com/vercel/next.js/discussions/51039
+// https://github.com/Sprokets/nextjs-csp-report-only/issues/1
+// HACK: `style-src` contains unsafe-inline. Can't get rid of it...
 const ProductionContentSecurityPolicy = `
     default-src 'self';
-    script-src 'self' cdn.form.io;
+    script-src 'self' cdn.form.io 'unsafe-inline';
+    style-src 'self' 'unsafe-inline';
     img-src 'self' data:;
     worker-src blob:;
     `;
