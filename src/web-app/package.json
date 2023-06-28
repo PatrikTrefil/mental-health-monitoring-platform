@@ -17,7 +17,7 @@
   },
   "dependencies": {
     "@formio/react": "^5.2.4-rc.1",
-    "@prisma/client": "^4.15.0",
+    "@prisma/client": "^4.16.1",
     "@tanstack/react-query": "^4.29.12",
     "@tanstack/react-table": "^8.9.1",
     "@trpc/client": "^10.29.1",
