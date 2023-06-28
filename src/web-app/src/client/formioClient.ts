@@ -10,7 +10,6 @@ import { Form, FormSchema } from "@/types/forms";
 import { Role } from "@/types/role";
 import { Submission } from "@/types/submission";
 import { UserFormSubmission } from "@/types/userFormSubmission";
-import { User } from "@/types/users";
 
 /**
  * Find out if the code is running on the server.
@@ -408,7 +407,7 @@ export async function getCurrentUser(formioToken: string) {
             "x-jwt-token": formioToken,
         },
     });
-    return (await response.json()) as User;
+    return (await response.json()) as UserFormSubmission;
 }
 /**
  * Fetches the list of roles from the server.
