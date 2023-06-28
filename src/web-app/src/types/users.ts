@@ -16,20 +16,3 @@ export const UserRolePrefixes = {
     SPRAVCE_DOTAZNIKU: "SD",
     ZADAVATEL_DOTAZNIKU: "ZD",
 } as const;
-
-export type User = {
-    _id: string;
-    form: string;
-    owner: string;
-    /**
-     * Role IDs
-     */
-    roles: string[];
-    data: {
-        id: string;
-    };
-    access: unknown[];
-    externalIds: unknown[];
-    created: string;
-    modified: string;
-};
