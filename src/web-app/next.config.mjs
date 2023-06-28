@@ -105,7 +105,7 @@ const nextConfig = {
     },
 };
 
-export default async (phase) => {
+export default async function getNextConfig(phase) {
     if (
         phase === PHASE_DEVELOPMENT_SERVER ||
         phase === PHASE_PRODUCTION_SERVER
@@ -116,4 +116,4 @@ export default async (phase) => {
     }
 
     return nextConfig;
-};
+}
