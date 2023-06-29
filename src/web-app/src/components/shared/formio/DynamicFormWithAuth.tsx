@@ -50,7 +50,7 @@ export default function DynamicFormWithAuth(
          */
         loadingNode?: JSX.Element;
         modifyFormBeforeRender?: (form: Form) => void;
-        onChange: (e: ChangeEvent) => void;
+        onChange?: (e: ChangeEvent) => void;
     }
 ) {
     const { data } = useSession();
