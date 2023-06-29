@@ -3,20 +3,46 @@
 import { submitForm } from "@/client/formioClient";
 import { trpc } from "@/client/trpcClient";
 import DynamicFormWithAuth from "@/components/shared/formio/DynamicFormWithAuth";
+import "@/styles/saveDraft.css";
+import { DataValue } from "@/types/submission";
 import { useSession } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Alert, Spinner } from "react-bootstrap";
 import { toast } from "react-toastify";
-
-// TODO: write docs about drafts
-// TODO: finish all todos
-// TODO: button keeps spinning after saving state
 
 /**
  * Page for filling out form with given form id (from url)
  */
 export default function FillOutForm({ formId }: { formId: string }) {
+    let progressToast = useRef<ReturnType<typeof toast> | null>(null);
+    const startLoadingToast = (content: React.ReactNode = "Probíhá ukládání") =>
+        (progressToast.current = toast(content, {
+            autoClose: false,
+            type: toast.TYPE.INFO,
+        }));
+    const finishLoadingToastWithSuccess = (
+        content: React.ReactNode = "Uloženo"
+    ) => {
+        if (!progressToast.current)
+            throw new Error("Progress toast is not initialized");
+        toast.update(progressToast.current, {
+            render: content,
+            type: toast.TYPE.SUCCESS,
+            autoClose: 5000,
+        });
+    };
+    const finishLoadingToastWithFailure = (
+        content: React.ReactNode = "Nepodařilo se uložit"
+    ) => {
+        if (!progressToast.current)
+            throw new Error("Progress toast is not initialized");
+        toast.update(progressToast.current, {
+            render: content,
+            type: toast.TYPE.ERROR,
+            autoClose: 5000,
+        });
+    };
     const router = useRouter();
     const { data } = useSession();
     const taskId = useSearchParams()?.get("taskId");
@@ -27,6 +53,7 @@ export default function FillOutForm({ formId }: { formId: string }) {
         { formId },
         {
             enabled: isDraftQueryEnabled,
+            retry: (_, error) => error.message !== "NOT_FOUND",
         }
     );
     const [isFormStateDirty, setIsFormStateDirty] = useState(false);
@@ -38,22 +65,21 @@ export default function FillOutForm({ formId }: { formId: string }) {
 
     useEffect(() => {
         if (currentDraft.isError && !hasFailureOfDraftLoadingBeenReported) {
-            setHasFailureOfDraftLoadingBeenReported(true);
-            toast.error("Nepodařilo se načíst rozpracovaný formulář");
+            if (currentDraft.error.message !== "NOT_FOUND") {
+                setHasFailureOfDraftLoadingBeenReported(true);
+                toast.error("Nepodařilo se načíst rozpracovaný formulář");
+            } else {
+                console.debug("Draft not found");
+                setIsDraftQueryEnabled(false);
+            }
         }
-    }, [currentDraft.isError, hasFailureOfDraftLoadingBeenReported]);
+    }, [
+        currentDraft.isError,
+        currentDraft.error,
+        hasFailureOfDraftLoadingBeenReported,
+    ]);
 
-    useEffect(() => {
-        const closeHandler = (e: BeforeUnloadEvent) => {
-            // www.geeksforgeeks.org/how-to-detect-browser-or-tab-closing-in-javascript/
-            e.preventDefault();
-            // to support legacy browsers
-            e.returnValue = "";
-        };
-        if (isFormStateDirty)
-            window.addEventListener("beforeunload", closeHandler);
-        else window.removeEventListener("beforeunload", closeHandler);
-    }, [isFormStateDirty]);
+    usePreventClose(isFormStateDirty);
 
     if (!taskId)
         return <Alert variant="danger">Nebyl zadán parametr taskId</Alert>;
@@ -81,34 +107,84 @@ export default function FillOutForm({ formId }: { formId: string }) {
                 else {
                     submission.data.taskId = taskId;
                     if (submission.data.submit) {
-                        await submitForm(
-                            data.user.formioToken,
-                            formPath,
-                            submission
-                        );
-                        toast.success("Formulář byl úspěšně odeslán");
+                        startLoadingToast();
+                        try {
+                            await submitForm(
+                                data.user.formioToken,
+                                formPath,
+                                submission
+                            );
+                        } catch (e) {
+                            finishLoadingToastWithFailure();
+                            console.error("Failed to submit form", e);
+                            return;
+                        }
+                        finishLoadingToastWithSuccess();
                         router.push("/uzivatel/prehled");
                     } else if (submission.data.saveDraft) {
-                        upsertDraft.mutate({ formId, data: submission.data });
+                        startLoadingToast();
+                        try {
+                            upsertDraft.mutate({
+                                formId,
+                                data: submission.data,
+                            });
+                        } catch (e) {
+                            finishLoadingToastWithFailure();
+                            console.error("Failed to save form state", e);
+                            return;
+                        }
+                        finishLoadingToastWithSuccess();
                         setIsFormStateDirty(false);
-                        toast.success("Stav formuláře byl úspěšně uložen");
                     }
                 }
             }}
-            defaultValues={currentDraft?.data?.data}
+            defaultValues={
+                currentDraft?.data?.data as
+                    | { [key: string]: DataValue }
+                    | undefined
+            }
             modifyFormBeforeRender={(form) => {
-                form.components.push({
+                form.components.unshift({
                     label: "Uložit stav",
                     key: "saveDraft",
-                    action: "saveState",
+                    action: "submit",
                     theme: "primary",
                     type: "button",
                 });
             }}
-            onChange={() => {
-                setIsFormStateDirty(true);
-                setIsDraftQueryEnabled(false);
+            onChange={(e) => {
+                if (
+                    currentDraft &&
+                    e.changed &&
+                    currentDraft?.data?.data[e.changed.component.key] !==
+                        e.changed.value
+                ) {
+                    console.debug("Change detected");
+                    setIsFormStateDirty(true);
+                    setIsDraftQueryEnabled(false);
+                }
             }}
         />
     );
+}
+
+function usePreventClose(isPreventionActive: boolean) {
+    const closeHandler = useMemo(() => {
+        return (e: BeforeUnloadEvent) => {
+            // www.geeksforgeeks.org/how-to-detect-browser-or-tab-closing-in-javascript/
+            e.preventDefault();
+            // to support legacy browsers
+            e.returnValue = "";
+        };
+    }, []);
+
+    useEffect(() => {
+        if (isPreventionActive) {
+            console.debug("Adding beforeunload listener");
+            window.addEventListener("beforeunload", closeHandler);
+        } else {
+            console.debug("Removing beforeunload listener");
+            window.removeEventListener("beforeunload", closeHandler);
+        }
+    }, [isPreventionActive, closeHandler]);
 }

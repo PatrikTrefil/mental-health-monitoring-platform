@@ -41,7 +41,7 @@ type HiddenComponent = ComponentBase & {
 
 type ButtonComponent = ComponentBase & {
     type: "button";
-    action: "saveState";
+    action: "saveState" | "submit";
     theme: "primary" | "secondary" | "success" | "info" | "warning" | "danger";
 };
 

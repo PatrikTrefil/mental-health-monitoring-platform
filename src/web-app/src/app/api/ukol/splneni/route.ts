@@ -41,7 +41,8 @@ export async function POST(req: Request) {
         body.data.request.form,
         formioToken,
         body.data.request.data.taskId,
-        body.data.submission._id
+        body.data.submission._id,
+        body.data.request.owner
     );
 
     if (!success) {
@@ -92,23 +93,31 @@ export async function POST(req: Request) {
  * @param formioToken JWT token for formio
  * @param taskId id of the task to be completed
  * @param submissionId id of the submission used to complete the task
+ * @param userId id of the user that is completing the task
  * @returns true if the submission is valid for the task
  */
 async function validateRequest(
     formId: string,
     formioToken: string,
     taskId: string,
-    submissionId: string
+    submissionId: string,
+    userId: string
 ) {
     // make sure the task exists and that it is for the correct form
-    const task = await prisma.task.findUnique({
-        where: {
-            id: taskId,
-        },
-        select: {
-            formId: true,
-        },
-    });
+    let task: { formId: string } | null;
+    try {
+        task = await prisma.task.findUnique({
+            where: {
+                id: taskId,
+            },
+            select: {
+                formId: true,
+            },
+        });
+    } catch (e) {
+        console.error("Loading task failed", e);
+        return false;
+    }
     if (task === null) {
         console.error("Task with given id does not exist");
         return false;
@@ -121,17 +130,34 @@ async function validateRequest(
     }
 
     // make sure a submission with given id exists and is accociated with the form
-    const form = await loadFormById(formId, formioToken);
+    let form: Awaited<ReturnType<typeof loadFormById>>;
+    try {
+        form = await loadFormById(formId, formioToken);
+    } catch (e) {
+        console.error("Loading form failed", e);
+        return false;
+    }
     if (!form) {
         console.error("The form that the submission is tied to does not exist");
         return false;
     }
 
-    const trustedSubmission = await loadSubmission(
-        form.path,
-        submissionId,
-        formioToken
-    );
+    let trustedSubmission: Awaited<ReturnType<typeof loadSubmission>>;
+    try {
+        trustedSubmission = await loadSubmission(
+            form.path,
+            submissionId,
+            formioToken
+        );
+    } catch (e) {
+        console.error("Loading submission failed", e);
+        return false;
+    }
+
+    if (trustedSubmission.owner !== userId) {
+        console.error("The submission is not owned by the user");
+        return false;
+    }
     if (trustedSubmission.data.taskId !== taskId) {
         console.error(
             "The submission is not associated with the task that is to be completed"

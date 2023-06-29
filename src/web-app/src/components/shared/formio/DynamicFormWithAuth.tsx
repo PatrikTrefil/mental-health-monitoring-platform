@@ -2,7 +2,7 @@
 
 import { loadFormByPath, submitForm } from "@/client/formioClient";
 import { useSmartFetch } from "@/hooks/useSmartFetch";
-import { Form } from "@/types/forms";
+import { Component, Form } from "@/types/forms";
 import { DataValue, Submission } from "@/types/submission";
 import { FormProps } from "@formio/react/lib/components/Form";
 import { useSession } from "next-auth/react";
@@ -10,6 +10,11 @@ import { useState } from "react";
 import { Alert, Spinner } from "react-bootstrap";
 import { toast } from "react-toastify";
 import DynamicForm from "./DynamicForm";
+
+type ChangeEvent = {
+    changed?: { component: Component; value: DataValue };
+    data: { [key: string]: unknown };
+};
 
 /**
  * A dynamic form that uses the user's formio token to authenticate.
@@ -45,6 +50,7 @@ export default function DynamicFormWithAuth(
          */
         loadingNode?: JSX.Element;
         modifyFormBeforeRender?: (form: Form) => void;
+        onChange: (e: ChangeEvent) => void;
     }
 ) {
     const { data } = useSession();
@@ -129,9 +135,9 @@ export default function DynamicFormWithAuth(
 
                 if (formProps.onSubmitDone) formProps.onSubmitDone();
             }}
-            onChange={() => {
+            onChange={(e: ChangeEvent) => {
                 setIsFormQueryEnabled(false);
-                formProps.onChange?.();
+                formProps.onChange?.(e);
             }}
         />
     );

@@ -135,24 +135,25 @@ export default function CreateForm() {
                             return;
                         }
                         console.debug("Form created.");
-                        const preCreationWebHookAction: WebhookAction = {
-                            name: "webhook",
-                            title: "Partially Complete Task",
-                            handler: ["before"],
-                            method: ["create"],
-                            settings: {
-                                url: `${process.env.NEXT_PUBLIC_INTERNAL_NEXT_SERVER_URL}/api/ukol/castecne-splneni`,
-                                block: true,
-                                forwardToken: true,
-                            },
-                        };
+                        const preCreationWebHookActionPartiallyCompleteTask: WebhookAction =
+                            {
+                                name: "webhook",
+                                title: "Partially Complete Task",
+                                handler: ["before"],
+                                method: ["create"],
+                                settings: {
+                                    url: `${process.env.NEXT_PUBLIC_INTERNAL_NEXT_SERVER_URL}/api/ukol/castecne-splneni`,
+                                    block: true,
+                                    forwardToken: true,
+                                },
+                            };
                         try {
                             console.debug(
                                 "Creating pre-creation webhook action..."
                             );
                             await createAction(
                                 createdForm._id,
-                                preCreationWebHookAction,
+                                preCreationWebHookActionPartiallyCompleteTask,
                                 session.data!.user.formioToken
                             );
                         } catch (e) {
@@ -161,24 +162,25 @@ export default function CreateForm() {
                             return;
                         }
                         console.debug("Pre-creation webhook action created.");
-                        const postCreationWebHookAction: WebhookAction = {
-                            name: "webhook",
-                            title: "Complete Task",
-                            handler: ["after"],
-                            method: ["create"],
-                            settings: {
-                                url: `${process.env.NEXT_PUBLIC_INTERNAL_NEXT_SERVER_URL}/api/ukol/splneni`,
-                                block: true,
-                                forwardToken: true,
-                            },
-                        };
+                        const postCreationWebHookActionCompleteTask: WebhookAction =
+                            {
+                                name: "webhook",
+                                title: "Complete Task",
+                                handler: ["after"],
+                                method: ["create"],
+                                settings: {
+                                    url: `${process.env.NEXT_PUBLIC_INTERNAL_NEXT_SERVER_URL}/api/ukol/splneni`,
+                                    block: true,
+                                    forwardToken: true,
+                                },
+                            };
                         try {
                             console.debug(
                                 "Creating post-creation webhook action..."
                             );
                             await createAction(
                                 createdForm._id,
-                                postCreationWebHookAction,
+                                postCreationWebHookActionCompleteTask,
                                 session.data!.user.formioToken
                             );
                         } catch (e) {
@@ -187,6 +189,37 @@ export default function CreateForm() {
                             return;
                         }
                         console.debug("Post-creation webhook action created.");
+                        const postCreationWebHookActionDeleteDraft: WebhookAction =
+                            {
+                                name: "webhook",
+                                title: "Delete drafts",
+                                handler: ["after"],
+                                method: ["create"],
+                                settings: {
+                                    url: `${process.env.NEXT_PUBLIC_INTERNAL_NEXT_SERVER_URL}/api/ukol/smazat-koncept`,
+                                    // The request may fail, because there are not any drafts (404),
+                                    // which is fine, so we don't block.
+                                    block: false,
+                                    forwardToken: true,
+                                },
+                            };
+                        try {
+                            console.debug(
+                                "Creating post-creation webhook to delete draft action..."
+                            );
+                            await createAction(
+                                createdForm._id,
+                                postCreationWebHookActionDeleteDraft,
+                                session.data!.user.formioToken
+                            );
+                        } catch (e) {
+                            console.error(e);
+                            toast.error("Vytvoření webhooku selhalo.");
+                            return;
+                        }
+                        console.debug(
+                            "Post-creation webhook to delete draft action created."
+                        );
 
                         toast.success("Formulář byl úspěšně vytvořen.");
                         router.push("/zamestnanec/prehled");

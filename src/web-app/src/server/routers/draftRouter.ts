@@ -6,6 +6,8 @@ import { createTRPCRouter, protectedProcedure } from "../trpc";
 
 const notFoundErrorCode = "P2025";
 
+const draftDataSchema = z.record(z.string(), z.unknown());
+
 const draftRouter = createTRPCRouter({
     /**
      * Update or insert a draft.
@@ -23,7 +25,7 @@ const draftRouter = createTRPCRouter({
         .input(
             z.object({
                 formId: z.string(),
-                data: z.unknown().transform((data, ctx) => {
+                data: draftDataSchema.transform((data, ctx) => {
                     try {
                         return JSON.stringify(data);
                     } catch (e) {
@@ -106,7 +108,7 @@ const draftRouter = createTRPCRouter({
 
             return {
                 ...result,
-                data: JSON.parse(result.data),
+                data: JSON.parse(result.data) as z.infer<typeof draftDataSchema>,
             };
         }),
     /**
