@@ -10,7 +10,7 @@ import { z } from "zod";
 /**
  * All environment variables are specified here. This schema is used in dev mode.
  */
-const allEnvVarsSchema = z.object({
+export const allEnvVarsSchema = z.object({
     NEXT_PUBLIC_FORMIO_BASE_URL: z.string().url(),
     NEXTAUTH_URL: z.string().url(),
     NEXTAUTH_SECRET: z.string(),
