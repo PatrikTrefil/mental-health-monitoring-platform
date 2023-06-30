@@ -1,6 +1,9 @@
 import {
     PHASE_DEVELOPMENT_SERVER,
+    PHASE_EXPORT,
+    PHASE_PRODUCTION_BUILD,
     PHASE_PRODUCTION_SERVER,
+    PHASE_TEST,
 } from "next/constants.js";
 // https://nextjs.org/docs/advanced-features/security-headers
 
@@ -106,13 +109,18 @@ const nextConfig = {
 };
 
 export default async function getNextConfig(phase) {
-    if (
-        phase === PHASE_DEVELOPMENT_SERVER ||
-        phase === PHASE_PRODUCTION_SERVER
-    ) {
-        const env = await import("./src/env.mjs");
-        // check that all environment variables are set
-        env.envVarSchema.parse(process.env);
+    const env = await import("./src/env.mjs");
+
+    if (phase === PHASE_DEVELOPMENT_SERVER) {
+        env.devEnvSchema.parse(process.env);
+    } else if (phase === PHASE_PRODUCTION_SERVER) {
+        env.productionServerEnvSchema.parse(process.env);
+    } else if (phase === PHASE_PRODUCTION_BUILD) {
+        env.productionBuildEnvSchema.parse(process.env);
+    } else if (phase === PHASE_EXPORT) {
+        throw new Error("This application is not meant to be exported");
+    } else if (phase === PHASE_TEST) {
+        env.testEnvSchema.parse(process.env);
     }
 
     return nextConfig;
