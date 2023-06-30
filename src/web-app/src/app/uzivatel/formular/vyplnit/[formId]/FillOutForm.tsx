@@ -147,7 +147,7 @@ export default function FillOutForm({ formId }: { formId: string }) {
             }
             modifyFormBeforeRender={(form) => {
                 form.components.unshift({
-                    label: "Uložit stav",
+                    label: "Uložit koncept",
                     key: "saveDraft",
                     action: "submit",
                     theme: "primary",
