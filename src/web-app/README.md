@@ -5,10 +5,11 @@
 -   install dependencies using `npm install` or `yarn install`
 -   configure the following environment variables in `.env` file (if you forget, the app will not start)
     -   `NEXT_PUBLIC_FORMIO_BASE_URL` - URL of the formio server
-    -   `DATABASE_URL` - URL of the database SQLite file (e.g. `file:./db.sqlite`)
-    -   `NEXT_PUBLIC_INTERNAL_NEXT_SERVER_URL` - URL for Formio server to call back to the web app (e.g. `http://web-app:3000`)
+    -   `DATABASE_URL` - URL of the database
+    -   `NEXT_PUBLIC_INTERNAL_NEXT_SERVER_URL` - URL for Formio server to call back to the web app
         -   It's public because it's used when defining
             webhooks in the client
+    -   you can find an example in `.env.example` file
 
 ## Production build
 
