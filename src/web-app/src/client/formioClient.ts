@@ -25,7 +25,7 @@ function isRunningOnServer() {
  */
 function getFormioUrl() {
     return isRunningOnServer()
-        ? process.env.FORMIO_SERVER_URL
+        ? process.env.NEXT_PUBLIC_INTERNAL_NEXT_SERVER_URL
         : process.env.NEXT_PUBLIC_FORMIO_BASE_URL;
 }
 
