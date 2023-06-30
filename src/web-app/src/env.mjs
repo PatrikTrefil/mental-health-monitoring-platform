@@ -45,8 +45,11 @@ export const productionBuildEnvSchema = allEnvVarsSchema.pick(buildMask);
  */
 export const productionServerEnvSchema = allEnvVarsSchema.omit(buildMask);
 
+// If you need to include more variables for new tests, add it the the mask
+// and make sure to add an example value to the `/.env.test.example` file.
+const testMask = { DATABASE_URL: true };
+
 /**
- * Environment variables needed for testing. If you need to include
- * more variables for new tests, add it the the mask.
+ * Environment variables needed for testing.
  */
-export const testEnvSchema = allEnvVarsSchema.pick({ DATABASE_URL: true });
+export const testEnvSchema = allEnvVarsSchema.pick(testMask);

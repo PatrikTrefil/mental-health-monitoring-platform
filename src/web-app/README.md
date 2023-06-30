@@ -54,8 +54,8 @@ you need to run this command in the container.
 
 ## Run tests
 
-Set the `DATABASE_URL` environment variable to the test database file path (e.g. `file:./test.db`)
-and run the following command:
+Setup the database by providing the necessary environment variables (see `/.env.test.example`)
+and migrating using `npx prisma` if needed.
 
 ```
 npm run test
