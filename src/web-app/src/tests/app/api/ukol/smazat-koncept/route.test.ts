@@ -43,7 +43,7 @@ it("deletes a concept", async () => {
     });
     // act - call the tested function
     const response = await deleteConceptPost(
-        new Request("http://mock-url.com", {
+        new Request(faker.internet.url(), {
             method: "POST",
             body: JSON.stringify({
                 request: {
@@ -67,7 +67,7 @@ it("deletes a concept", async () => {
 
 it("returns 404 if the draft does not exist", async () => {
     const response = await deleteConceptPost(
-        new Request("http://mock-url.com", {
+        new Request(faker.internet.url(), {
             method: "POST",
             body: JSON.stringify({
                 request: {
