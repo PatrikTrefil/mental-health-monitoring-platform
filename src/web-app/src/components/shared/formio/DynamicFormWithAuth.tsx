@@ -11,6 +11,9 @@ import { Alert, Spinner } from "react-bootstrap";
 import { toast } from "react-toastify";
 import DynamicForm from "./DynamicForm";
 
+/**
+ * Change event produced by the {@link DynamicForm} component.
+ */
 type ChangeEvent = {
     changed?: { component: Component; value: DataValue };
     data: { [key: string]: unknown };
