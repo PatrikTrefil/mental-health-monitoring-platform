@@ -45,6 +45,7 @@
     "zod": "^3.21.4"
   },
   "devDependencies": {
+    "@faker-js/faker": "^8.0.2",
     "@tanstack/eslint-plugin-query": "^4.29.4",
     "@types/file-saver": "^2.0.5",
     "@vitest/coverage-c8": "^0.31.4",

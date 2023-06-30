@@ -1,13 +1,17 @@
 import { POST as deleteConceptPost } from "@/app/api/ukol/smazat-koncept/route";
 import { prisma } from "@/server/db";
+import { faker } from "@faker-js/faker";
 import { expect, it, vi } from "vitest";
 
-const formId = "form-id";
-const userSubmissionId = "user-submission-id";
-const userId = "user-id";
-const taskId = "task-id";
+// make tests deterministic
+faker.seed(123);
 
-const mockValidAdminToken = "valid admin token";
+const formId = faker.string.uuid();
+const userSubmissionId = faker.string.uuid();
+const userId = faker.string.uuid();
+const taskId = faker.string.uuid();
+
+const mockValidAdminToken = faker.string.alpha(10);
 
 vi.mock("@/client/formioClient", () => ({
     loginAdmin: vi.fn(() => mockValidAdminToken),
@@ -23,12 +27,19 @@ vi.mock("@/client/formioClient", () => ({
 
 it("deletes a concept", async () => {
     // create the draft to delete in DB
-    await prisma.draft.create({
-        data: {
-            formId,
-            userId: userSubmissionId,
-            data: "{}",
+    await prisma.draft.upsert({
+        where: {
+            formId_userId: {
+                formId,
+                userId: userId,
+            },
         },
+        create: {
+            data: "{}",
+            formId,
+            userId: userId,
+        },
+        update: {},
     });
     // act - call the tested function
     const response = await deleteConceptPost(
@@ -49,7 +60,7 @@ it("deletes a concept", async () => {
     expect(response.status).toBe(200);
     expect(
         prisma.draft.findUnique({
-            where: { formId_userId: { formId, userId: userSubmissionId } },
+            where: { formId_userId: { formId, userId } },
         })
     ).resolves.toMatchInlineSnapshot("null");
 });
