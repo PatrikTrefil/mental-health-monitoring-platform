@@ -108,7 +108,9 @@ const draftRouter = createTRPCRouter({
 
             return {
                 ...result,
-                data: JSON.parse(result.data) as z.infer<typeof draftDataSchema>,
+                data: JSON.parse(result.data) as z.infer<
+                    typeof draftDataSchema
+                >,
             };
         }),
     /**

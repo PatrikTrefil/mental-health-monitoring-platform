@@ -38,7 +38,7 @@ export async function POST(req: Request) {
         process.env.FORMIO_ROOT_PASSWORD
     );
     const users = await loadUsers(adminToken);
-    const user = users.find(u => u._id === body.data.request.owner);
+    const user = users.find((u) => u._id === body.data.request.owner);
     if (!user)
         return new Response(JSON.stringify({ error: "User not found" }), {
             status: 404,
