@@ -110,18 +110,20 @@ const nextConfig = {
 };
 
 export default async function getNextConfig(phase) {
-    const env = await import("./src/env.mjs");
+    if (process.env.SKIP_ENV_VALIDATION === undefined) {
+        const env = await import("./src/env.mjs");
 
-    if (phase === PHASE_DEVELOPMENT_SERVER) {
-        env.devEnvSchema.parse(process.env);
-    } else if (phase === PHASE_PRODUCTION_SERVER) {
-        env.productionServerEnvSchema.parse(process.env);
-    } else if (phase === PHASE_PRODUCTION_BUILD) {
-        env.productionBuildEnvSchema.parse(process.env);
-    } else if (phase === PHASE_EXPORT) {
-        throw new Error("This application is not meant to be exported");
-    } else if (phase === PHASE_TEST) {
-        env.testEnvSchema.parse(process.env);
+        if (phase === PHASE_DEVELOPMENT_SERVER) {
+            env.devEnvSchema.parse(process.env);
+        } else if (phase === PHASE_PRODUCTION_SERVER) {
+            env.productionServerEnvSchema.parse(process.env);
+        } else if (phase === PHASE_PRODUCTION_BUILD) {
+            env.productionBuildEnvSchema.parse(process.env);
+        } else if (phase === PHASE_EXPORT) {
+            throw new Error("This application is not meant to be exported");
+        } else if (phase === PHASE_TEST) {
+            env.testEnvSchema.parse(process.env);
+        }
     }
 
     return nextConfig;
