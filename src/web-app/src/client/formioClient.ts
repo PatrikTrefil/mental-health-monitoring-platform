@@ -25,7 +25,7 @@ function isRunningOnServer() {
  */
 function getFormioUrl() {
     return isRunningOnServer()
-        ? process.env.NEXT_PUBLIC_INTERNAL_NEXT_SERVER_URL
+        ? process.env.FORMIO_SERVER_URL
         : process.env.NEXT_PUBLIC_FORMIO_BASE_URL;
 }
 
@@ -498,7 +498,9 @@ export async function refreshToken(currentToken: string) {
  * @throws TypeError if the request completely fails
  */
 export async function loginUser(id: string, password: string) {
-    console.log("Making login request...");
+    console.log("Making login request...", {
+        url: `${getFormioUrl()}/login`,
+    });
     const loginResponse = await fetch(`${getFormioUrl()}/login`, {
         body: JSON.stringify({
             data: {

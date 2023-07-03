@@ -16,6 +16,7 @@ export const allEnvVarsSchema = z.object({
     NEXTAUTH_SECRET: z.string(),
     FORMIO_ROOT_EMAIL: z.string().email(),
     FORMIO_ROOT_PASSWORD: z.string(),
+    FORMIO_SERVER_URL: z.string().url(),
     DATABASE_URL: z.string().url(),
     NEXT_PUBLIC_INTERNAL_NEXT_SERVER_URL: z.string().url(),
 });
@@ -29,7 +30,7 @@ const publicEnvVarsPrefix = "NEXT_PUBLIC_";
  * because they will be inlined during build.
  */
 const buildMask = Object.fromEntries(
-    Object.keys(env.envVarSchema.shape)
+    Object.keys(allEnvVarsSchema.shape)
         .filter((key) => key.startsWith(publicEnvVarsPrefix))
         .map((k) => [k, true])
 );

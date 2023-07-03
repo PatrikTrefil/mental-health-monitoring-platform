@@ -9,6 +9,7 @@
     -   `NEXT_PUBLIC_INTERNAL_NEXT_SERVER_URL` - URL for Formio server to call back to the web app
         -   It's public because it's used when defining
             webhooks in the client
+    -   `FORMIO_SERVER_URL` - internal URL of the Formio server
     -   you can find an example in `.env.example` file
 
 ## Production build

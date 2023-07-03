@@ -1,18 +1,22 @@
 # docker compose for production
 version: "3"
 
+# TODO: test that production build works
+# TODO: commit reverse proxy fix, readme fix, docs
+
 services:
   web-app:
     build:
       context: ./src/web-app
       dockerfile: Dockerfile.production
       args:
-      - NEXT_PUBLIC_FORMIO_BASE_URL=http://${DOMAIN_NAME}:80/formio/
-      - NEXT_PUBLIC_INTERNAL_NEXT_SERVER_URL=http://web-app:80
+        - NEXT_PUBLIC_FORMIO_BASE_URL=http://${DOMAIN_NAME}:80/formio/
+        - NEXT_PUBLIC_INTERNAL_NEXT_SERVER_URL=http://web-app:80
     environment:
       - NEXTAUTH_URL=http://${DOMAIN_NAME}/api/auth
       - NEXTAUTH_SECRET=${NEXTAUTH_SECRET}
       - FORMIO_ROOT_EMAIL=${FORMIO_ROOT_EMAIL}
+      - FORMIO_SERVER_URL=${FORMIO_SERVER_URL}
       - FORMIO_ROOT_PASSWORD=${FORMIO_ROOT_PASSWORD}
       - DATABASE_URL=file:/data/sqlitedb/db.sqlite
     volumes:
@@ -26,8 +30,11 @@ services:
     # since the image is not available in any repository we disable pulling
     pull_policy: never
 
-    build: ./src/reverse-proxy/production/
-
+    build:
+      context: ./src/reverse-proxy/production/
+      args:
+        - FORMIO_APP_URL=http://${DOMAIN_NAME}/formio/
+        - FORMIO_API_URL=http://${DOMAIN_NAME}/formio/
     ports:
       - 80:80
   mongo:
