@@ -67,7 +67,7 @@ export default function TaskTable() {
     );
 
     const { isLoading, isError, error, data, isFetching, refetch } =
-        trpc.listTasks.useQuery();
+        trpc.task.listTasks.useQuery();
 
     const table = useReactTable({
         columns,

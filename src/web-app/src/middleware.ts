@@ -6,8 +6,6 @@ import withLogging from "./middleware/withLogging";
 // To implement middleware chaining we are going to use decorators (higher order functions)
 // https://reacthustle.com/blog/how-to-chain-multiple-middleware-functions-in-nextjs
 
-// TODO: test that auth works
-
 const middlewares: MiddlewareWrapper[] = [withAuth, withLogging];
 
 export default chainMiddlewares(middlewares);

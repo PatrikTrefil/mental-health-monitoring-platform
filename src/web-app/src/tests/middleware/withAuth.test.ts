@@ -30,8 +30,7 @@ vi.mock("@/client/formioClient", () => ({
                 access: [],
                 form: "",
                 roles: [mockUserRoleId],
-                externalIds: [],
-                modified: "",
+                metadata: {},
             };
             return mockUser;
         }

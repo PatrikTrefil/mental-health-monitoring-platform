@@ -1,0 +1,6 @@
+/* Hide icons from Formio buttons. Their component does not hide the
+   loading spinner even if the triggered action is successful. We work
+   around this by using loading toasts. */
+.formio-form button i {
+    display: none;
+}

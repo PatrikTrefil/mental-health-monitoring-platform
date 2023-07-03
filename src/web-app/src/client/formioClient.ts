@@ -498,7 +498,9 @@ export async function refreshToken(currentToken: string) {
  * @throws TypeError if the request completely fails
  */
 export async function loginUser(id: string, password: string) {
-    console.log("Making login request...");
+    console.log("Making login request...", {
+        url: `${getFormioUrl()}/login`,
+    });
     const loginResponse = await fetch(`${getFormioUrl()}/login`, {
         body: JSON.stringify({
             data: {

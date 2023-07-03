@@ -1,6 +1,6 @@
 "use client";
 
-import { ClientProvider as TrpcClientProvider } from "@/client/trpcClient";
+import { ClientProvider as TrpcAndReactQueryClientProvider } from "@/client/trpcClient";
 import { SSRProvider } from "@/components/shared/client-react-bootstrap";
 import { SessionProvider } from "next-auth/react";
 import { ToastContainer } from "react-toastify";
@@ -9,7 +9,7 @@ import { ToastContainer } from "react-toastify";
 
 export function Providers({ children }: { children?: React.ReactNode }) {
     return (
-        <TrpcClientProvider>
+        <TrpcAndReactQueryClientProvider>
             <SSRProvider>
                 <SessionProvider>
                     {children}
@@ -22,6 +22,6 @@ export function Providers({ children }: { children?: React.ReactNode }) {
                     />
                 </SessionProvider>
             </SSRProvider>
-        </TrpcClientProvider>
+        </TrpcAndReactQueryClientProvider>
     );
 }

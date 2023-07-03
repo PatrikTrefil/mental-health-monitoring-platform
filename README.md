@@ -33,17 +33,7 @@ git submodule update
 ## Spouštění aplikace
 
 Před spuštěním aplikace je potřeba dodat `.env` soubor pro konfiguraci kontejneru.
-Zde je šablona pro tento soubor:
-
-```
-MONGO_INITDB_ROOT_USERNAME=<root username>
-MONGO_INITDB_ROOT_PASSWORD=<root password>
-FORMIO_NODE_CONFIG={"jwt":{"secret":"<your secret>"}, "mongoSecret":"<your secret>", "mongo": "mongodb://mongo:27017/formio"}
-FORMIO_ROOT_EMAIL=<root email>
-FORMIO_ROOT_PASSWORD=<root password>
-FORMIO_MONGO_USER=<formio username>
-FORMIO_MONGO_PASSWORD=<formio password>
-```
+Ukázkovou konfiguraci najdete v `.env.example`.
 
 -   konfigurace mongo
     -   `MONGO_INITDB_ROOT_USERNAME` - uživatelské jméno pro přihlášení do MongoDB jako root

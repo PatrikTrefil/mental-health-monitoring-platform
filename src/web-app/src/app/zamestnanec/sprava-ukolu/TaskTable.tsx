@@ -3,7 +3,7 @@
 import { trpc } from "@/client/trpcClient";
 import SimplePagination from "@/components/shared/SimplePagination";
 import TaskState from "@/constants/taskState";
-import { AppRouter } from "@/server/routers/_app";
+import { AppRouter } from "@/server/routers/root";
 import {
     createColumnHelper,
     flexRender,
@@ -22,9 +22,9 @@ import { toast } from "react-toastify";
 export default function TaskTable() {
     const utils = trpc.useContext();
 
-    const deleteTodo = trpc.deleteTask.useMutation({
+    const deleteTodo = trpc.task.deleteTask.useMutation({
         onSuccess: () => {
-            utils.listTasks.invalidate();
+            utils.task.listTasks.invalidate();
         },
         onError: () => {
             toast.error("Smazání úkolu selhalo.");
@@ -32,7 +32,9 @@ export default function TaskTable() {
     });
 
     const columnHelper =
-        createColumnHelper<inferProcedureOutput<AppRouter["createTask"]>>();
+        createColumnHelper<
+            inferProcedureOutput<AppRouter["task"]["createTask"]>
+        >();
     const columns = useMemo(
         () => [
             columnHelper.accessor("id", {
@@ -93,7 +95,7 @@ export default function TaskTable() {
     );
 
     const { isLoading, isError, error, data, isFetching, refetch } =
-        trpc.listTasks.useQuery();
+        trpc.task.listTasks.useQuery();
 
     const table = useReactTable({
         columns,

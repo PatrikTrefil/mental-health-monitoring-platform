@@ -1,11 +1,15 @@
 import {
     PHASE_DEVELOPMENT_SERVER,
+    PHASE_EXPORT,
+    PHASE_PRODUCTION_BUILD,
     PHASE_PRODUCTION_SERVER,
+    PHASE_TEST,
 } from "next/constants.js";
 // https://nextjs.org/docs/advanced-features/security-headers
 
 /* HACK: setting `worker-src blob:` is dangerous (formio should fix this,
    see issue https://github.com/formio/formio.js/issues/5146) */
+// HACK: the script-src contains `unsafe-eval` because of formio Form component
 // HACK: The `script-src` contains `unsafe-inline`. I could not
 // find a way of implementing strict CSP with Next.js
 // https://github.com/vercel/next.js/issues/23993
@@ -14,7 +18,7 @@ import {
 // HACK: `style-src` contains unsafe-inline. Can't get rid of it...
 const ProductionContentSecurityPolicy = `
     default-src 'self';
-    script-src 'self' cdn.form.io 'unsafe-inline';
+    script-src 'self' cdn.form.io 'unsafe-inline' 'unsafe-eval';
     style-src 'self' 'unsafe-inline';
     img-src 'self' data:;
     worker-src blob:;
@@ -106,13 +110,20 @@ const nextConfig = {
 };
 
 export default async function getNextConfig(phase) {
-    if (
-        phase === PHASE_DEVELOPMENT_SERVER ||
-        phase === PHASE_PRODUCTION_SERVER
-    ) {
+    if (process.env.SKIP_ENV_VALIDATION === undefined) {
         const env = await import("./src/env.mjs");
-        // check that all environment variables are set
-        env.envVarSchema.parse(process.env);
+
+        if (phase === PHASE_DEVELOPMENT_SERVER) {
+            env.devEnvSchema.parse(process.env);
+        } else if (phase === PHASE_PRODUCTION_SERVER) {
+            env.productionServerEnvSchema.parse(process.env);
+        } else if (phase === PHASE_PRODUCTION_BUILD) {
+            env.productionBuildEnvSchema.parse(process.env);
+        } else if (phase === PHASE_EXPORT) {
+            throw new Error("This application is not meant to be exported");
+        } else if (phase === PHASE_TEST) {
+            env.testEnvSchema.parse(process.env);
+        }
     }
 
     return nextConfig;

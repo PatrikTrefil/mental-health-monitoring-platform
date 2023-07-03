@@ -12,7 +12,8 @@ export type FormSchema = {
 export type Component =
     | StringResultComponent
     | SelectBoxesComponent
-    | HiddenComponent;
+    | HiddenComponent
+    | ButtonComponent;
 
 type ComponentBase = {
     label: string;
@@ -38,8 +39,14 @@ type HiddenComponent = ComponentBase & {
     lockKey: boolean;
 };
 
+type ButtonComponent = ComponentBase & {
+    type: "button";
+    action: "saveState" | "submit";
+    theme: "primary" | "secondary" | "success" | "info" | "warning" | "danger";
+};
+
 type StringResultComponent = ComponentBase & {
-    type: "button" | "checkbox" | "textarea" | "radio" | "number" | "textfield";
+    type: "checkbox" | "textarea" | "radio" | "number" | "textfield";
 };
 
 type SelectBoxesComponent = ComponentBase & {
