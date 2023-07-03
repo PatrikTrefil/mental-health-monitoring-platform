@@ -17,12 +17,8 @@ runs:
       working-directory: ./src/web-app/
       run: npm ci
 
-    - name: Install env-cmd
-      shell: bash
-      working-directory: ./src/web-app/
-      run: npm install -g env-cmd
-
     - name: Run build
       shell: bash
       working-directory: ./src/web-app/
-      run: npx env-cmd -f ./env.example npm run build
+      # Load environment variables from .env.example file (sed is used to ignore comments)
+      run: export $(echo $(cat .env.example | sed 's/#.*//g'| xargs)) && npm run build
