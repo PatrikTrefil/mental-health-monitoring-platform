@@ -30,8 +30,10 @@ Deployment_Node(server, "Server", "Ubuntu, CPU: 2 jádra, RAM: 4 GB") {
         }
         Deployment_Node(spravceUkolu_docker, "Docker container", "Docker Engine") {
             ContainerDb(ukolyDb, "Databáze úkolů",  "SQLite")
+            ContainerDb(spravaNedokoncenychVyplneniDb, "Databáze nedokončených vyplnění", "SQLite")
             Deployment_Node(express, "Next.js") {
                 Container(spravaUkolu, "Správa úkolů", "TypeScript")
+                Container(spravaNedokoncenychVyplneni, "Správa nedokončených vyplnění", "TypeScript")
             }
         }
         Deployment_Node(formio_docker, "Docker container", "Docker Engine") {
@@ -51,6 +53,10 @@ Rel(spravaFormularu, formulareDb, "Ukládá data", "MongoDB Wire Protocol")
 Rel(spravaFormularu, manazerUzivatelu, "Autorizuje akce")
 Rel(spravaUkolu, manazerUzivatelu, "Autorizuje akce", "HTTPS")
 BiRel(spravaFormularu, spravaUkolu, "Synchronizují stavy", "HTTPS")
+Rel(webApp, spravaNedokoncenychVyplneni, "Používá")
+Rel(spravaFormularu, spravaNedokoncenychVyplneni, "Informuje o vyplnění", "HTTPS")
+Rel(spravaNedokoncenychVyplneni, manazerUzivatelu, "Autorizuje akce", "HTTPS")
+Rel(spravaNedokoncenychVyplneni, spravaNedokoncenychVyplneniDb, "Ukládá data")
 
 Rel(monitoringWeb, monitoringServer, "Čte data")
 
