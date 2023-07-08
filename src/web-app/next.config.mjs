@@ -82,14 +82,6 @@ const nextConfig = {
     eslint: {
         dirs: ["src"],
     },
-    // this makes hot reloading work when Dockerized
-    webpack: (config) => {
-        config.watchOptions = {
-            poll: 1000,
-            aggregateTimeout: 300,
-        };
-        return config;
-    },
     redirects: async () => [
         {
             source: "/zamestnanec",
