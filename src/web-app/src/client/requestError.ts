@@ -1,13 +1,14 @@
 /**
- * Error thrown when a fetch request fails.
+ * Error thrown when an http request fails or the received
+ * response was unexpected.
  */
 export class RequestError extends Error {
     /**
      * Status code of the failed request.
      */
-    statusCode: number;
-    constructor(status: number) {
-        super();
+    statusCode?: number;
+    constructor(message: string, status?: number) {
+        super(message);
         this.statusCode = status;
     }
 }

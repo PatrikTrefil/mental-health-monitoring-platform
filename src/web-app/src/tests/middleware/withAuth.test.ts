@@ -1,6 +1,6 @@
 import {
-    fetchRoleList,
     getCurrentUser,
+    loadRoles,
     loginAdmin,
 } from "@/client/userManagementClient";
 import { stackMiddlewares } from "@/middleware/stackMiddleware";
@@ -36,7 +36,7 @@ vi.mock("@/client/userManagementClient", () => ({
         }
         throw new Error("Unexpected token");
     }),
-    fetchRoleList: vi.fn(),
+    loadRoles: vi.fn(),
     loginAdmin: vi.fn(),
 }));
 
@@ -152,8 +152,8 @@ describe("accessing /api/ukol/*", () => {
             async () => mockValidAdminToken
         );
 
-        vi.mocked(fetchRoleList).mockImplementationOnce(async () => {
-            const mockRoleList: Awaited<ReturnType<typeof fetchRoleList>> = [
+        vi.mocked(loadRoles).mockImplementationOnce(async () => {
+            const mockRoleList: Awaited<ReturnType<typeof loadRoles>> = [
                 {
                     _id: mockUserRoleId,
                     title: UserRoleTitles.KLIENT_PACIENT,

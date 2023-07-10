@@ -1,6 +1,6 @@
 import {
-    fetchRoleList,
     getCurrentUser,
+    loadRoles,
     loginAdmin,
 } from "@/client/userManagementClient";
 import { UserRoleTitle, UserRoleTitles } from "@/types/users";
@@ -100,13 +100,13 @@ async function apiMiddleware(req: NextRequest) {
             return new NextResponse("Unauthorized", { status: 401 });
         }
 
-        let roleList: Awaited<ReturnType<typeof fetchRoleList>> | undefined;
+        let roleList: Awaited<ReturnType<typeof loadRoles>> | undefined;
         try {
             const adminToken = await loginAdmin(
                 process.env.FORMIO_ROOT_EMAIL,
                 process.env.FORMIO_ROOT_PASSWORD
             );
-            roleList = await fetchRoleList(adminToken);
+            roleList = await loadRoles(adminToken);
         } catch {
             return new NextResponse("Internal server error", { status: 500 });
         }

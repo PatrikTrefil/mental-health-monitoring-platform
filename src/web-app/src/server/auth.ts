@@ -1,6 +1,6 @@
 import { RequestError } from "@/client/requestError";
 import {
-    fetchRoleList,
+    loadRoles,
     loginAdmin,
     loginUser,
     refreshToken,
@@ -74,7 +74,7 @@ export const authOptions: AuthOptions = {
                         process.env.FORMIO_ROOT_PASSWORD
                     );
 
-                    const roleList = await fetchRoleList(adminToken);
+                    const roleList = await loadRoles(adminToken);
 
                     const roleTitles = user.roles.map((roleId) => {
                         const title = roleList.find(
@@ -94,7 +94,7 @@ export const authOptions: AuthOptions = {
                     };
                 } catch (e) {
                     console.error("Error: ", e); // log on server
-                    if (e instanceof RequestError) {
+                    if (e instanceof RequestError && e.statusCode) {
                         const isInvalidCredentials =
                             e.statusCode >= 400 && e.statusCode < 500;
                         if (isInvalidCredentials) return null;

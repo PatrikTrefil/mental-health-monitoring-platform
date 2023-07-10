@@ -73,6 +73,8 @@ export default function DynamicFormWithAuth(
                 token
             );
 
+            if (result === null) throw new Error("Form not found");
+
             if (formProps.defaultValues)
                 for (const [k, v] of Object.entries(formProps.defaultValues)) {
                     const c = result.components.find((c) => c.key === k);
@@ -80,8 +82,6 @@ export default function DynamicFormWithAuth(
                 }
             if (formProps.modifyFormBeforeRender)
                 formProps.modifyFormBeforeRender(result);
-
-            if (result === null) throw new Error("Form not found");
 
             return result;
         },
