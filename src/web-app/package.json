@@ -47,6 +47,7 @@
   "devDependencies": {
     "@faker-js/faker": "^8.0.2",
     "@tanstack/eslint-plugin-query": "^4.29.4",
+    "@total-typescript/ts-reset": "^0.4.2",
     "@types/file-saver": "^2.0.5",
     "@vitest/coverage-c8": "^0.31.4",
     "cross-env": "^7.0.3",

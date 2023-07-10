@@ -126,7 +126,13 @@ export async function createForm(formioToken: string, formSchema: FormSchema) {
         },
         body: JSON.stringify(formSchema),
     });
-    if (!response.ok) throw new Error((await response.json())?.message);
+    const body = await response.json();
+    if (!response.ok)
+        throw new Error(
+            typeof body === "object" && body !== null && "message" in body
+                ? String(body?.message)
+                : undefined
+        );
     return (await response.json()) as Form;
 }
 
