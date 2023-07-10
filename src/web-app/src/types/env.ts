@@ -3,10 +3,11 @@
  * @module envTypes
  */
 import { z } from "zod";
-import { envVarSchema } from "../env.mjs";
+import { allEnvVarsSchema } from "../env.mjs";
 
 declare global {
     namespace NodeJS {
-        interface ProcessEnv extends Readonly<z.infer<typeof envVarSchema>> {}
+        interface ProcessEnv
+            extends Readonly<z.infer<typeof allEnvVarsSchema>> {}
     }
 }

@@ -11,7 +11,7 @@ services:
     build:
       context: src/web-app/
       dockerfile: Dockerfile.dev
-    restart: always
+    restart: on-failure
     volumes:
       - ./src/web-app:/app
       # keep node_modules and .next folders in the container, rather than host

@@ -3,6 +3,7 @@
 import csTranslation from "@/lib/formioTranslation";
 import { FormioComponentLoader } from "@/lib/formiojsWrapper";
 import { FormProps, Options } from "@formio/react/lib/components/Form";
+import { useMemo } from "react";
 import DynamicFormWithAuth from "./DynamicFormWithAuth";
 
 /**
@@ -28,11 +29,19 @@ export default function DynamicForm({
      */
     language?: string;
 } & FormProps) {
-    const Component = FormioComponentLoader(async () => {
-        const mod = await import("@formio/react");
-        return mod.Form;
-    }, loading);
-
+    // The use memo use very important here,
+    // otherwise the component would completely rerender and
+    // lose all its internal state (the user would effectively
+    // lose all their input)
+    const Component = useMemo(() => {
+        return FormioComponentLoader(async () => {
+            const mod = await import("@formio/react");
+            return mod.Form;
+        }, loading);
+        // Disable the dependency warning because the loading component
+        // should not change (if it changed, it would result in the user losing their input)
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
     // add the cs translation if it is not already there
     if (props.options) {
         if (props.options.i18n)

@@ -5,10 +5,10 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 
-export const appRouter = createTRPCRouter({
+const taskRouter = createTRPCRouter({
     /**
-     * Get list of all tasks. If user is employee, return all tasks.
-     * If user is client, return only tasks for them.
+     * Get list of all tasks. If user is {@link UserRoleTitles.ZADAVATEL_DOTAZNIKU}, return all tasks.
+     * If user is {@link UserRoleTitles.KLIENT_PACIENT}, return only tasks for them.
      */
     listTasks: protectedProcedure.query((opts) => {
         const userRoleTitles = opts.ctx.session.user.roleTitles;
@@ -23,10 +23,15 @@ export const appRouter = createTRPCRouter({
         } else throw new TRPCError({ code: "FORBIDDEN" });
     }),
     /**
-     * Get task by id. If the task with given id does not exist, throw NOT_FOUND error.
-     * If the task exists and it is assigned to the user that is requesting it, return it.
-     * If the task exists and it is not assigned to the user that is requesting it and the user
-     * is not an employee, throw FORBIDDEN error.
+     * Get task by id.
+     *
+     * @throws {TRPCError} FORBIDDEN if the user is not a {@link UserRoleTitles.ZADAVATEL_DOTAZNIKU}
+     * or {@link UserRoleTitles.KLIENT_PACIENT}
+     * @throws {TRPCError} FORBIDDEN if the user is not an {@link UserRoleTitles.ZADAVATEL_DOTAZNIKU}
+     * and the task is not assigned to them
+     * @throws {TRPCError} NOT_FOUND if the task does not exist
+     *
+     * @returns {Prisma.Task} the task with given id
      */
     getTask: protectedProcedure
         .input(
@@ -36,6 +41,13 @@ export const appRouter = createTRPCRouter({
         )
         .query(async (opts) => {
             const userRoleTitles = opts.ctx.session.user.roleTitles;
+
+            if (
+                !userRoleTitles.includes(UserRoleTitles.ZADAVATEL_DOTAZNIKU) &&
+                !userRoleTitles.includes(UserRoleTitles.KLIENT_PACIENT)
+            )
+                throw new TRPCError({ code: "FORBIDDEN" });
+
             const result = await opts.ctx.prisma.task.findUnique({
                 where: {
                     id: opts.input.id,
@@ -52,10 +64,16 @@ export const appRouter = createTRPCRouter({
             return result;
         }),
     /**
-     * Create new task. If the user is not an employee, throw FORBIDDEN error.
-     * If the form with given formId does not exist, throw CONFLICT error.
-     * If the form with given formId exists and the user is an employee,
-     * create new task and return it.
+     * Create new task.
+     *
+     * @throws {TRPCError} FORBIDDEN if the user is not an {@link UserRoleTitles.ZADAVATEL_DOTAZNIKU}
+     * @throws {TRPCError} CONFLICT if the form with given formId does not exist
+     * @throws {TRPCError} CONFLICT if the user with given forUserId does not exist
+     * @throws {TRPCError} INTERNAL_SERVER_ERROR if the checking of form existence fails
+     * @throws {TRPCError} INTERNAL_SERVER_ERROR if the creation of task fails
+     * @throws {TRPCError} INTERNAL_SERVER_ERROR if the loading of users fails
+     *
+     * @returns {Prisma.Task} the created task
      */
     createTask: protectedProcedure
         .input(
@@ -118,9 +136,10 @@ export const appRouter = createTRPCRouter({
             });
         }),
     /**
-     * Delete task by id. If the user is not an employee, throw FORBIDDEN error.
-     * If the task with given id does not exist, throw NOT_FOUND error. Otherwise
-     * delete the task.
+     * Delete task by id.
+     *
+     * @throws {TRPCError} FORBIDDEN if the user is not an {@link UserRoleTitles.ZADAVATEL_DOTAZNIKU}
+     * @throws {TRPCError} NOT_FOUND if the task with given id does not exist
      */
     deleteTask: protectedProcedure
         .input(
@@ -154,5 +173,4 @@ export const appRouter = createTRPCRouter({
         }),
 });
 
-// export type definition of API
-export type AppRouter = typeof appRouter;
+export default taskRouter;

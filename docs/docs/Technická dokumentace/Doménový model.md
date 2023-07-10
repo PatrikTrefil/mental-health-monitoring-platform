@@ -90,6 +90,15 @@ classDiagram
     }
     %% Vztahy
     AnalýzaVypracováníFormuláře "1" --> "1" VypracováníFormuláře : analyzuje
+
+    class NedokončenéVyplněníFormuláře {
+        data
+    }
+    %% Vztahy
+    NedokončenéVyplněníFormuláře "0..n" --> "1" DefiniceFormuláře : vyplňuje
+    Plnitel "1" --> "0..n" NedokončenéVyplněníFormuláře : vlastní
+    NedokončenéVyplněníFormuláře "0..1" --> "1" ZadáníÚkolu : částečně vypracovává
+
 ```
 
 :::note
@@ -156,7 +165,29 @@ Vypracování úkolu ve tvaru vyplnění formuláře.
 
 Analýza vypracování formuláře, která je určena k uložení odvozených dat.
 
+### NedokončenéVyplněníFormuláře
+
+Nedokončené vyplnění formuláře, které slouží k uložení částečně vyplněných
+formulářů. (Umožňuje uživateli přerušit vyplňování formuláře a pokračovat
+později)
+
 ## Omezení
+
+### NedokončenéVyplněníFormuláře
+
+-   Nedokončené vyplnění formuláře pro definici formuláře, zadání úkolu a
+    uživatele může existovat pouze pokud je zadání úkolu pro uživatele a zadání
+    úkolu zadává stejný formulář, který je částečně vyplněn nedokončeným
+    vypněním formuláře.
+
+    ```
+    context plnitel: Plnitel inv
+    plnitel->vlastni->forAll(
+        nedokonceneVyplneniFormulare |
+            nedokonceneVyplneniFormulare->castecneVypracovava->zadanPro = self and
+            nedokonceneVyplneniFormulare->castecneVypracovava->definovano = nedokonceneVyplneniFormulare->vyplnuje
+            )
+    ```
 
 ### ZadáníÚkolu
 

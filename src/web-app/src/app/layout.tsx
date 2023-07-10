@@ -1,4 +1,5 @@
 import "@/styles/globals.css";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import "bootstrap/dist/css/bootstrap.css";
 import "formiojs/dist/formio.full.min.css";
 import "react-toastify/dist/ReactToastify.min.css";
@@ -15,7 +16,11 @@ export default function RootLayout({
     return (
         <html lang="cs">
             <body>
-                <Providers>{children}</Providers>
+                <Providers>
+                    {/* This won't be included in the production build */}
+                    <ReactQueryDevtools initialIsOpen={false} />
+                    {children}
+                </Providers>
                 <CookieConsent
                     buttonText="Souhlasím"
                     disableStyles={true}
