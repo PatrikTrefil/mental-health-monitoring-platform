@@ -236,20 +236,6 @@ export async function loadSubmission(
 }
 
 /**
- * Get current formio user
- * @param formioToken JWT token for formio
- * @throws {TypeError} if the fetch fails or the response is not valid json
- */
-export async function getCurrentUser(formioToken: string) {
-    const response = await fetch(`${getFormioUrl()}/current`, {
-        headers: {
-            "x-jwt-token": formioToken,
-        },
-    });
-    return (await response.json()) as UserFormSubmission;
-}
-
-/**
  * Get submissions of a form
  * @param formId id of the form to load submissions from
  * @param formioToken JWT token for formio

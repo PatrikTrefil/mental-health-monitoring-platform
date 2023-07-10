@@ -1,5 +1,8 @@
-import { getCurrentUser } from "@/client/formManagementClient";
-import { fetchRoleList, loginAdmin } from "@/client/userManagementClient";
+import {
+    fetchRoleList,
+    getCurrentUser,
+    loginAdmin,
+} from "@/client/userManagementClient";
 import { UserRoleTitle, UserRoleTitles } from "@/types/users";
 import withAuthNextAuth, { NextRequestWithAuth } from "next-auth/middleware";
 import { NextRequest, NextResponse } from "next/server";
@@ -92,7 +95,8 @@ async function apiMiddleware(req: NextRequest) {
         let user: Awaited<ReturnType<typeof getCurrentUser>> | undefined;
         try {
             user = await getCurrentUser(formioToken);
-        } catch {
+        } catch (e) {
+            console.log(e);
             return new NextResponse("Unauthorized", { status: 401 });
         }
 

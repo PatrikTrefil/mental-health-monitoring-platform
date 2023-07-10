@@ -284,3 +284,17 @@ export async function updateUser(
 ) {
     return updateSubmission("/klientpacient", submisionId, data, formioToken);
 }
+/**
+ * Get current formio user
+ * @param formioToken JWT token for formio
+ * @throws {TypeError} if the fetch fails or the response is not valid json
+ */
+
+export async function getCurrentUser(formioToken: string) {
+    const response = await fetch(`${getFormioUrl()}/current`, {
+        headers: {
+            "x-jwt-token": formioToken,
+        },
+    });
+    return (await response.json()) as UserFormSubmission;
+}

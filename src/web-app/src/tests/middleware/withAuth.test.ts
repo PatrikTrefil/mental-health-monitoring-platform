@@ -1,5 +1,8 @@
-import { getCurrentUser } from "@/client/formManagementClient";
-import { fetchRoleList, loginAdmin } from "@/client/userManagementClient";
+import {
+    fetchRoleList,
+    getCurrentUser,
+    loginAdmin,
+} from "@/client/userManagementClient";
 import { stackMiddlewares } from "@/middleware/stackMiddleware";
 import withAuth from "@/middleware/withAuth";
 import { UserRoleTitle, UserRoleTitles } from "@/types/users";
@@ -15,7 +18,7 @@ const mockValidAdminToken = "valid admin token";
 
 const mockUserRoleId = "123";
 
-vi.mock("@/client/formioClient", () => ({
+vi.mock("@/client/userManagementClient", () => ({
     getCurrentUser: vi.fn(async (token: string) => {
         if (token === mockInvalidUserToken) throw new TypeError();
         else if (token === mockValidUserToken) {

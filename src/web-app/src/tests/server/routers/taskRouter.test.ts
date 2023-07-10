@@ -19,7 +19,7 @@ const mockInputTask: CreateTaskInput & { description: string } = {
     formId: "123",
 };
 
-vi.mock("@/client/formioClient", () => ({
+vi.mock("@/client/formManagementClient", () => ({
     loadFormById: vi.fn(async () => {
         const mockForm: Awaited<ReturnType<typeof loadFormById>> = {
             _id: "123",
@@ -32,6 +32,9 @@ vi.mock("@/client/formioClient", () => ({
         };
         return mockForm;
     }),
+}));
+
+vi.mock("@/client/userManagementClient", () => ({
     loadUsers: vi.fn(async () => {
         const mockUsers: Awaited<ReturnType<typeof loadUsers>> = [
             {
