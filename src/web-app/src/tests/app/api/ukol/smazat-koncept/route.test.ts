@@ -13,7 +13,7 @@ const taskId = faker.string.uuid();
 
 const mockValidAdminToken = faker.string.alpha(10);
 
-vi.mock("@/client/formioClient", () => ({
+vi.mock("@/client/userManagementClient", () => ({
     loginAdmin: vi.fn(() => mockValidAdminToken),
     loadUsers: vi.fn(() => [
         {
