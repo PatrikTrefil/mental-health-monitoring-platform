@@ -17,9 +17,3 @@ exports[`accessing 'Zadavatel dotazníků' page > should be possible if the user
 exports[`accessing 'Zadavatel dotazníků' page > should not be possible if no token is provided 1`] = `307`;
 
 exports[`accessing 'Zadavatel dotazníků' page > should not be possible if the user is not an Zadavatel dotazníků 1`] = `307`;
-
-exports[`accessing 'Zamestnanec' page > should be possible if the user is an Zamestnanec 1`] = `307`;
-
-exports[`accessing 'Zamestnanec' page > should not be possible if no token is provided 1`] = `307`;
-
-exports[`accessing 'Zamestnanec' page > should not be possible if the user is not an Zamestnanec 1`] = `307`;

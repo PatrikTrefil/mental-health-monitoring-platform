@@ -1,8 +1,12 @@
 import UserRoleTitles from "@/constants/userRoleTitles";
 import { AppRouter, appRouter } from "@/server/routers/root";
+import { faker } from "@faker-js/faker";
 import { inferProcedureInput } from "@trpc/server";
 import { describe, expect, it } from "vitest";
 import { createInnerTRPCContextMockSession } from "./utility";
+
+// make tests deterministic
+faker.seed(123);
 
 describe.each(
     Object.values(UserRoleTitles).filter(
@@ -47,20 +51,24 @@ describe(`as a ${UserRoleTitles.KLIENT_PACIENT} it`, () => {
         UserRoleTitles.KLIENT_PACIENT,
     ]);
     const caller = appRouter.createCaller(ctx);
-    const formId = "some-form-id";
+    const nonexistentFormId = "nonexistent-form-id";
 
     it("throws when getting a non-existing draft", async () => {
-        expect(caller.draft.getDraft({ formId })).rejects.toMatchSnapshot();
+        expect(
+            caller.draft.getDraft({ formId: nonexistentFormId })
+        ).rejects.toMatchSnapshot();
     });
 
     it("throws when deleting a non-existing draft", async () => {
-        expect(caller.draft.deleteDraft({ formId })).rejects.toMatchSnapshot();
+        expect(
+            caller.draft.deleteDraft({ formId: nonexistentFormId })
+        ).rejects.toMatchSnapshot();
     });
 
     it("should throw when passing a non-stringifiable JSON value", async () => {
         expect(
             caller.draft.upsertDraft({
-                formId,
+                formId: nonexistentFormId,
                 data: {
                     a: BigInt(10),
                 },
@@ -68,12 +76,14 @@ describe(`as a ${UserRoleTitles.KLIENT_PACIENT} it`, () => {
         ).rejects.toMatchSnapshot();
     });
 
+    const formId = faker.string.alpha(10);
+
     it("should be possible to create a draft", async () => {
         type CreateDraftInput = inferProcedureInput<
             AppRouter["draft"]["upsertDraft"]
         >;
         const input: CreateDraftInput = {
-            formId,
+            formId: formId,
             data: {},
         };
         const result = await caller.draft.upsertDraft(input);
@@ -85,7 +95,7 @@ describe(`as a ${UserRoleTitles.KLIENT_PACIENT} it`, () => {
             AppRouter["draft"]["upsertDraft"]
         >;
         const input: UpdateDraftInput = {
-            formId,
+            formId: formId,
             data: { new: "data" },
         };
         const result = await caller.draft.upsertDraft(input);
@@ -93,6 +103,6 @@ describe(`as a ${UserRoleTitles.KLIENT_PACIENT} it`, () => {
     });
 
     it("should be possible to delete a draft ", async () => {
-        await caller.draft.deleteDraft({ formId });
+        await caller.draft.deleteDraft({ formId: formId });
     });
 });

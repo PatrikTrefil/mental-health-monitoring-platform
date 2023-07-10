@@ -27,7 +27,7 @@ exports[`as $1 it > should not be possible to update a draft 4`] = `[TRPCError: 
 exports[`as a Klient/Pacient it > should be possible to create a draft 1`] = `
 {
   "data": "{}",
-  "formId": "some-form-id",
+  "formId": "KLowlJCLLz",
   "userId": "123",
 }
 `;
@@ -35,7 +35,7 @@ exports[`as a Klient/Pacient it > should be possible to create a draft 1`] = `
 exports[`as a Klient/Pacient it > should be possible to edit my draft 1`] = `
 {
   "data": "{\\"new\\":\\"data\\"}",
-  "formId": "some-form-id",
+  "formId": "KLowlJCLLz",
   "userId": "123",
 }
 `;
