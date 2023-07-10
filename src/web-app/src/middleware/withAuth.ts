@@ -3,7 +3,8 @@ import {
     loadRoles,
     loginAdmin,
 } from "@/client/userManagementClient";
-import { UserRoleTitle, UserRoleTitles } from "@/types/users";
+import UserRoleTitles from "@/constants/userRoleTitles";
+import { UserRoleTitle } from "@/types/userManagement/UserRoleTitle";
 import withAuthNextAuth, { NextRequestWithAuth } from "next-auth/middleware";
 import { NextRequest, NextResponse } from "next/server";
 import { MiddlewareWrapper } from "./types";

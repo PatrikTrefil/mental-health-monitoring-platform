@@ -1,7 +1,17 @@
 export interface Submission {
+    /**
+     * ID of the submission
+     */
     _id: string;
+    /**
+     * ID of the form to which this submission belongs
+     */
     form: string;
+    /**
+     * ID of the user who owns this submission
+     */
     owner: string;
+    access: string[];
     data: {
         [key: string]: DataValue | undefined;
     };

@@ -1,5 +1,5 @@
+import UserRoleTitles from "@/constants/userRoleTitles";
 import { AppRouter, appRouter } from "@/server/routers/root";
-import { UserRoleTitles } from "@/types/users";
 import { inferProcedureInput } from "@trpc/server";
 import { describe, expect, it } from "vitest";
 import { createInnerTRPCContextMockSession } from "./utility";

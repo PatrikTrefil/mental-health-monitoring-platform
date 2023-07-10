@@ -2,8 +2,8 @@
 
 import { loadFormByPath, submitForm } from "@/client/formManagementClient";
 import { useSmartFetch } from "@/hooks/useSmartFetch";
-import { Component, Form } from "@/types/forms";
-import { DataValue, Submission } from "@/types/submission";
+import { Component, Form } from "@/types/formManagement/forms";
+import { DataValue, Submission } from "@/types/formManagement/submission";
 import { FormProps } from "@formio/react/lib/components/Form";
 import { useSession } from "next-auth/react";
 import { useState } from "react";

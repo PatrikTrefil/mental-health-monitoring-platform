@@ -1,7 +1,7 @@
 /**
  * User role string constants
  */
-export const UserRoleTitles = {
+const UserRoleTitles = {
     ADMIN: "Administrator",
     KLIENT_PACIENT: "Klient/Pacient",
     SPRAVCE_DOTAZNIKU: "Správce dotazníků",
@@ -9,10 +9,4 @@ export const UserRoleTitles = {
     AUTHENTICATED: "Authenticated",
 } as const;
 
-export type UserRoleTitle =
-    (typeof UserRoleTitles)[keyof typeof UserRoleTitles];
-
-export const UserRolePrefixes = {
-    SPRAVCE_DOTAZNIKU: "SD",
-    ZADAVATEL_DOTAZNIKU: "ZD",
-} as const;
+export default UserRoleTitles;

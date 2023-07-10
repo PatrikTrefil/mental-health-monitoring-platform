@@ -1,6 +1,6 @@
 "use client";
 
-import { UserRoleTitles } from "@/types/users";
+import UserRoleTitles from "@/constants/userRoleTitles";
 import { useSession } from "next-auth/react";
 import { Button } from "react-bootstrap";
 import FormDefinitionsTable from "./FormDefinitionsTable";

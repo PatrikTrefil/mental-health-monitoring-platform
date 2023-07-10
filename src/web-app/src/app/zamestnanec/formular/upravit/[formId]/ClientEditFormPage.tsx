@@ -3,7 +3,7 @@ import { loadFormById, updateForm } from "@/client/formManagementClient";
 import DynamicFormBuilder from "@/components/shared/formio/DynamicFormBuilder";
 import DynamicFormEdit from "@/components/shared/formio/DynamicFormEdit";
 import { useSmartFetch } from "@/hooks/useSmartFetch";
-import { Form } from "@/types/forms";
+import { Form } from "@/types/formManagement/forms";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";

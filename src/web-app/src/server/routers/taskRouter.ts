@@ -1,6 +1,6 @@
 import { loadFormById } from "@/client/formManagementClient";
 import { loadUsers } from "@/client/userManagementClient";
-import { UserRoleTitles } from "@/types/users";
+import UserRoleTitles from "@/constants/userRoleTitles";
 import { Prisma } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";

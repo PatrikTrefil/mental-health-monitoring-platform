@@ -1,5 +1,5 @@
 import { createInnerTRPCContext } from "@/server/trpc";
-import { UserRoleTitle } from "@/types/users";
+import { UserRoleTitle } from "@/types/userManagement/UserRoleTitle";
 
 export function createInnerTRPCContextMockSession(
     roleTitles: UserRoleTitle[],

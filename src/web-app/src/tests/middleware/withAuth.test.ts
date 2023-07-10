@@ -3,9 +3,10 @@ import {
     loadRoles,
     loginAdmin,
 } from "@/client/userManagementClient";
+import UserRoleTitles from "@/constants/userRoleTitles";
 import { stackMiddlewares } from "@/middleware/stackMiddleware";
 import withAuth from "@/middleware/withAuth";
-import { UserRoleTitle, UserRoleTitles } from "@/types/users";
+import { UserRoleTitle } from "@/types/userManagement/UserRoleTitle";
 import { NextRequestWithAuth } from "next-auth/middleware";
 import { NextRequest } from "next/server";
 import { describe, expect, it, vi } from "vitest";

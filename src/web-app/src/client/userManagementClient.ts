@@ -1,6 +1,6 @@
-import { Role } from "@/types/role";
-import { Submission } from "@/types/submission";
-import { UserFormSubmission } from "@/types/userFormSubmission";
+import { Submission } from "@/types/formManagement/submission";
+import { Role } from "@/types/userManagement/role";
+import { User } from "@/types/userManagement/user";
 import axios, { AxiosResponse } from "axios";
 import { updateSubmission } from "./formManagementClient";
 import getFormioUrl from "./formioUrl";
@@ -12,9 +12,7 @@ import { RequestError } from "./requestError";
  * @returns list of all users
  * @throws {RequestError} if the http request fails
  */
-export async function loadUsers(
-    formioToken: string
-): Promise<UserFormSubmission[]> {
+export async function loadUsers(formioToken: string): Promise<User[]> {
     try {
         const { data } = await axios.get<unknown>(
             `${getFormioUrl()}/klientpacient/submission`,
@@ -24,7 +22,7 @@ export async function loadUsers(
                 },
             }
         );
-        return data as UserFormSubmission[];
+        return data as User[];
     } catch (e) {
         if (axios.isAxiosError(e))
             throw new RequestError("Failed to load users", e.status);
@@ -83,9 +81,7 @@ export async function loadRoles(formioToken: string): Promise<Role[]> {
  * @param formioToken JWT token for formio
  * @throws {RequestError} if the http request fails
  */
-export async function loadEmployees(
-    formioToken: string
-): Promise<UserFormSubmission[]> {
+export async function loadEmployees(formioToken: string): Promise<User[]> {
     const spravceDotaznikuResponse = await axios.get<unknown>(
         `${getFormioUrl()}/zamestnanec/spravce-dotazniku/submission`,
         {
@@ -104,10 +100,8 @@ export async function loadEmployees(
         }
     );
 
-    const spravciDotazniku =
-        spravceDotaznikuResponse.data as UserFormSubmission[];
-    const zadavateleDotazniku =
-        zadavatelDotaznikuResponse.data as UserFormSubmission[];
+    const spravciDotazniku = spravceDotaznikuResponse.data as User[];
+    const zadavateleDotazniku = zadavatelDotaznikuResponse.data as User[];
 
     return spravciDotazniku.concat(zadavateleDotazniku);
 }
@@ -248,12 +242,12 @@ export async function refreshToken(currentToken: string): Promise<string> {
 export async function loginUser(
     id: string,
     password: string
-): Promise<{ user: UserFormSubmission; formioToken: string }> {
+): Promise<{ user: User; formioToken: string }> {
     console.log("Making login request...", {
         url: `${getFormioUrl()}/login`,
     });
 
-    let userFormSubmission: UserFormSubmission;
+    let userFormSubmission: User;
     let formioToken: string;
 
     try {
@@ -271,7 +265,7 @@ export async function loginUser(
                 },
             }
         );
-        userFormSubmission = data as UserFormSubmission;
+        userFormSubmission = data as User;
         formioToken = headers["x-jwt-token"];
         if (typeof formioToken !== "string")
             throw new RequestError("No token received");
@@ -307,16 +301,14 @@ export async function updateUser(
  * @throws {RequestError} if the http request fails
  * @returns current user
  */
-export async function getCurrentUser(
-    formioToken: string
-): Promise<UserFormSubmission> {
+export async function getCurrentUser(formioToken: string): Promise<User> {
     try {
         const { data } = await axios.get<unknown>(`${getFormioUrl()}/current`, {
             headers: {
                 "x-jwt-token": formioToken,
             },
         });
-        return data as UserFormSubmission;
+        return data as User;
     } catch (e) {
         if (axios.isAxiosError(e))
             throw new RequestError("Failed to get current user", e.status);

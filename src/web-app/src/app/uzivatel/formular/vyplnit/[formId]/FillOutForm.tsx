@@ -4,7 +4,7 @@ import { submitForm } from "@/client/formManagementClient";
 import { trpc } from "@/client/trpcClient";
 import DynamicFormWithAuth from "@/components/shared/formio/DynamicFormWithAuth";
 import "@/styles/saveDraft.css";
-import { DataValue } from "@/types/submission";
+import { DataValue } from "@/types/formManagement/submission";
 import { useSession } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";

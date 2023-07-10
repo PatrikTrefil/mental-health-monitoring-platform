@@ -1,6 +1,6 @@
-import { Action } from "@/types/action";
-import { Form, FormSchema } from "@/types/forms";
-import { Submission } from "@/types/submission";
+import { Action } from "@/types/formManagement/action";
+import { Form, FormSchema } from "@/types/formManagement/forms";
+import { Submission } from "@/types/formManagement/submission";
 import axios from "axios";
 import getFormioUrl from "./formioUrl";
 import { RequestError } from "./requestError";

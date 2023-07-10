@@ -5,8 +5,10 @@ import {
     loginUser,
     refreshToken,
 } from "@/client/userManagementClient";
-import { UserFormSubmission } from "@/types/userFormSubmission";
-import { UserRoleTitle, UserRoleTitles } from "@/types/users";
+import UserRoleTitles from "@/constants/userRoleTitles";
+import { UserRoleTitle } from "@/types/userManagement/UserRoleTitle";
+// Renaming to LocalUser because User is used by next-auth
+import { User as LocalUser } from "@/types/userManagement/user";
 import { type GetServerSidePropsContext } from "next";
 import { AuthOptions, DefaultSession, getServerSession } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
@@ -14,13 +16,13 @@ import { z } from "zod";
 
 // make auto-completion work for useSession
 declare module "next-auth" {
-    interface User extends UserFormSubmission {
+    interface User extends LocalUser {
         roleTitles: UserRoleTitle[];
         formioToken: string;
         formioTokenExpiration: number;
     }
     interface Session {
-        user: UserFormSubmission &
+        user: LocalUser &
             DefaultSession["user"] & {
                 roleTitles: UserRoleTitle[];
                 formioToken: string;
@@ -30,7 +32,7 @@ declare module "next-auth" {
 
 declare module "next-auth/jwt" {
     interface JWT {
-        user?: UserFormSubmission &
+        user?: LocalUser &
             DefaultSession["user"] & {
                 roleTitles: UserRoleTitle[];
                 formioToken: string;
