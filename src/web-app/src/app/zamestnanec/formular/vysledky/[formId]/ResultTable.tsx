@@ -96,10 +96,13 @@ export default function ResultTable({ formId }: { formId: string }) {
                         `data.${comp.key}` as keyof Submission,
                         {
                             header: comp.label,
-                            cell: (props) =>
-                                stringifyResult(
-                                    props.row.original.data[comp.key].value
-                                ),
+                            cell: (props) => {
+                                const value =
+                                    props.row.original.data[comp.key]?.value;
+                                if (value === undefined)
+                                    throw new Error("Unexpected undefined");
+                                return stringifyResult(value);
+                            },
                         }
                     )
                 );
