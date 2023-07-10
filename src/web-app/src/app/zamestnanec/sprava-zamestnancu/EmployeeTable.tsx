@@ -4,7 +4,7 @@ import {
     deleteSpravceDotazniku,
     deleteZadavatelDotazniku,
     loadEmployees,
-} from "@/client/formioClient";
+} from "@/client/userManagementClient";
 import SimplePagination from "@/components/shared/SimplePagination";
 import DynamicFormWithAuth from "@/components/shared/formio/DynamicFormWithAuth";
 import { UserFormSubmission } from "@/types/userFormSubmission";

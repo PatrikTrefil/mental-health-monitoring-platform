@@ -1,7 +1,7 @@
 "use client";
 
 import ExportButton from "@/app/zamestnanec/prehled/ExportButton";
-import { deleteForm, loadForms } from "@/client/formioClient";
+import { deleteForm, loadForms } from "@/client/formManagementClient";
 import SimplePagination from "@/components/shared/SimplePagination";
 import { Form as FormDefinition } from "@/types/forms";
 import { useQuery, useQueryClient } from "@tanstack/react-query";

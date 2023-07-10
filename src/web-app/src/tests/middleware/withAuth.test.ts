@@ -1,8 +1,5 @@
-import {
-    fetchRoleList,
-    getCurrentUser,
-    loginAdmin,
-} from "@/client/formioClient";
+import { getCurrentUser } from "@/client/formManagementClient";
+import { fetchRoleList, loginAdmin } from "@/client/userManagementClient";
 import { stackMiddlewares } from "@/middleware/stackMiddleware";
 import withAuth from "@/middleware/withAuth";
 import { UserRoleTitle, UserRoleTitles } from "@/types/users";

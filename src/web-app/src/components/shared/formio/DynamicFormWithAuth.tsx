@@ -1,6 +1,6 @@
 "use client";
 
-import { loadFormByPath, submitForm } from "@/client/formioClient";
+import { loadFormByPath, submitForm } from "@/client/formManagementClient";
 import { useSmartFetch } from "@/hooks/useSmartFetch";
 import { Component, Form } from "@/types/forms";
 import { DataValue, Submission } from "@/types/submission";

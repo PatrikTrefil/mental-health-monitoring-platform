@@ -1,10 +1,7 @@
 "use client";
 
-import {
-    loadFormById,
-    loadSubmissions,
-    loadUsers,
-} from "@/client/formioClient";
+import { loadFormById, loadSubmissions } from "@/client/formManagementClient";
+import { loadUsers } from "@/client/userManagementClient";
 import SimplePagination from "@/components/shared/SimplePagination";
 import { useSmartFetch } from "@/hooks/useSmartFetch";
 import { Form as FormFormio } from "@/types/forms";

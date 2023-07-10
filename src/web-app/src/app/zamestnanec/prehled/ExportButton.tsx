@@ -1,6 +1,6 @@
 "use client";
 
-import { exportFormSubmissions } from "@/client/formioClient";
+import { exportFormSubmissions } from "@/client/formManagementClient";
 import { saveAs } from "file-saver";
 import { useSession } from "next-auth/react";
 import { Button } from "react-bootstrap";

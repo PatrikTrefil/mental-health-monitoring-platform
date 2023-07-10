@@ -1,6 +1,6 @@
 "use client";
 
-import { deleteUser, loadUsers } from "@/client/formioClient";
+import { deleteUser, loadUsers } from "@/client/userManagementClient";
 import SimplePagination from "@/components/shared/SimplePagination";
 import DynamicFormWithAuth from "@/components/shared/formio/DynamicFormWithAuth";
 import { UserFormSubmission } from "@/types/userFormSubmission";
