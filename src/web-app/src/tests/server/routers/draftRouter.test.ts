@@ -13,11 +13,13 @@ faker.seed(123);
 vi.mock("@/server/db");
 
 describe.each(
-    Object.values(UserRoleTitles).filter(
-        (r) => r !== UserRoleTitles.KLIENT_PACIENT
-    )
-)("as $1 it", (role) => {
-    const ctx = createInnerTRPCContextMockSession([role]);
+    Object.values(UserRoleTitles)
+        .filter((r) => r !== UserRoleTitles.KLIENT_PACIENT)
+        .map((r) => ({
+            roleTitle: r,
+        }))
+)("as ${roleTitle} it", ({ roleTitle }) => {
+    const ctx = createInnerTRPCContextMockSession([roleTitle]);
     const caller = appRouter.createCaller(ctx);
 
     it("should not be possible to create a draft", async () => {
