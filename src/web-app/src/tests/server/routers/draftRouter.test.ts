@@ -1,12 +1,16 @@
 import UserRoleTitles from "@/constants/userRoleTitles";
+import { prisma } from "@/server/__mocks__/db";
 import { AppRouter, appRouter } from "@/server/routers/root";
 import { faker } from "@faker-js/faker";
+import { Prisma } from "@prisma/client";
 import { inferProcedureInput } from "@trpc/server";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { createInnerTRPCContextMockSession } from "./utility";
 
 // make tests deterministic
 faker.seed(123);
+
+vi.mock("@/server/db");
 
 describe.each(
     Object.values(UserRoleTitles).filter(
@@ -54,12 +58,19 @@ describe(`as a ${UserRoleTitles.KLIENT_PACIENT} it`, () => {
     const nonexistentFormId = "nonexistent-form-id";
 
     it("throws when getting a non-existing draft", async () => {
+        prisma.draft.findUnique.mockResolvedValue(null);
         expect(
             caller.draft.getDraft({ formId: nonexistentFormId })
         ).rejects.toMatchSnapshot();
     });
 
     it("throws when deleting a non-existing draft", async () => {
+        prisma.draft.delete.mockImplementationOnce(() => {
+            throw new Prisma.PrismaClientKnownRequestError("not found", {
+                code: "P2025",
+                clientVersion: "",
+            });
+        });
         expect(
             caller.draft.deleteDraft({ formId: nonexistentFormId })
         ).rejects.toMatchSnapshot();
@@ -83,9 +94,16 @@ describe(`as a ${UserRoleTitles.KLIENT_PACIENT} it`, () => {
             AppRouter["draft"]["upsertDraft"]
         >;
         const input: CreateDraftInput = {
-            formId: formId,
+            formId,
             data: {},
         };
+        if (!ctx.session) throw new Error("no session");
+
+        prisma.draft.upsert.mockResolvedValueOnce({
+            formId,
+            userId: ctx.session.user.data.id,
+            data: JSON.stringify(input.data),
+        });
         const result = await caller.draft.upsertDraft(input);
         expect(result).toMatchSnapshot();
     });
@@ -98,11 +116,23 @@ describe(`as a ${UserRoleTitles.KLIENT_PACIENT} it`, () => {
             formId: formId,
             data: { new: "data" },
         };
+        if (!ctx.session) throw new Error("no session");
+        prisma.draft.upsert.mockResolvedValueOnce({
+            formId,
+            data: JSON.stringify(input.data),
+            userId: ctx.session.user.data.id,
+        });
         const result = await caller.draft.upsertDraft(input);
         expect(result).toMatchSnapshot();
     });
 
     it("should be possible to delete a draft ", async () => {
-        await caller.draft.deleteDraft({ formId: formId });
+        if (!ctx.session) throw new Error("no session");
+        prisma.draft.delete.mockResolvedValueOnce({
+            formId,
+            userId: ctx.session.user.data.id,
+            data: "",
+        });
+        await caller.draft.deleteDraft({ formId });
     });
 });
