@@ -3,7 +3,6 @@ import { loadUsers } from "@/client/userManagementClient";
 import TaskState from "@/constants/taskState";
 import UserRoleTitles from "@/constants/userRoleTitles";
 import { appRouter, type AppRouter } from "@/server/routers/root";
-import { Form } from "@/types/formManagement/forms";
 import { type inferProcedureInput } from "@trpc/server";
 import { describe, expect, it, vi } from "vitest";
 import {
@@ -60,17 +59,14 @@ describe("todo functionality", () => {
             ])
         );
 
-        vi.mocked(loadFormById).mockImplementationOnce(async () => {
-            const mockForm: Form = {
-                _id: mockInputTask.formId,
-                title: "",
-                created: "",
-                name: "name",
-                path: "/path",
-                submissionAccess: [],
-                components: [],
-            };
-            return mockForm;
+        vi.mocked(loadFormById).mockResolvedValueOnce({
+            _id: mockInputTask.formId,
+            title: "",
+            created: "",
+            name: "name",
+            path: "/path",
+            submissionAccess: [],
+            components: [],
         });
         const createdTask = await caller.task.createTask(mockInputTask);
 
