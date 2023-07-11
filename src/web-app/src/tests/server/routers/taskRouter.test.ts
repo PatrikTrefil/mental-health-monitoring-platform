@@ -234,6 +234,24 @@ describe("todo functionality", () => {
         }
     });
 
+    it("deletes an existing todo as employee", async () => {
+        const employeeCtx = createInnerTRPCContextMockSession([
+            UserRoleTitles.ZADAVATEL_DOTAZNIKU,
+        ]);
+        const caller = appRouter.createCaller(employeeCtx);
+
+        const mockTaskId = faker.string.uuid();
+        await caller.task.deleteTask({
+            id: mockTaskId,
+        });
+
+        expect(prisma.task.delete).toHaveBeenCalledWith({
+            where: {
+                id: mockTaskId,
+            },
+        });
+    });
+
     it("throws not found when deleting a non-existing todo as employee", async () => {
         const caller = appRouter.createCaller(
             createInnerTRPCContextMockSession([
