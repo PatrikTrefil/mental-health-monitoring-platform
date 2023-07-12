@@ -1,9 +1,6 @@
 # docker compose for production
 version: "3"
 
-# TODO: test that production build works
-# TODO: commit reverse proxy fix, readme fix, docs
-
 services:
   web-app:
     build:
