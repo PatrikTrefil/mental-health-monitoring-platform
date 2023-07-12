@@ -1,6 +1,5 @@
-import TaskState from "@/constants/taskState";
 import { prisma } from "@/server/db";
-import { Prisma } from "@prisma/client";
+import { Prisma, TaskState } from "@prisma/client";
 import { z } from "zod";
 
 const postBodySchema = z.object({

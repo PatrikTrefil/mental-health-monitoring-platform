@@ -2,8 +2,8 @@
 
 import { trpc } from "@/client/trpcClient";
 import SimplePagination from "@/components/shared/SimplePagination";
-import TaskState from "@/constants/taskState";
 import { AppRouter } from "@/server/routers/root";
+import { TaskState } from "@prisma/client";
 import {
     createColumnHelper,
     flexRender,

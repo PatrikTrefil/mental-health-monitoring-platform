@@ -1,8 +1,7 @@
 "use client";
 import { trpc } from "@/client/trpcClient";
 import SimplePagination from "@/components/shared/SimplePagination";
-import TaskState from "@/constants/taskState";
-import { Task } from "@prisma/client";
+import { Task, TaskState } from "@prisma/client";
 import {
     createColumnHelper,
     flexRender,
