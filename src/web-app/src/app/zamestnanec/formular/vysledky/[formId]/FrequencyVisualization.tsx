@@ -32,9 +32,12 @@ export default function FrequencyVisualization({
     const valueFrequencies = useMemo(() => {
         if (!fieldToVisualize) return new Map<string, number>();
 
-        const values = data.map((dataEntry) =>
-            stringifyResult(dataEntry[fieldToVisualize].value)
-        );
+        const values = data.map((dataEntry) => {
+            const value = dataEntry[fieldToVisualize]?.value;
+            if (value === undefined) throw new Error("Unexpected undefined");
+
+            return stringifyResult(value);
+        });
         return calculateFrequencies(values);
     }, [data, fieldToVisualize]);
 

@@ -4,11 +4,12 @@ import {
     deleteSpravceDotazniku,
     deleteZadavatelDotazniku,
     loadEmployees,
-} from "@/client/formioClient";
+} from "@/client/userManagementClient";
 import SimplePagination from "@/components/shared/SimplePagination";
 import DynamicFormWithAuth from "@/components/shared/formio/DynamicFormWithAuth";
-import { UserFormSubmission } from "@/types/userFormSubmission";
-import { UserRolePrefixes, UserRoleTitles } from "@/types/users";
+import { UserIDRolePrefixes } from "@/constants/userIDRolePrefixes";
+import UserRoleTitles from "@/constants/userRoleTitles";
+import { User } from "@/types/userManagement/user";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
     createColumnHelper,
@@ -36,7 +37,7 @@ export default function EmployeeTable() {
         employeeId: string;
     }>();
 
-    const columnHelper = createColumnHelper<UserFormSubmission>();
+    const columnHelper = createColumnHelper<User>();
     const columns = useMemo(
         () => [
             columnHelper.accessor("data.id", {
@@ -52,13 +53,13 @@ export default function EmployeeTable() {
                 cell: (props) => {
                     if (
                         props.row.original.data.id.startsWith(
-                            UserRolePrefixes.SPRAVCE_DOTAZNIKU
+                            UserIDRolePrefixes.SPRAVCE_DOTAZNIKU
                         )
                     )
                         return UserRoleTitles.SPRAVCE_DOTAZNIKU;
                     else if (
                         props.row.original.data.id.startsWith(
-                            UserRolePrefixes.ZADAVATEL_DOTAZNIKU
+                            UserIDRolePrefixes.ZADAVATEL_DOTAZNIKU
                         )
                     )
                         return UserRoleTitles.ZADAVATEL_DOTAZNIKU;
@@ -74,13 +75,13 @@ export default function EmployeeTable() {
                     let deleteButton: React.ReactNode | null;
                     if (
                         session?.data?.user.data.id.startsWith(
-                            UserRolePrefixes.SPRAVCE_DOTAZNIKU
+                            UserIDRolePrefixes.SPRAVCE_DOTAZNIKU
                         ) ||
                         (session?.data?.user.data.id.startsWith(
-                            UserRolePrefixes.ZADAVATEL_DOTAZNIKU
+                            UserIDRolePrefixes.ZADAVATEL_DOTAZNIKU
                         ) &&
                             props.row.original.data.id.startsWith(
-                                UserRolePrefixes.ZADAVATEL_DOTAZNIKU
+                                UserIDRolePrefixes.ZADAVATEL_DOTAZNIKU
                             ))
                     )
                         deleteButton = (
@@ -95,7 +96,7 @@ export default function EmployeeTable() {
                                     try {
                                         if (
                                             props.row.original.data.id.startsWith(
-                                                UserRolePrefixes.SPRAVCE_DOTAZNIKU
+                                                UserIDRolePrefixes.SPRAVCE_DOTAZNIKU
                                             )
                                         )
                                             await deleteSpravceDotazniku(
@@ -104,7 +105,7 @@ export default function EmployeeTable() {
                                             );
                                         else if (
                                             props.row.original.data.id.startsWith(
-                                                UserRolePrefixes.ZADAVATEL_DOTAZNIKU
+                                                UserIDRolePrefixes.ZADAVATEL_DOTAZNIKU
                                             )
                                         )
                                             await deleteZadavatelDotazniku(

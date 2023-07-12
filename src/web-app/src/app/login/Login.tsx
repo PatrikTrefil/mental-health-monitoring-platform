@@ -1,6 +1,6 @@
 "use client";
 
-import { UserRoleTitles } from "@/types/users";
+import UserRoleTitles from "@/constants/userRoleTitles";
 import { useMutation } from "@tanstack/react-query";
 import { SignInResponse, signIn, useSession } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";

@@ -1,9 +1,10 @@
 import {
-    fetchRoleList,
     getCurrentUser,
+    loadRoles,
     loginAdmin,
-} from "@/client/formioClient";
-import { UserRoleTitle, UserRoleTitles } from "@/types/users";
+} from "@/client/userManagementClient";
+import UserRoleTitles from "@/constants/userRoleTitles";
+import { UserRoleTitle } from "@/types/userManagement/UserRoleTitle";
 import withAuthNextAuth, { NextRequestWithAuth } from "next-auth/middleware";
 import { NextRequest, NextResponse } from "next/server";
 import { MiddlewareWrapper } from "./types";
@@ -95,17 +96,18 @@ async function apiMiddleware(req: NextRequest) {
         let user: Awaited<ReturnType<typeof getCurrentUser>> | undefined;
         try {
             user = await getCurrentUser(formioToken);
-        } catch {
+        } catch (e) {
+            console.log(e);
             return new NextResponse("Unauthorized", { status: 401 });
         }
 
-        let roleList: Awaited<ReturnType<typeof fetchRoleList>> | undefined;
+        let roleList: Awaited<ReturnType<typeof loadRoles>> | undefined;
         try {
             const adminToken = await loginAdmin(
                 process.env.FORMIO_ROOT_EMAIL,
                 process.env.FORMIO_ROOT_PASSWORD
             );
-            roleList = await fetchRoleList(adminToken);
+            roleList = await loadRoles(adminToken);
         } catch {
             return new NextResponse("Internal server error", { status: 500 });
         }

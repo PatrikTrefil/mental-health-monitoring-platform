@@ -55,9 +55,6 @@ you need to run this command in the container.
 
 ## Run tests
 
-Setup the database by providing the necessary environment variables (see `/.env.test.example`)
-and migrating using `npx prisma` if needed.
-
 ```
 npm run test
 ```

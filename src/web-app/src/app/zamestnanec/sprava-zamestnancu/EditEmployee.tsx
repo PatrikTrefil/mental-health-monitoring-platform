@@ -1,6 +1,6 @@
 "use client";
 
-import { updateSubmission } from "@/client/formioClient";
+import { updateSubmission } from "@/client/formManagementClient";
 import DynamicFormWithAuth from "@/components/shared/formio/DynamicFormWithAuth";
 import { useSession } from "next-auth/react";
 import { Alert, Spinner } from "react-bootstrap";

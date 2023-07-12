@@ -1,12 +1,14 @@
+import { RequestError } from "@/client/requestError";
 import {
-    RequestError,
-    fetchRoleList,
+    loadRoles,
     loginAdmin,
     loginUser,
     refreshToken,
-} from "@/client/formioClient";
-import { UserFormSubmission } from "@/types/userFormSubmission";
-import { UserRoleTitle, UserRoleTitles } from "@/types/users";
+} from "@/client/userManagementClient";
+import UserRoleTitles from "@/constants/userRoleTitles";
+import { UserRoleTitle } from "@/types/userManagement/UserRoleTitle";
+// Renaming to LocalUser because User is used by next-auth
+import { User as LocalUser } from "@/types/userManagement/user";
 import { type GetServerSidePropsContext } from "next";
 import { AuthOptions, DefaultSession, getServerSession } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
@@ -14,13 +16,13 @@ import { z } from "zod";
 
 // make auto-completion work for useSession
 declare module "next-auth" {
-    interface User extends UserFormSubmission {
+    interface User extends LocalUser {
         roleTitles: UserRoleTitle[];
         formioToken: string;
         formioTokenExpiration: number;
     }
     interface Session {
-        user: UserFormSubmission &
+        user: LocalUser &
             DefaultSession["user"] & {
                 roleTitles: UserRoleTitle[];
                 formioToken: string;
@@ -30,7 +32,7 @@ declare module "next-auth" {
 
 declare module "next-auth/jwt" {
     interface JWT {
-        user?: UserFormSubmission &
+        user?: LocalUser &
             DefaultSession["user"] & {
                 roleTitles: UserRoleTitle[];
                 formioToken: string;
@@ -74,7 +76,7 @@ export const authOptions: AuthOptions = {
                         process.env.FORMIO_ROOT_PASSWORD
                     );
 
-                    const roleList = await fetchRoleList(adminToken);
+                    const roleList = await loadRoles(adminToken);
 
                     const roleTitles = user.roles.map((roleId) => {
                         const title = roleList.find(
@@ -94,7 +96,7 @@ export const authOptions: AuthOptions = {
                     };
                 } catch (e) {
                     console.error("Error: ", e); // log on server
-                    if (e instanceof RequestError) {
+                    if (e instanceof RequestError && e.statusCode) {
                         const isInvalidCredentials =
                             e.statusCode >= 400 && e.statusCode < 500;
                         if (isInvalidCredentials) return null;

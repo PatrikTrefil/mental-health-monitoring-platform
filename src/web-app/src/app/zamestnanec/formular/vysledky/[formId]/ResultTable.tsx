@@ -1,14 +1,15 @@
 "use client";
 
-import {
-    loadFormById,
-    loadSubmissions,
-    loadUsers,
-} from "@/client/formioClient";
+import { loadFormById, loadSubmissions } from "@/client/formManagementClient";
+import { loadUsers } from "@/client/userManagementClient";
 import SimplePagination from "@/components/shared/SimplePagination";
 import { useSmartFetch } from "@/hooks/useSmartFetch";
-import { Form as FormFormio } from "@/types/forms";
-import { DataValue, SelectBoxDataValue, Submission } from "@/types/submission";
+import { Form as FormFormio } from "@/types/formManagement/forms";
+import {
+    DataValue,
+    SelectBoxDataValue,
+    Submission,
+} from "@/types/formManagement/submission";
 import {
     createColumnHelper,
     flexRender,
@@ -96,10 +97,13 @@ export default function ResultTable({ formId }: { formId: string }) {
                         `data.${comp.key}` as keyof Submission,
                         {
                             header: comp.label,
-                            cell: (props) =>
-                                stringifyResult(
-                                    props.row.original.data[comp.key].value
-                                ),
+                            cell: (props) => {
+                                const value =
+                                    props.row.original.data[comp.key]?.value;
+                                if (value === undefined)
+                                    throw new Error("Unexpected undefined");
+                                return stringifyResult(value);
+                            },
                         }
                     )
                 );

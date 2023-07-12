@@ -1,7 +1,10 @@
 import { POST as deleteConceptPost } from "@/app/api/ukol/smazat-koncept/route";
-import { prisma } from "@/server/db";
+import { prisma } from "@/server/__mocks__/db";
 import { faker } from "@faker-js/faker";
+import { Prisma } from "@prisma/client";
 import { expect, it, vi } from "vitest";
+
+vi.mock("@/server/db");
 
 // make tests deterministic
 faker.seed(123);
@@ -13,7 +16,7 @@ const taskId = faker.string.uuid();
 
 const mockValidAdminToken = faker.string.alpha(10);
 
-vi.mock("@/client/formioClient", () => ({
+vi.mock("@/client/userManagementClient", () => ({
     loginAdmin: vi.fn(() => mockValidAdminToken),
     loadUsers: vi.fn(() => [
         {
@@ -26,21 +29,6 @@ vi.mock("@/client/formioClient", () => ({
 }));
 
 it("deletes a concept", async () => {
-    // create the draft to delete in DB
-    await prisma.draft.upsert({
-        where: {
-            formId_userId: {
-                formId,
-                userId: userId,
-            },
-        },
-        create: {
-            data: "{}",
-            formId,
-            userId: userId,
-        },
-        update: {},
-    });
     // act - call the tested function
     const response = await deleteConceptPost(
         new Request(faker.internet.url(), {
@@ -58,14 +46,23 @@ it("deletes a concept", async () => {
     );
     // assert - the draft is deleted
     expect(response.status).toBe(200);
-    expect(
-        prisma.draft.findUnique({
-            where: { formId_userId: { formId, userId } },
-        })
-    ).resolves.toMatchInlineSnapshot("null");
+    expect(prisma.draft.delete).toHaveBeenCalledWith({
+        where: {
+            formId_userId: {
+                formId,
+                userId,
+            },
+        },
+    });
 });
 
 it("returns 404 if the draft does not exist", async () => {
+    prisma.draft.delete.mockImplementationOnce(() => {
+        throw new Prisma.PrismaClientKnownRequestError("Not found", {
+            code: "P2025",
+            clientVersion: "",
+        });
+    });
     const response = await deleteConceptPost(
         new Request(faker.internet.url(), {
             method: "POST",

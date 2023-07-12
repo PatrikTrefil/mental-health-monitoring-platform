@@ -1,4 +1,4 @@
-import { loadUsers, loginAdmin } from "@/client/formioClient";
+import { loadUsers, loginAdmin } from "@/client/userManagementClient";
 import { prisma } from "@/server/db";
 import { Prisma } from "@prisma/client";
 import { z } from "zod";

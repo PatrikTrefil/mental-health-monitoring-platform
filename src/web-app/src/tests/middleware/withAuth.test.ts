@@ -1,14 +1,19 @@
 import {
-    fetchRoleList,
     getCurrentUser,
+    loadRoles,
     loginAdmin,
-} from "@/client/formioClient";
+} from "@/client/userManagementClient";
+import UserRoleTitles from "@/constants/userRoleTitles";
 import { stackMiddlewares } from "@/middleware/stackMiddleware";
 import withAuth from "@/middleware/withAuth";
-import { UserRoleTitle, UserRoleTitles } from "@/types/users";
+import { UserRoleTitle } from "@/types/userManagement/UserRoleTitle";
+import { faker } from "@faker-js/faker";
 import { NextRequestWithAuth } from "next-auth/middleware";
 import { NextRequest } from "next/server";
 import { describe, expect, it, vi } from "vitest";
+
+// make tests deterministic
+faker.seed(123);
 
 const authMiddleware = stackMiddlewares([withAuth]);
 
@@ -16,19 +21,19 @@ const mockInvalidUserToken = "invalid user token;";
 const mockValidUserToken = "valid user token";
 const mockValidAdminToken = "valid admin token";
 
-const mockUserRoleId = "123";
+const mockUserRoleId = faker.string.alpha(10);
 
-vi.mock("@/client/formioClient", () => ({
+vi.mock("@/client/userManagementClient", () => ({
     getCurrentUser: vi.fn(async (token: string) => {
         if (token === mockInvalidUserToken) throw new TypeError();
         else if (token === mockValidUserToken) {
             const mockUser: Awaited<ReturnType<typeof getCurrentUser>> = {
-                _id: "12324",
-                data: { id: "123" },
-                created: "",
-                owner: "",
+                _id: faker.string.uuid(),
+                data: { id: faker.string.alpha(5) },
+                created: faker.date.recent().toISOString(),
+                owner: faker.string.uuid(),
                 access: [],
-                form: "",
+                form: faker.string.uuid(),
                 roles: [mockUserRoleId],
                 metadata: {},
             };
@@ -36,7 +41,7 @@ vi.mock("@/client/formioClient", () => ({
         }
         throw new Error("Unexpected token");
     }),
-    fetchRoleList: vi.fn(),
+    loadRoles: vi.fn(),
     loginAdmin: vi.fn(),
 }));
 
@@ -87,8 +92,8 @@ describe.each<TestInput>([
                         formioToken: "",
                         metadata: {},
                         owner: "",
-                        roles: ["foo"],
-                        formioTokenExpiration: 10,
+                        roles: [],
+                        formioTokenExpiration: Infinity,
                     },
                 },
             };
@@ -101,7 +106,8 @@ describe.each<TestInput>([
                 token: {
                     user: {
                         roleTitles: [roleTitleToTest],
-                        _id: "123",
+                        // rest of user object should be irrelevant
+                        _id: "",
                         email: "",
                         created: "",
                         access: [],
@@ -110,8 +116,8 @@ describe.each<TestInput>([
                         formioToken: "",
                         metadata: {},
                         owner: "",
-                        roles: ["kdjf"],
-                        formioTokenExpiration: 10,
+                        roles: [],
+                        formioTokenExpiration: Infinity,
                     },
                 },
             };
@@ -152,8 +158,8 @@ describe("accessing /api/ukol/*", () => {
             async () => mockValidAdminToken
         );
 
-        vi.mocked(fetchRoleList).mockImplementationOnce(async () => {
-            const mockRoleList: Awaited<ReturnType<typeof fetchRoleList>> = [
+        vi.mocked(loadRoles).mockImplementationOnce(async () => {
+            const mockRoleList: Awaited<ReturnType<typeof loadRoles>> = [
                 {
                     _id: mockUserRoleId,
                     title: UserRoleTitles.KLIENT_PACIENT,
