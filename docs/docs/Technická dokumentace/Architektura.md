@@ -100,7 +100,7 @@ Person(zadavatelUkolu, "Zadavatel úkolů")
 System_Boundary(systemBoundary, "Platforma pro monitorování mentálního zdraví") {
     Container_Boundary(webAppBoundary, "Web app") {
         Component(userSection, "Uživatelská sekce")
-        Component(managementSection, "Manažerská sekce")
+        Component(managementSection, "Zaměstnanecká sekce")
     }
     Container(spravaFormularu, "Správa formulářů")
     Container(spravaUkolu, "Správa úkolů")
