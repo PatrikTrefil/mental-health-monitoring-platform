@@ -55,6 +55,9 @@ services:
   monitoring:
     ports:
       - 9090:8080
+  postgres:
+    ports:
+      - 5432:5432
 
 volumes:
   web-app-node-modules:

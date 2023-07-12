@@ -15,9 +15,7 @@ services:
       - FORMIO_ROOT_EMAIL=${FORMIO_ROOT_EMAIL}
       - FORMIO_SERVER_URL=${FORMIO_SERVER_URL}
       - FORMIO_ROOT_PASSWORD=${FORMIO_ROOT_PASSWORD}
-      - DATABASE_URL=file:/data/sqlitedb/db.sqlite
-    volumes:
-      - sqlite-todo-data:/data/sqlitedb
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_USER}
   reverse-proxy:
     restart: on-failure
 
@@ -78,7 +76,15 @@ services:
     # map kernel log
     devices:
       - device=/dev/kmsg
+  postgres:
+    image: postgres:15
+    restart: on-failure
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
 
 volumes:
   mongodb-data:
-  sqlite-todo-data:
+  postgres-data:
