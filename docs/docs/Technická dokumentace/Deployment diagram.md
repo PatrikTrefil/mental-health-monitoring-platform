@@ -57,6 +57,7 @@ Rel(webApp, spravaNedokoncenychVyplneni, "Používá")
 Rel(spravaFormularu, spravaNedokoncenychVyplneni, "Informuje o vyplnění", "HTTPS")
 Rel(spravaNedokoncenychVyplneni, manazerUzivatelu, "Autorizuje akce", "HTTPS")
 Rel(spravaNedokoncenychVyplneni, spravaNedokoncenychVyplneniDb, "Ukládá data")
+Rel(manazerUzivatelu, uzivateleDb, "Ukládá data")
 
 Rel(monitoringWeb, monitoringServer, "Čte data")
 
