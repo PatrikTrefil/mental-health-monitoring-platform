@@ -96,9 +96,9 @@ export const authOptions: AuthOptions = {
                     };
                 } catch (e) {
                     console.error("Error: ", e); // log on server
-                    if (e instanceof RequestError && e.statusCode) {
+                    if (e instanceof RequestError && e.status) {
                         const isInvalidCredentials =
-                            e.statusCode >= 400 && e.statusCode < 500;
+                            e.status >= 400 && e.status < 500;
                         if (isInvalidCredentials) return null;
                     }
                     throw new Error("Unexpected error on server"); // Send generic error to client
