@@ -94,8 +94,7 @@ export default function TaskTable() {
         [columnHelper, deleteTodo]
     );
 
-    const { isLoading, isError, error, data, isFetching, refetch } =
-        trpc.task.listTasks.useQuery();
+    const { isLoading, isError, error, data } = trpc.task.listTasks.useQuery();
 
     const table = useReactTable({
         columns,
@@ -122,30 +121,6 @@ export default function TaskTable() {
 
     return (
         <>
-            <div className="d-flex flex-wrap align-items-center gap-2">
-                <Button
-                    onClick={() => {
-                        refetch();
-                    }}
-                    className="mb-1"
-                    disabled={isFetching}
-                >
-                    {isFetching ? "Načítání..." : "Aktualizovat"}
-                </Button>
-            </div>
-            <Form.Select
-                className="my-2"
-                value={table.getState().pagination.pageSize}
-                onChange={(e) => {
-                    table.setPageSize(Number(e.target.value));
-                }}
-            >
-                {[10, 20, 30].map((pageSize: number) => (
-                    <option key={pageSize} value={pageSize}>
-                        Zobrazit {pageSize}
-                    </option>
-                ))}
-            </Form.Select>
             <div className="my-2 d-block text-nowrap overflow-auto">
                 <Table striped bordered hover>
                     <thead>
@@ -181,7 +156,20 @@ export default function TaskTable() {
                     </tbody>
                 </Table>
             </div>
-            <div className="d-flex justify-content-center align-items-center">
+            <div className="d-flex justify-content-between align-items-center">
+                <Form.Select
+                    className="my-2 w-auto"
+                    value={table.getState().pagination.pageSize}
+                    onChange={(e) => {
+                        table.setPageSize(Number(e.target.value));
+                    }}
+                >
+                    {[10, 20, 30].map((pageSize: number) => (
+                        <option key={pageSize} value={pageSize}>
+                            Zobrazit {pageSize}
+                        </option>
+                    ))}
+                </Form.Select>
                 <SimplePagination
                     pageIndex={table.getState().pagination.pageIndex}
                     totalPages={table.getPageCount()}

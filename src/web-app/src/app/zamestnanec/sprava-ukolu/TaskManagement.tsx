@@ -17,9 +17,14 @@ export default function TaskManagement() {
                 variant="primary"
                 onClick={() => setShowTaskCreationModal(true)}
             >
-                Zadat úkol
+                <i
+                    className="bi bi-plus-lg"
+                    style={{
+                        paddingRight: "5px",
+                    }}
+                ></i>
+                Nový úkol
             </Button>
-            <h2>Seznam úkolů</h2>
             <TaskTable />
             <Modal
                 show={showTaskCreationModal}

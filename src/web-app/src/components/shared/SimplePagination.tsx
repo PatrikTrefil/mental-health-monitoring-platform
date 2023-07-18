@@ -29,7 +29,7 @@ export default function SimplePagination({
     setPageIndex,
 }: PaginationProps) {
     return (
-        <Pagination>
+        <Pagination className="my-1">
             <Pagination.First
                 onClick={() => setPageIndex(0)}
                 disabled={pageIndex === 0}

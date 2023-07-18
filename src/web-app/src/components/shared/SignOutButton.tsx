@@ -23,7 +23,7 @@ export default function SignOutButton(
             onClick={() => signOutMutation()}
             disabled={isLoading}
         >
-            {isLoading ? "Načítání..." : <>Odhlásit&nbsp;se</>}
+            {isLoading ? "Načítání..." : <><i className="bi bi-box-arrow-right" style={{paddingRight: "5px"}}></i>Odhlásit&nbsp;se</>}
         </Button>
     );
 }
