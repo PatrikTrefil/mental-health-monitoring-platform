@@ -48,6 +48,12 @@ Ukázkovou konfiguraci najdete v `.env.example`.
     -   `DOMAIN_NAME` - doménové jméno, na kterém bude aplikace dostupná (např. `domena.cz`, `localhost`)
     -   `NEXTAUTH_SECRET` - klíč pro šifrování tokenů
 
+Také je potřeba nainstalovat závislosti pro Formio aplikaci:
+
+```sh
+$ cd src/formio && npm install
+```
+
 ### Spuštění aplikace v produkčním módu
 
 ```sh

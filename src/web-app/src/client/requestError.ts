@@ -1,14 +1,23 @@
 /**
- * Error thrown when an http request fails or the received
- * response was unexpected.
+ * Options for creating a new {@link RequestError}.
+ */
+export type RequestErrorOptions = ErrorOptions & {
+    /**
+     * Status code of the failed request.
+     */
+    status?: number;
+};
+
+/**
+ * Error thrown when an http request returns a non-ok status code.
  */
 export class RequestError extends Error {
     /**
      * Status code of the failed request.
      */
-    statusCode?: number;
-    constructor(message: string, status?: number) {
-        super(message);
-        this.statusCode = status;
+    status?: number;
+    constructor(message: string, opts?: RequestErrorOptions) {
+        super(message, opts);
+        this.status = opts?.status;
     }
 }

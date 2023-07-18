@@ -4,101 +4,91 @@ slug: domenovy-model
 
 ## Diagram
 
-```mermaid
-classDiagram
-    class Osoba {
-        ID: String
-        heslo: String
-    }
-    <<Abstract>> Osoba
+```plantuml
+@startuml
 
-    note for Osoba "Dědičnost typu {incomplete, disjoint}"
+abstract class "Osoba" as Osoba {
+    ID: String
+    heslo: String
+}
+note top of Osoba
+    Dědičnost typu {incomplete, disjoint}
+end note
 
-    class Zaměstnanec
-    %% Dědičnost
-    Zaměstnanec --|> Osoba
+class "Zaměstnanec" as Zaměstnanec {
+}
+Osoba <|-- Zaměstnanec
+note top of Zaměstnanec
+    Dědičnost typu {incomplete, overlapping}
+end note
 
-    note for Zaměstnanec "Dědičnost typu {incomplete, overlapping}"
+class "SprávceÚkolů" as SprávceÚkolů {
+}
+Zaměstnanec <|-- SprávceÚkolů
+SprávceÚkolů "1" --> "0..n" DefiniceÚkolu : definoval
 
+abstract class "Plnitel" as Plnitel {
+}
+Osoba <|-- Plnitel
+note top of Plnitel
+    Dědičnost typu {complete, disjoint}
+end note
 
-    class SprávceÚkolů
-    %% Dědičnost
-    SprávceÚkolů --|> Zaměstnanec
-    %% Vztahy
-    SprávceÚkolů "1" --> "0..n" DefiniceÚkolu : definoval
+class "Klient" as Klient {
+}
+Plnitel <|-- Klient
 
-    class Plnitel
-    <<Abstract>> Plnitel
-    %% Dědičnost
-    Plnitel --|> Osoba
+class "Pacient" as Pacient {
+}
+Plnitel <|-- Pacient
 
-    note for Plnitel "Dědičnost typu {complete, disjoint}"
+abstract class "DefiniceÚkolu" as DefiniceÚkolu {
+    ID: String
+}
 
-    class Klient
-    %% Dědičnost
-    Klient --|> Plnitel
+class "DefiniceFormuláře" as DefiniceFormuláře {
+    data
+}
+DefiniceÚkolu <|-- DefiniceFormuláře
 
-    class Pacient
-    %% Dědičnost
-    Pacient --|> Plnitel
+class "ZadáníÚkolu" as ZadáníÚkolu {
+    ID: String
+    splnitDo: Date
+    zadáno: Date
+    opakování: TimeSpan
+}
+ZadáníÚkolu "1" --> "1" DefiniceÚkolu : definováno
+ZadáníÚkolu "1" --> "1" Plnitel : zadán pro
+ZadáníÚkolu "1" --> "0..1" VypracováníÚkolu : vypracování
 
-    class DefiniceÚkolu {
-        ID: String
-    }
-    <<Abstract>> DefiniceÚkolu
+abstract class "VypracováníÚkolu" as VypracováníÚkolu {
+    ID: String
+    datumVypracování: Date
+}
 
-    class DefiniceFormuláře {
-        data
-    }
-    %% Dědičnost
-    DefiniceÚkolu <|-- DefiniceFormuláře
+class "VypracováníFormuláře" as VypracováníFormuláře {
+    data
+}
+VypracováníFormuláře --|> VypracováníÚkolu
 
+class "ZadavatelÚkolů" as ZadavatelÚkolů {
+}
+Zaměstnanec <|-- ZadavatelÚkolů
+ZadavatelÚkolů "1" --> "0..n" ZadáníÚkolu : zadal
 
+class "AnalýzaVypracováníFormuláře" as AnalýzaVypracováníFormuláře {
+    data
+}
+AnalýzaVypracováníFormuláře "1" --> "1" VypracováníFormuláře : analyzuje
 
-    class ZadáníÚkolu {
-        ID: String
-        splnitDo: Date
-        zadáno: Date
-        opakování: TimeSpan
-    }
-    %% Vztahy
-    ZadáníÚkolu "1" --> "1" DefiniceÚkolu : definováno
-    ZadáníÚkolu "1" --> "1" Plnitel : zadán pro
-    ZadáníÚkolu "1" --> "0..1" VypracováníÚkolu : vypracování
+class "NedokončenéVyplněníFormuláře" as NedokončenéVyplněníFormuláře {
+    data
+}
+NedokončenéVyplněníFormuláře "0..n" --> "1" DefiniceFormuláře : vyplňuje
+Plnitel "1" --> "0..n" NedokončenéVyplněníFormuláře : vlastní
+NedokončenéVyplněníFormuláře "0..1" --> "1" ZadáníÚkolu : částečně vypracovává
 
-
-    class VypracováníÚkolu {
-        ID: String
-        datumVypracování: Date
-    }
-    <<Abstract>> VypracováníÚkolu
-
-    class VypracováníFormuláře {
-        data
-    }
-    %% Dědičnost
-    VypracováníFormuláře --|> VypracováníÚkolu
-
-    class ZadavatelÚkolů
-    %% Dědičnost
-    ZadavatelÚkolů --|> Zaměstnanec
-    %% Vztahy
-    ZadavatelÚkolů "1" --> "0..n" ZadáníÚkolu : zadal
-
-    class AnalýzaVypracováníFormuláře {
-        data
-    }
-    %% Vztahy
-    AnalýzaVypracováníFormuláře "1" --> "1" VypracováníFormuláře : analyzuje
-
-    class NedokončenéVyplněníFormuláře {
-        data
-    }
-    %% Vztahy
-    NedokončenéVyplněníFormuláře "0..n" --> "1" DefiniceFormuláře : vyplňuje
-    Plnitel "1" --> "0..n" NedokončenéVyplněníFormuláře : vlastní
-    NedokončenéVyplněníFormuláře "0..1" --> "1" ZadáníÚkolu : částečně vypracovává
-
+@enduml
 ```
 
 :::note
