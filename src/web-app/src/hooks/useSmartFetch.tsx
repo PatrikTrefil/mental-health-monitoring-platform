@@ -38,9 +38,8 @@ export function useSmartFetch<TData, TError = unknown>({
     enabled: boolean;
 }): SmartFetchState<TData, TError> {
     const [data, setData] = useState<TData>();
-    const [status, setStatus] = useState<SmartFetchState<TData, TError>["status"]>(
-        "loading"
-    );
+    const [status, setStatus] =
+        useState<SmartFetchState<TData, TError>["status"]>("loading");
     const [error, setError] = useState<TError | null>();
 
     useEffect(() => {
