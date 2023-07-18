@@ -13,7 +13,7 @@ import {
 } from "@tanstack/react-table";
 import { inferProcedureOutput } from "@trpc/server";
 import { useMemo } from "react";
-import { Alert, Button, Form, Spinner, Table } from "react-bootstrap";
+import { Alert, Badge, Button, Form, Spinner, Table } from "react-bootstrap";
 import { toast } from "react-toastify";
 
 /**
@@ -56,13 +56,35 @@ export default function TaskTable() {
             columnHelper.accessor("state", {
                 header: "Stav",
                 cell: (props) => {
+                    const badgeFontSize = "0.9em";
                     switch (props.row.original.state) {
                         case TaskState.READY:
-                            return "Nedokončeno";
+                            return (
+                                <Badge
+                                    bg="info"
+                                    style={{ fontSize: badgeFontSize }}
+                                >
+                                    Nedokončeno
+                                </Badge>
+                            );
                         case TaskState.PARTIALLY_COMPLETED:
-                            return "Částečně dokončeno";
+                            return (
+                                <Badge
+                                    bg="info"
+                                    style={{ fontSize: badgeFontSize }}
+                                >
+                                    Částečně dokončeno
+                                </Badge>
+                            );
                         case TaskState.COMPLETED:
-                            return "Dokončeno";
+                            return (
+                                <Badge
+                                    bg="success"
+                                    style={{ fontSize: badgeFontSize }}
+                                >
+                                    Dokončeno
+                                </Badge>
+                            );
                         default:
                             console.error(
                                 "Unknown task state: ",
