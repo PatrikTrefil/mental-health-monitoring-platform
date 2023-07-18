@@ -95,10 +95,6 @@ export default function CreateForm() {
                     roles: [klientPacientRoleId],
                 },
                 {
-                    type: "read_own",
-                    roles: [klientPacientRoleId],
-                },
-                {
                     type: "read_all",
                     roles: [zadavatelDotaznikuRoleId],
                 },

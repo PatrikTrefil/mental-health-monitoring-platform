@@ -61,17 +61,17 @@ Rel_D(spravceUkolu, webApp, "Používá")
 
 Rel(webApp, spravaNedokoncenychVyplneni, "Používá")
 Rel(spravaFormularu, spravaNedokoncenychVyplneni, "Informuje o vyplnění")
-Rel(spravaNedokoncenychVyplneni, manazerUzivatelu, "Autorizuje akce")
-Rel(spravaUkolu, ukolyDb, "Ukládá data")
-Rel(spravaNedokoncenychVyplneni, spravaNedokoncenychVyplneniDb, "Ukládá data")
-Rel(webApp, spravaFormularu, "Používá")
+Rel(spravaNedokoncenychVyplneni, manazerUzivatelu, "Autorizuje akce", "gateway")
+Rel(spravaUkolu, ukolyDb, "Ukládá data", "gateway")
+Rel(spravaNedokoncenychVyplneni, spravaNedokoncenychVyplneniDb, "Ukládá data", "gateway")
+Rel(webApp, spravaFormularu, "Používá", "gateway")
 Rel(webApp, spravaUkolu, "Používá")
 Rel(webApp, manazerUzivatelu, "Spravuje uživatele a autorizuje akce")
 Rel(spravaFormularu, formulareDb, "Ukládá data")
-Rel(spravaFormularu, manazerUzivatelu, "Autorizuje akce")
-BiRel(spravaFormularu, spravaUkolu, "Synchronizují stavy")
-Rel(spravaUkolu, manazerUzivatelu, "Autorizuje akce")
-Rel(manazerUzivatelu, uzivateleDb, "Ukládá data")
+Rel(spravaFormularu, manazerUzivatelu, "Autorizuje akce", "gateway")
+BiRel(spravaFormularu, spravaUkolu, "Synchronizují stavy", "gateway")
+Rel(spravaUkolu, manazerUzivatelu, "Autorizuje akce", "gateway")
+Rel(manazerUzivatelu, uzivateleDb, "Ukládá data", "gateway")
 
 Rel(monitoringServer, spravaFormularu, "Monitoruje")
 Rel(monitoringServer, formulareDb, "Monitoruje")
@@ -81,6 +81,16 @@ Rel(monitoringWeb, monitoringServer, "Čte data")
 
 @enduml
 ```
+
+:::note
+
+Pokud je vztah mezi dvěma kontejnery vyznačený jako gateway, znamená to, že
+komunikace probíhá skrze prostředníka, který poskytuje vrstvu abstrakce, čímž
+snižuje provázanost komunikujících systémů (coupling) a zajišťuje
+modifikovatelnost. Bližší informace o tomto vzoru lze nalézt v [článku Gateway
+od Martin Fowler][gateway_fowler].
+
+:::
 
 ## Komponenty
 
@@ -125,3 +135,5 @@ Rel(managementSection, spravaUkolu, "Používá")
 
 @enduml
 ```
+
+[gateway_fowler]: https://martinfowler.com/articles/gateway-pattern.html

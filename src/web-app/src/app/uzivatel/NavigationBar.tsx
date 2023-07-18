@@ -13,38 +13,56 @@ export default function NavigationBarClientPatient() {
     return (
         <Navbar bg="primary" variant="dark" collapseOnSelect expand="xxl">
             <Container>
-                <Navbar.Brand href="/uzivatel/prehled">NUDZ</Navbar.Brand>
+                <Navbar.Brand
+                    href="/uzivatel/prehled"
+                    style={{
+                        fontSize: "2rem",
+                        fontWeight: 600,
+                    }}
+                >
+                    NUDZ
+                </Navbar.Brand>
                 <Navbar.Toggle
                     data-bs-target="#navbar-scroll"
                     data-bs-toggle="collapse"
                 />
                 <Navbar.Collapse id="navbar-scroll">
-                    <Nav
-                        variant="underline"
-                        activeKey={pathname ?? ""}
-                        className="align-items-center gap-3"
-                    >
-                        <Nav.Link href="/uzivatel/prehled">Přehled</Nav.Link>
-                        <Nav.Item>
-                            Přihlášen&nbsp;jako:&nbsp;
-                            {data?.user.data.id ?? (
-                                <Spinner
-                                    animation="border"
-                                    role="status"
-                                    size="sm"
-                                >
-                                    <span className="visually-hidden">
-                                        Načítání...
-                                    </span>
-                                </Spinner>
-                            )}
-                        </Nav.Item>
-                        <Nav.Item>
-                            <SignOutButton
-                                variant="secondary"
-                                className="mx-2"
-                            />
-                        </Nav.Item>
+                    <Nav className="align-item-center w-100 gap-3">
+                        <Nav
+                            variant="underline"
+                            activeKey={pathname ?? ""}
+                            className="align-items-center gap-3"
+                        >
+                            <Nav.Link href="/uzivatel/prehled">
+                                Přehled
+                            </Nav.Link>
+                        </Nav>
+                        <Nav
+                            variant="underline"
+                            activeKey={pathname ?? ""}
+                            className="align-items-center w-100 justify-content-end gap-2"
+                        >
+                            <Nav.Item className="text-white">
+                                Přihlášen&nbsp;jako:&nbsp;
+                                {data?.user.data.id ?? (
+                                    <Spinner
+                                        animation="border"
+                                        role="status"
+                                        size="sm"
+                                    >
+                                        <span className="visually-hidden">
+                                            Načítání...
+                                        </span>
+                                    </Spinner>
+                                )}
+                            </Nav.Item>
+                            <Nav.Item>
+                                <SignOutButton
+                                    variant="light"
+                                    className="mx-3"
+                                />
+                            </Nav.Item>
+                        </Nav>
                     </Nav>
                 </Navbar.Collapse>
             </Container>

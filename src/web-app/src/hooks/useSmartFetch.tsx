@@ -25,17 +25,21 @@ export type ErrorState<TError> = {
     isError: true;
 };
 
+export type SmartFetchState<TData, TError> =
+    | LoadingState
+    | SuccessState<TData>
+    | ErrorState<TError>;
+
 export function useSmartFetch<TData, TError = unknown>({
     queryFn,
     enabled = true,
 }: {
     queryFn: () => Promise<TData>;
     enabled: boolean;
-}): LoadingState | SuccessState<TData> | ErrorState<TError> {
+}): SmartFetchState<TData, TError> {
     const [data, setData] = useState<TData>();
-    const [status, setStatus] = useState<"error" | "success" | "loading">(
-        "loading"
-    );
+    const [status, setStatus] =
+        useState<SmartFetchState<TData, TError>["status"]>("loading");
     const [error, setError] = useState<TError | null>();
 
     useEffect(() => {
