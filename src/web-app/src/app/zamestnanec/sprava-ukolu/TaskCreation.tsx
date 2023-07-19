@@ -5,9 +5,9 @@ import { trpc } from "@/client/trpcClient";
 import { loadUsers } from "@/client/userManagementClient";
 import { useQuery } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
-import { FormEventHandler, useState } from "react";
-import { Alert, Button, Form, Spinner } from "react-bootstrap";
-import AsyncSelect from "react-select/async";
+import { FormEventHandler, useMemo, useState } from "react";
+import { Alert, Button, Form } from "react-bootstrap";
+import Select from "react-select";
 import { toast } from "react-toastify";
 
 /**
@@ -38,6 +38,13 @@ export default function TaskCreation({ onSettled }: TaskCreationProps) {
         enabled: !!session.data?.user.formioToken,
     });
 
+    const userOptionsList = useMemo(() => {
+        return userList?.map((user) => ({
+            value: user.data.id,
+            label: user.data.id,
+        }));
+    }, [userList]);
+
     const {
         isLoading: isLoadingForms,
         isError: isErrorForms,
@@ -51,6 +58,11 @@ export default function TaskCreation({ onSettled }: TaskCreationProps) {
         keepPreviousData: true,
         enabled: !!session.data?.user.formioToken,
     });
+
+    const formOptionsList = useMemo(
+        () => forms?.map((f) => ({ value: f._id, label: f.name })),
+        [forms]
+    );
 
     const utils = trpc.useContext();
 
@@ -68,7 +80,7 @@ export default function TaskCreation({ onSettled }: TaskCreationProps) {
     const [taskName, setTaskName] = useState("");
     const [taskDescription, setTaskDescription] = useState<string>("");
     const [taskUserIds, setTaskUserIds] = useState<string[]>([]);
-    const [taskFormId, setTaskFormId] = useState("");
+    const [taskFormId, setTaskFormId] = useState<string | null>();
 
     const handleSubmit: FormEventHandler<HTMLFormElement> = (e) => {
         e.preventDefault();
@@ -78,30 +90,22 @@ export default function TaskCreation({ onSettled }: TaskCreationProps) {
                 name: taskName,
                 description: taskDescription,
                 forUserId: userId,
-                formId: taskFormId,
+                formId: taskFormId!, // formId is required
             });
     };
-
-    if (isLoadingUsers || isLoadingForms)
-        return (
-            <div className="position-absolute top-50 start-50 translate-middle">
-                <Spinner animation="border" role="status">
-                    <span className="visually-hidden">Načítání...</span>
-                </Spinner>
-            </div>
-        );
 
     if (isErrorUsers) {
         console.error(errorUsers);
         return (
             <>
                 <Alert variant="danger">
-                    Nepodařilo se načíst seznam uživatelů
+                    <Alert.Heading>Nastala chyba</Alert.Heading>
+                    <p>Nepodařilo se načíst seznam uživatelů</p>
                 </Alert>
                 <Button onClick={() => refetchUsers()}>
                     Zkusit načíst znovu
                 </Button>
-                <Button as="a" href="/zamestnanec/prehled">
+                <Button as="a" href="/zamestnanec/prehled" className="ms-2">
                     Zpět na přehled
                 </Button>
             </>
@@ -113,27 +117,18 @@ export default function TaskCreation({ onSettled }: TaskCreationProps) {
         return (
             <>
                 <Alert variant="danger">
-                    Nepodařilo se načíst seznam formulářů
+                    <Alert.Heading>Nastala chyba</Alert.Heading>
+                    <p>Nepodařilo se načíst seznam formulářů</p>
                 </Alert>
                 <Button onClick={() => refetchForms()}>
                     Zkusit načíst znovu
                 </Button>
-                <Button as="a" href="/zamestnanec/prehled">
+                <Button as="a" href="/zamestnanec/prehled" className="ms-2">
                     Zpět na přehled
                 </Button>
             </>
         );
     }
-
-    if (userList.length === 0)
-        return (
-            <>
-                <Alert variant="danger">Žádní uživatelé</Alert>
-                <Button as="a" href="/zamestnanec/prehled">
-                    Zpět na přehled
-                </Button>
-            </>
-        );
 
     return (
         <Form onSubmit={handleSubmit}>
@@ -145,7 +140,9 @@ export default function TaskCreation({ onSettled }: TaskCreationProps) {
                 value={taskName}
                 required
             />
-            <Form.Label htmlFor="popis-ukolu">Popis úkolu</Form.Label>
+            <Form.Label htmlFor="popis-ukolu">
+                Popis úkolu <i>(nepovinné)</i>
+            </Form.Label>
             <Form.Control
                 type="text"
                 id="popis-ukolu"
@@ -153,51 +150,33 @@ export default function TaskCreation({ onSettled }: TaskCreationProps) {
                 value={taskDescription}
             />
             <Form.Label htmlFor="pro-uzivatele">Pro uživatele</Form.Label>
-            <AsyncSelect
+            <Select
                 id="pro-uzivatele"
                 required
-                loadOptions={async (inputValue: string) => {
-                    if (!session.data?.user.formioToken) return [];
-
-                    const users = await loadUsers(
-                        session.data.user.formioToken
-                    );
-                    return users
-                        .map((user) => ({
-                            value: user.data.id,
-                            label: user.data.id,
-                        }))
-                        .filter((item) => item.label.includes(inputValue));
-                }}
-                defaultOptions={true}
+                options={userOptionsList}
+                isLoading={isLoadingUsers}
+                isSearchable
                 isMulti
                 placeholder="Vyberte uživatele"
-                onChange={(item) =>
+                onChange={(selected) =>
                     setTaskUserIds(
-                        Array.from(item.values()).map((item) => item.value)
+                        Array.from(selected.values()).map((item) => item.value)
                     )
                 }
             />
             <Form.Label htmlFor="form-id">Formulář k vyplnění</Form.Label>
-            <Form.Select
+            <Select
                 id="form-id"
                 required
-                value={taskFormId}
-                onChange={(e) => setTaskFormId(e.target.value)}
-            >
-                <option disabled hidden value="">
-                    Vyberte název formuláře
-                </option>
-                {forms.map((form) => (
-                    <option key={form._id} value={form._id}>
-                        {form.name}
-                    </option>
-                ))}
-            </Form.Select>
+                options={formOptionsList}
+                isLoading={isLoadingForms}
+                onChange={(newValue) => setTaskFormId(newValue?.value)}
+                placeholder="Vyberte formulář"
+            />
             <Form.Control
                 type="submit"
                 value={createTask.isLoading ? "Vytváření..." : "Vytvořit úkol"}
-                className="mt-2"
+                className="mt-3"
                 disabled={createTask.isLoading}
             />
         </Form>
