@@ -83,7 +83,7 @@ export default function FormDefinitionsTable() {
         [columnHelper, queryClient, session.data]
     );
 
-    const { isLoading, isError, error, data, isFetching, refetch } = useQuery({
+    const { isLoading, isError, error, data } = useQuery({
         queryKey: ["forms", session.data],
         queryFn: () =>
             loadForms(session.data!.user.formioToken, ["klientPacient"]),
@@ -115,31 +115,7 @@ export default function FormDefinitionsTable() {
 
     return (
         <>
-            <div className="d-flex flex-wrap align-items-center gap-2">
-                <Button
-                    onClick={() => {
-                        refetch();
-                    }}
-                    className="mb-1"
-                    disabled={isFetching}
-                >
-                    {isFetching ? "Načítání..." : "Aktualizovat"}
-                </Button>
-            </div>
-            <Form.Select
-                className="my-2"
-                value={table.getState().pagination.pageSize}
-                onChange={(e) => {
-                    table.setPageSize(Number(e.target.value));
-                }}
-            >
-                {[10, 20, 30].map((pageSize: number) => (
-                    <option key={pageSize} value={pageSize}>
-                        Zobrazit {pageSize}
-                    </option>
-                ))}
-            </Form.Select>
-            <div className="my-2 d-block text-nowrap overflow-auto w-100">
+            <div className="mt-2 d-block text-nowrap overflow-auto w-100">
                 <Table striped bordered hover>
                     <thead>
                         {table.getHeaderGroups().map((headerGroup) => (
@@ -174,7 +150,20 @@ export default function FormDefinitionsTable() {
                     </tbody>
                 </Table>
             </div>
-            <div className="d-flex justify-content-center align-items-center">
+            <div className="d-flex justify-content-between align-items-center">
+                <Form.Select
+                    className="my-2 w-auto"
+                    value={table.getState().pagination.pageSize}
+                    onChange={(e) => {
+                        table.setPageSize(Number(e.target.value));
+                    }}
+                >
+                    {[10, 20, 30].map((pageSize: number) => (
+                        <option key={pageSize} value={pageSize}>
+                            Zobrazit {pageSize}
+                        </option>
+                    ))}
+                </Form.Select>
                 <SimplePagination
                     pageIndex={table.getState().pagination.pageIndex}
                     totalPages={table.getPageCount()}
