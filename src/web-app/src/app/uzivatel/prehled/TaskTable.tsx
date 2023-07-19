@@ -1,6 +1,7 @@
 "use client";
 import { trpc } from "@/client/trpcClient";
 import SimplePagination from "@/components/shared/SimplePagination";
+import TaskStateBadge from "@/components/shared/TaskStateBadge";
 import { Task, TaskState } from "@prisma/client";
 import {
     createColumnHelper,
@@ -30,22 +31,9 @@ export default function TaskTable() {
             }),
             columnHelper.accessor("state", {
                 header: "Stav",
-                cell: (props) => {
-                    switch (props.row.original.state) {
-                        case TaskState.READY:
-                            return "Nedokončeno";
-                        case TaskState.PARTIALLY_COMPLETED:
-                            return "Částečně dokončeno";
-                        case TaskState.COMPLETED:
-                            return "Dokončeno";
-                        default:
-                            console.error(
-                                "Unknown task state: ",
-                                props.row.original.state
-                            );
-                            return "Neznámý stav";
-                    }
-                },
+                cell: (props) => (
+                    <TaskStateBadge taskState={props.row.original.state} />
+                ),
             }),
             columnHelper.display({
                 id: "actions",
