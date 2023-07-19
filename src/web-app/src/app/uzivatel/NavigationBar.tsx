@@ -43,7 +43,10 @@ export default function NavigationBarClientPatient() {
                             className="align-items-center w-100 justify-content-end gap-2"
                         >
                             <Nav.Item className="text-white">
-                                Přihlášen&nbsp;jako:&nbsp;
+                                <i
+                                    className="bi bi-person"
+                                    style={{ paddingRight: "5px" }}
+                                ></i>
                                 {data?.user.data.id ?? (
                                     <Spinner
                                         animation="border"
