@@ -188,7 +188,7 @@ export default function EmployeeTable() {
         setShowCreateZadavatelDotaznikuModal,
     ] = useState(false);
 
-    const { isLoading, isError, error, data, isFetching, refetch } = useQuery({
+    const { isLoading, isError, error, data } = useQuery({
         queryKey: ["employees", session.data],
         queryFn: () => loadEmployees(session.data!.user.formioToken),
         enabled: !!session.data?.user.formioToken,
@@ -228,40 +228,28 @@ export default function EmployeeTable() {
                     <Button
                         onClick={() => setShowCreateSpravceDotaznikuModal(true)}
                     >
+                        <i
+                            className="bi bi-plus-lg"
+                            style={{
+                                paddingRight: "5px",
+                            }}
+                        ></i>
                         Založit účet nového správce dotazníků
                     </Button>
                 )}
                 <Button
                     onClick={() => setShowCreateZadavatelDotaznikuModal(true)}
                 >
+                    <i
+                        className="bi bi-plus-lg"
+                        style={{
+                            paddingRight: "5px",
+                        }}
+                    ></i>
                     Založit účet nového zadavatele dotazníků
                 </Button>
             </div>
-            <h2>Seznam zaměstnanců</h2>
-            <div className="d-flex flex-wrap align-items-center gap-2">
-                <Button
-                    onClick={() => {
-                        refetch();
-                    }}
-                    className="mb-1"
-                    disabled={isFetching}
-                >
-                    {isFetching ? "Načítání..." : "Aktualizovat"}
-                </Button>
-            </div>
-            <Form.Select
-                className="my-2"
-                value={table.getState().pagination.pageSize}
-                onChange={(e) => {
-                    table.setPageSize(Number(e.target.value));
-                }}
-            >
-                {[10, 20, 30].map((pageSize: number) => (
-                    <option key={pageSize} value={pageSize}>
-                        Zobrazit {pageSize}
-                    </option>
-                ))}
-            </Form.Select>
+
             <div className="my-2 d-block text-nowrap overflow-auto">
                 <Table striped bordered hover>
                     <thead>
@@ -297,7 +285,20 @@ export default function EmployeeTable() {
                     </tbody>
                 </Table>
             </div>
-            <div className="d-flex justify-content-center align-items-center">
+            <div className="d-flex justify-content-between align-items-center">
+                <Form.Select
+                    className="my-2 w-auto"
+                    value={table.getState().pagination.pageSize}
+                    onChange={(e) => {
+                        table.setPageSize(Number(e.target.value));
+                    }}
+                >
+                    {[10, 20, 30].map((pageSize: number) => (
+                        <option key={pageSize} value={pageSize}>
+                            Zobrazit {pageSize}
+                        </option>
+                    ))}
+                </Form.Select>
                 <SimplePagination
                     pageIndex={table.getState().pagination.pageIndex}
                     totalPages={table.getPageCount()}

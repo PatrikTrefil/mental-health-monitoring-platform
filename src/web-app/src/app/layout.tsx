@@ -1,5 +1,6 @@
 import "@/styles/globals.css";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import "bootstrap-icons/font/bootstrap-icons.css";
 import "bootstrap/dist/css/bootstrap.css";
 import "formiojs/dist/formio.full.min.css";
 import "react-toastify/dist/ReactToastify.min.css";
