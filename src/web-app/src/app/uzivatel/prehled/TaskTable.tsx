@@ -1,4 +1,5 @@
 "use client";
+
 import { trpc } from "@/client/trpcClient";
 import SimplePagination from "@/components/shared/SimplePagination";
 import TaskStateBadge from "@/components/shared/TaskStateBadge";
@@ -11,7 +12,16 @@ import {
     useReactTable,
 } from "@tanstack/react-table";
 import { useMemo } from "react";
-import { Alert, Button, Form, Spinner, Table } from "react-bootstrap";
+import {
+    Alert,
+    Button,
+    Form,
+    OverlayTrigger,
+    Spinner,
+    Table,
+    Tooltip,
+} from "react-bootstrap";
+import { OverlayChildren } from "react-bootstrap/esm/Overlay";
 
 export default function TaskTable() {
     const columnHelper = createColumnHelper<Task>();
@@ -38,23 +48,53 @@ export default function TaskTable() {
             columnHelper.display({
                 id: "actions",
                 header: "Akce",
-                cell: (props) => (
-                    <Button
-                        variant="primary"
-                        as="a"
-                        href={`/uzivatel/formular/vyplnit/${props.row.original.formId}?taskId=${props.row.original.id}`}
-                        disabled={props.row.original.state !== TaskState.READY}
-                    >
-                        Splnit
-                    </Button>
-                ),
+                cell: (props) => {
+                    const state = props.row.original.state;
+                    let tooltip: OverlayChildren;
+                    switch (state) {
+                        case TaskState.READY:
+                            tooltip = <></>;
+                            break;
+                        case TaskState.COMPLETED:
+                            tooltip = <Tooltip>Úkol je již splněn.</Tooltip>;
+                            break;
+                        case TaskState.PARTIALLY_COMPLETED:
+                            tooltip = (
+                                <Tooltip>
+                                    Úkol je v procesu odevzdávání.
+                                </Tooltip>
+                            );
+                            break;
+                    }
+                    return (
+                        <OverlayTrigger overlay={tooltip}>
+                            <span className="d-inline-block">
+                                <Button
+                                    variant={
+                                        props.row.original.state ===
+                                        TaskState.READY
+                                            ? "primary"
+                                            : "secondary"
+                                    }
+                                    as="a"
+                                    href={`/uzivatel/formular/vyplnit/${props.row.original.formId}?taskId=${props.row.original.id}`}
+                                    disabled={
+                                        props.row.original.state !==
+                                        TaskState.READY
+                                    }
+                                >
+                                    Splnit
+                                </Button>
+                            </span>
+                        </OverlayTrigger>
+                    );
+                },
             }),
         ],
         [columnHelper]
     );
 
-    const { isLoading, isError, error, data, isFetching, refetch } =
-        trpc.task.listTasks.useQuery();
+    const { isLoading, isError, error, data } = trpc.task.listTasks.useQuery();
 
     const table = useReactTable({
         columns,
@@ -81,31 +121,6 @@ export default function TaskTable() {
 
     return (
         <>
-            <h2>Seznam úkolů</h2>
-            <div className="d-flex flex-wrap align-items-center gap-2">
-                <Button
-                    onClick={() => {
-                        refetch();
-                    }}
-                    className="mb-1"
-                    disabled={isFetching}
-                >
-                    {isFetching ? "Načítání..." : "Aktualizovat"}
-                </Button>
-            </div>
-            <Form.Select
-                className="my-2"
-                value={table.getState().pagination.pageSize}
-                onChange={(e) => {
-                    table.setPageSize(Number(e.target.value));
-                }}
-            >
-                {[10, 20, 30].map((pageSize: number) => (
-                    <option key={pageSize} value={pageSize}>
-                        Zobrazit {pageSize}
-                    </option>
-                ))}
-            </Form.Select>
             <div className="my-2 d-block text-nowrap overflow-auto w-100">
                 <Table striped bordered hover>
                     <thead>
@@ -141,7 +156,20 @@ export default function TaskTable() {
                     </tbody>
                 </Table>
             </div>
-            <div className="d-flex justify-content-center align-items-center">
+            <div className="d-flex justify-content-between align-items-center">
+                <Form.Select
+                    className="my-2 w-auto"
+                    value={table.getState().pagination.pageSize}
+                    onChange={(e) => {
+                        table.setPageSize(Number(e.target.value));
+                    }}
+                >
+                    {[10, 20, 30].map((pageSize: number) => (
+                        <option key={pageSize} value={pageSize}>
+                            Zobrazit {pageSize}
+                        </option>
+                    ))}
+                </Form.Select>
                 <SimplePagination
                     pageIndex={table.getState().pagination.pageIndex}
                     totalPages={table.getPageCount()}

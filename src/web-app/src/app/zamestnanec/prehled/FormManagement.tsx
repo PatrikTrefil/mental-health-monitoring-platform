@@ -14,7 +14,13 @@ export default function FormManagement() {
                 UserRoleTitles.SPRAVCE_DOTAZNIKU
             ) && (
                 <Button as="a" href="/zamestnanec/formular/vytvorit">
-                    Vytvořit formulář
+                    <i
+                        className="bi bi-plus-lg"
+                        style={{
+                            paddingRight: "5px",
+                        }}
+                    ></i>
+                    Nový formulář
                 </Button>
             )}
             <h2>Definice formulářů</h2>

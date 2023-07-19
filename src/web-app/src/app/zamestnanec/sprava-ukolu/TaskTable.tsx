@@ -108,7 +108,7 @@ export default function TaskTable() {
 
     return (
         <>
-            <div className="my-2 d-block text-nowrap overflow-auto">
+            <div className="mt-2 d-block text-nowrap overflow-auto">
                 <Table striped bordered hover>
                     <thead>
                         {table.getHeaderGroups().map((headerGroup) => (
