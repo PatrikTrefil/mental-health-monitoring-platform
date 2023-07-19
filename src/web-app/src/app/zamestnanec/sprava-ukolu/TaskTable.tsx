@@ -2,8 +2,8 @@
 
 import { trpc } from "@/client/trpcClient";
 import SimplePagination from "@/components/shared/SimplePagination";
+import TaskStateBadge from "@/components/shared/TaskStateBadge";
 import { AppRouter } from "@/server/routers/root";
-import { TaskState } from "@prisma/client";
 import {
     createColumnHelper,
     flexRender,
@@ -13,7 +13,7 @@ import {
 } from "@tanstack/react-table";
 import { inferProcedureOutput } from "@trpc/server";
 import { useMemo } from "react";
-import { Alert, Badge, Button, Form, Spinner, Table } from "react-bootstrap";
+import { Alert, Button, Form, Spinner, Table } from "react-bootstrap";
 import { toast } from "react-toastify";
 
 /**
@@ -55,44 +55,9 @@ export default function TaskTable() {
             }),
             columnHelper.accessor("state", {
                 header: "Stav",
-                cell: (props) => {
-                    const badgeFontSize = "0.9em";
-                    switch (props.row.original.state) {
-                        case TaskState.READY:
-                            return (
-                                <Badge
-                                    bg="info"
-                                    style={{ fontSize: badgeFontSize }}
-                                >
-                                    Nedokončeno
-                                </Badge>
-                            );
-                        case TaskState.PARTIALLY_COMPLETED:
-                            return (
-                                <Badge
-                                    bg="info"
-                                    style={{ fontSize: badgeFontSize }}
-                                >
-                                    Částečně dokončeno
-                                </Badge>
-                            );
-                        case TaskState.COMPLETED:
-                            return (
-                                <Badge
-                                    bg="success"
-                                    style={{ fontSize: badgeFontSize }}
-                                >
-                                    Dokončeno
-                                </Badge>
-                            );
-                        default:
-                            console.error(
-                                "Unknown task state: ",
-                                props.row.original.state
-                            );
-                            return "Neznámý stav";
-                    }
-                },
+                cell: (props) => (
+                    <TaskStateBadge taskState={props.row.original.state} />
+                ),
             }),
             columnHelper.accessor("updatedAt", {
                 header: "Aktualizováno dne",
