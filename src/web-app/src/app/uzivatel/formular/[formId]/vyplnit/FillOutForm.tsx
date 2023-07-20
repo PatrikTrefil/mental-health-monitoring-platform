@@ -152,6 +152,7 @@ export default function FillOutForm({ formId }: { formId: string }) {
                     action: "submit",
                     theme: "primary",
                     type: "button",
+                    disabled: false,
                 });
             }}
             onChange={(e) => {

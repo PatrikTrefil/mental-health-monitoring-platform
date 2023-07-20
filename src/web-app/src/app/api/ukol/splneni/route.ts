@@ -152,6 +152,10 @@ async function validateRequest(
         console.error("Loading submission failed", e);
         return false;
     }
+    if (trustedSubmission === null) {
+        console.error("Loading submission failed (not found)");
+        return false;
+    }
 
     if (trustedSubmission.owner !== userId) {
         console.error("The submission is not owned by the user");

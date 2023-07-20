@@ -75,6 +75,7 @@ export default function CreateForm() {
             properties: {},
             isNew: false,
             lockKey: true,
+            disabled: false,
         };
 
         const startingFormSchema = {
