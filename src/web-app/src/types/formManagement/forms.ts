@@ -19,6 +19,7 @@ type ComponentBase = {
     label: string;
     key: string;
     defaultValue?: DataValue;
+    disabled: boolean;
 };
 
 type HiddenComponent = ComponentBase & {

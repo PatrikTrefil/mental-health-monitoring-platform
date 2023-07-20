@@ -254,21 +254,33 @@ export async function createAction<TSettings>(
  * @param formioToken JWT token for formio
  * @throws {RequestError} if the http request fails
  * @throws {TypeError} if the response is not valid json or when a network error is encountered or CORS is misconfigured on the server-side
+ * @returns submission or null if the returned status is 404
  */
 export async function loadSubmission(
     formPath: string,
     submissionId: string,
     formioToken: string
-) {
-    const response = await safeFetch(
-        `${getFormioUrl()}/${formPath}/submission/${submissionId}`,
-        {
-            headers: {
-                "x-jwt-token": formioToken,
-                "Content-Type": "application/json",
-            },
+): Promise<Submission | null> {
+    let response: Response;
+    try {
+        response = await safeFetch(
+            `${getFormioUrl()}/${formPath}/submission/${submissionId}`,
+            {
+                headers: {
+                    "x-jwt-token": formioToken,
+                    "Content-Type": "application/json",
+                },
+            }
+        );
+    } catch (e) {
+        if (e instanceof RequestError) {
+            if (e.status === 404) return null;
+            throw e;
+        } else if (e instanceof TypeError) {
+            throw e;
         }
-    );
+        throw new Error("Unexpected error caught", { cause: e });
+    }
     return (await response.json()) as Submission;
 }
 

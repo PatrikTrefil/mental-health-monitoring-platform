@@ -39,13 +39,13 @@ export default function FormDefinitionsTable() {
                     <div className="d-flex align-items-center gap-2">
                         <Button
                             as="a"
-                            href={`/zamestnanec/formular/nahled/${props.row.original._id}`}
+                            href={`/zamestnanec/formular/${props.row.original._id}/nahled`}
                         >
                             Náhled
                         </Button>
                         <Button
                             as="a"
-                            href={`/zamestnanec/formular/upravit/${props.row.original._id}`}
+                            href={`/zamestnanec/formular/${props.row.original._id}/upravit`}
                         >
                             Upravit
                         </Button>
@@ -72,7 +72,7 @@ export default function FormDefinitionsTable() {
                         <ExportButton formId={props.row.original._id} />
                         <Button
                             as="a"
-                            href={`/zamestnanec/formular/vysledky/${props.row.original._id}`}
+                            href={`/zamestnanec/formular/${props.row.original._id}/vysledek`}
                         >
                             Výsledky
                         </Button>
