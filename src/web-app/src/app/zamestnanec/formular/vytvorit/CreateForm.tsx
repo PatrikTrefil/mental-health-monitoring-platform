@@ -225,9 +225,7 @@ export default function CreateForm() {
                     // Make clients/patients able to fill out the form
                     // and make the employees able to see their submissions
                     form={startingFormSchema}
-                >
-                    <DynamicFormBuilder />
-                </DynamicFormEdit>
+                />
             </>
         );
     }
