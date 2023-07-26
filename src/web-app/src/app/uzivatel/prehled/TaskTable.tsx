@@ -77,7 +77,7 @@ export default function TaskTable() {
                                             : "secondary"
                                     }
                                     as="a"
-                                    href={`/uzivatel/formular/${props.row.original.formId}?taskId=${props.row.original.id}/vyplnit`}
+                                    href={`/uzivatel/formular/${props.row.original.formId}/vyplnit?taskId=${props.row.original.id}`}
                                     disabled={
                                         props.row.original.state !==
                                         TaskState.READY
