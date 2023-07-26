@@ -1,9 +1,9 @@
 "use client";
 
+import { employeesQuery } from "@/client/queries/userManagement";
 import {
     deleteSpravceDotazniku,
     deleteZadavatelDotazniku,
-    loadEmployees,
 } from "@/client/userManagementClient";
 import SimplePagination from "@/components/shared/SimplePagination";
 import DynamicFormWithAuth from "@/components/shared/formio/DynamicFormWithAuth";
@@ -189,8 +189,10 @@ export default function EmployeeTable() {
     ] = useState(false);
 
     const { isLoading, isError, error, data } = useQuery({
-        queryKey: ["employees", session.data],
-        queryFn: () => loadEmployees(session.data!.user.formioToken),
+        ...employeesQuery.list(
+            session.data?.user.formioToken!,
+            session.data?.user.data.id!
+        ),
         enabled: !!session.data?.user.formioToken,
     });
 

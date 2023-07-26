@@ -2,7 +2,6 @@
 
 import { createAction, createForm } from "@/client/formManagementClient";
 import { loadRoles } from "@/client/userManagementClient";
-import DynamicFormBuilder from "@/components/shared/formio/DynamicFormBuilder";
 import DynamicFormEdit from "@/components/shared/formio/DynamicFormEdit";
 import UserRoleTitles from "@/constants/userRoleTitles";
 import { useSmartFetch } from "@/hooks/useSmartFetch";

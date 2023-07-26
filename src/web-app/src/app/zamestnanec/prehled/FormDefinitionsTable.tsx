@@ -1,7 +1,8 @@
 "use client";
 
 import ExportButton from "@/app/zamestnanec/prehled/ExportButton";
-import { deleteForm, loadForms } from "@/client/formManagementClient";
+import { deleteForm } from "@/client/formManagementClient";
+import { formsQuery } from "@/client/queries/formManagement";
 import SimplePagination from "@/components/shared/SimplePagination";
 import { Form as FormDefinition } from "@/types/formManagement/forms";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -84,9 +85,11 @@ export default function FormDefinitionsTable() {
     );
 
     const { isLoading, isError, error, data } = useQuery({
-        queryKey: ["forms", session.data],
-        queryFn: () =>
-            loadForms(session.data!.user.formioToken, ["klientPacient"]),
+        ...formsQuery.list(
+            session.data?.user.formioToken!,
+            session.data?.user.data.id!,
+            ["klientPacient"]
+        ),
         enabled: !!session.data?.user.formioToken,
     });
 

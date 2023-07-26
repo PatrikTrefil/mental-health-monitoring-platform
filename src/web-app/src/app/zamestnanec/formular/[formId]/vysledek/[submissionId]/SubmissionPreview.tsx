@@ -1,6 +1,7 @@
 "use client";
 
-import { loadFormById, loadSubmission } from "@/client/formManagementClient";
+import { loadSubmission } from "@/client/formManagementClient";
+import { formsQuery } from "@/client/queries/formManagement";
 import DynamicFormWithAuth from "@/components/shared/formio/DynamicFormWithAuth";
 import { useSmartFetch } from "@/hooks/useSmartFetch";
 import { useQuery } from "@tanstack/react-query";
@@ -29,13 +30,7 @@ export default function SubmissionPreview(props: {
         error: errorForm,
         refetch: refetchForm,
     } = useQuery({
-        queryKey: [
-            `/form/${props.formId}`,
-            session.data?.user.formioToken,
-            session.data,
-        ],
-        queryFn: () =>
-            loadFormById(props.formId, session.data!.user.formioToken),
+        ...formsQuery.detail(session.data?.user.formioToken!, props.formId),
         enabled: !!session.data?.user.formioToken,
     });
 

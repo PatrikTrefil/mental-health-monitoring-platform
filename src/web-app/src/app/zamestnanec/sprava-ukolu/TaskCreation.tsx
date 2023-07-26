@@ -1,8 +1,8 @@
 "use client";
 
-import { loadForms } from "@/client/formManagementClient";
+import { formsQuery } from "@/client/queries/formManagement";
+import { usersQuery } from "@/client/queries/userManagement";
 import { trpc } from "@/client/trpcClient";
-import { loadUsers } from "@/client/userManagementClient";
 import { useQuery } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
 import { FormEventHandler, useMemo, useState } from "react";
@@ -33,8 +33,10 @@ export default function TaskCreation({ onSettled }: TaskCreationProps) {
         data: userList,
         refetch: refetchUsers,
     } = useQuery({
-        queryKey: ["users", session.data],
-        queryFn: () => loadUsers(session.data!.user.formioToken),
+        ...usersQuery.list(
+            session.data?.user.formioToken!,
+            session.data?.user.data.id!
+        ),
         enabled: !!session.data?.user.formioToken,
     });
 
@@ -52,9 +54,11 @@ export default function TaskCreation({ onSettled }: TaskCreationProps) {
         data: forms,
         refetch: refetchForms,
     } = useQuery({
-        queryKey: ["forms", session.data],
-        queryFn: () =>
-            loadForms(session.data!.user.formioToken, ["klientPacient"]),
+        ...formsQuery.list(
+            session.data?.user.formioToken!,
+            session.data?.user.data.id!,
+            ["klientPacient"]
+        ),
         keepPreviousData: true,
         enabled: !!session.data?.user.formioToken,
     });

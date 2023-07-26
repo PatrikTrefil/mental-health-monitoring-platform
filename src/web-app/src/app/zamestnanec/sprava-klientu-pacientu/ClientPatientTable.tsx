@@ -1,6 +1,7 @@
 "use client";
 
-import { deleteUser, loadUsers } from "@/client/userManagementClient";
+import { usersQuery } from "@/client/queries/userManagement";
+import { deleteUser } from "@/client/userManagementClient";
 import SimplePagination from "@/components/shared/SimplePagination";
 import DynamicFormWithAuth from "@/components/shared/formio/DynamicFormWithAuth";
 import { User } from "@/types/userManagement/user";
@@ -95,8 +96,10 @@ export default function ClientPatientTable() {
     const [showCreateUserModal, setShowCreateUserModal] = useState(false);
 
     const { isLoading, isError, error, data } = useQuery({
-        queryKey: ["users", session.data],
-        queryFn: () => loadUsers(session.data!.user.formioToken),
+        ...usersQuery.list(
+            session.data?.user.formioToken!,
+            session.data?.user.data.id!
+        ),
         enabled: !!session.data?.user.formioToken,
     });
 
