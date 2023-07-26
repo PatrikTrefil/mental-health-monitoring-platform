@@ -1,10 +1,12 @@
 "use client";
 
 import { submitForm } from "@/client/formManagementClient";
+import { formsQuery } from "@/client/queries/formManagement";
 import { trpc } from "@/client/trpcClient";
 import DynamicFormWithAuth from "@/components/shared/formio/DynamicFormWithAuth";
 import "@/styles/saveDraft.css";
 import { DataValue } from "@/types/formManagement/submission";
+import { useQuery } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -54,6 +56,7 @@ export default function FillOutForm({ formId }: { formId: string }) {
         {
             enabled: isDraftQueryEnabled,
             retry: (_, error) => error.message !== "NOT_FOUND",
+            cacheTime: 0,
         }
     );
     const [isFormStateDirty, setIsFormStateDirty] = useState(false);
@@ -81,10 +84,20 @@ export default function FillOutForm({ formId }: { formId: string }) {
 
     usePreventClose(isFormStateDirty);
 
+    const {
+        data: form,
+        isLoading: isLoadingForm,
+        isError: isErrorForm,
+        error: errorForm,
+    } = useQuery({
+        ...formsQuery.detail(data?.user.formioToken!, formId),
+        enabled: !!data?.user.formioToken,
+    });
+
     if (!taskId)
         return <Alert variant="danger">Nebyl zadán parametr taskId</Alert>;
 
-    if (currentDraft.isLoading)
+    if (currentDraft.isLoading || isLoadingForm)
         return (
             <div className="position-absolute top-50 start-50 translate-middle">
                 <Spinner animation="border" role="status">
@@ -93,81 +106,103 @@ export default function FillOutForm({ formId }: { formId: string }) {
             </div>
         );
 
+    if (isErrorForm) {
+        console.error(errorForm);
+        return (
+            <Alert variant="danger">
+                <Alert.Heading>Načítání formuláře selhalo</Alert.Heading>
+                <p>Formulář se nepodařilo načíst.</p>
+            </Alert>
+        );
+    }
+
+    if (form === null)
+        return (
+            <Alert variant="danger">
+                <Alert.Heading>Formulář neexistuje</Alert.Heading>
+                <p>Formulář s ID {formId} nebyl nalezen.</p>
+            </Alert>
+        );
+
     return (
-        <DynamicFormWithAuth
-            relativeFormPath={`/form/${formId}`}
-            onSubmitFail={() => {
-                toast.error("Formulář se nepodařilo odeslat");
-                console.error("Failed to submit form");
-            }}
-            onSubmit={async (submission, formPath) => {
-                if (!data?.user.formioToken)
-                    throw new Error("Formio token not available");
-                else if (!taskId) throw new Error("Task id not available");
-                else {
-                    submission.data.taskId = taskId;
-                    if (submission.data.submit) {
-                        startLoadingToast();
-                        try {
-                            await submitForm(
-                                data.user.formioToken,
-                                formPath,
-                                submission
-                            );
-                        } catch (e) {
-                            finishLoadingToastWithFailure();
-                            console.error("Failed to submit form", e);
-                            return;
+        <>
+            <h1>{form.title}</h1>
+            <DynamicFormWithAuth
+                relativeFormPath={`/form/${formId}`}
+                onSubmitFail={() => {
+                    toast.error("Formulář se nepodařilo odeslat");
+                    console.error("Failed to submit form");
+                }}
+                onSubmit={async (submission, formPath) => {
+                    if (!data?.user.formioToken)
+                        throw new Error("Formio token not available");
+                    else if (!taskId) throw new Error("Task id not available");
+                    else {
+                        submission.data.taskId = taskId;
+                        if (submission.data.submit) {
+                            startLoadingToast();
+                            try {
+                                await submitForm(
+                                    data.user.formioToken,
+                                    formPath,
+                                    submission
+                                );
+                            } catch (e) {
+                                finishLoadingToastWithFailure();
+                                console.error("Failed to submit form", e);
+                                return;
+                            }
+                            finishLoadingToastWithSuccess();
+                            // set this to remove the warning about unsaved changes
+                            setIsFormStateDirty(false);
+                            router.push("/uzivatel/prehled");
+                        } else if (submission.data.saveDraft) {
+                            startLoadingToast();
+                            try {
+                                upsertDraft.mutate({
+                                    formId,
+                                    data: submission.data,
+                                });
+                            } catch (e) {
+                                finishLoadingToastWithFailure();
+                                console.error("Failed to save form state", e);
+                                return;
+                            }
+                            finishLoadingToastWithSuccess();
+                            setIsFormStateDirty(false);
                         }
-                        finishLoadingToastWithSuccess();
-                        // set this to remove the warning about unsaved changes
-                        setIsFormStateDirty(false);
-                        router.push("/uzivatel/prehled");
-                    } else if (submission.data.saveDraft) {
-                        startLoadingToast();
-                        try {
-                            upsertDraft.mutate({
-                                formId,
-                                data: submission.data,
-                            });
-                        } catch (e) {
-                            finishLoadingToastWithFailure();
-                            console.error("Failed to save form state", e);
-                            return;
-                        }
-                        finishLoadingToastWithSuccess();
-                        setIsFormStateDirty(false);
                     }
+                }}
+                defaultValues={
+                    currentDraft?.data?.data as
+                        | { [key: string]: DataValue }
+                        | undefined
                 }
-            }}
-            defaultValues={
-                currentDraft?.data?.data as
-                    | { [key: string]: DataValue }
-                    | undefined
-            }
-            modifyFormBeforeRender={(form) => {
-                form.components.unshift({
-                    label: "Uložit koncept",
-                    key: "saveDraft",
-                    action: "submit",
-                    theme: "primary",
-                    type: "button",
-                    disabled: false,
-                });
-            }}
-            onChange={(e) => {
-                if (
-                    currentDraft &&
-                    e.changed &&
-                    currentDraft?.data?.data[e.changed.component.key] !==
-                        e.changed.value
-                ) {
-                    console.debug("Change detected");
-                    setIsFormStateDirty(true);
-                    setIsDraftQueryEnabled(false);
-                }
-            }}
-        />
+                modifyFormBeforeRender={(form) => {
+                    form.components.unshift({
+                        label: "Uložit koncept",
+                        key: "saveDraft",
+                        action: "submit",
+                        theme: "primary",
+                        type: "button",
+                        disabled: false,
+                        leftIcon: "bi bi-save",
+                    });
+                }}
+                onChange={(e) => {
+                    if (
+                        currentDraft &&
+                        e.changed &&
+                        currentDraft?.data?.data[e.changed.component.key] !==
+                            e.changed.value
+                    ) {
+                        console.debug("Change detected");
+                        setIsFormStateDirty(true);
+                        setIsDraftQueryEnabled(false);
+                    }
+                }}
+            />
+        </>
     );
 }
 
