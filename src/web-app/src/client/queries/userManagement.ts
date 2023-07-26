@@ -8,6 +8,12 @@ export const usersQuery = createQueryKeys("users", {
         queryKey: [callerId],
         queryFn: () => loadUsers(formioToken),
     }),
+    detail: (formioToken: string, userSubmissionId: string) => ({
+        // We don't include the token in the query key, because the result does not depend on it
+        // eslint-disable-next-line @tanstack/query/exhaustive-deps
+        queryKey: [userSubmissionId],
+        queryFn: () => loadUser(formioToken, userSubmissionId),
+    }),
 });
 
 export const employeesQuery = createQueryKeys("employees", {

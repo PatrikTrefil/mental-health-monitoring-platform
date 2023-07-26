@@ -2,6 +2,7 @@
 
 import { loadSubmission } from "@/client/formManagementClient";
 import { formsQuery } from "@/client/queries/formManagement";
+import { usersQuery } from "@/client/queries/userManagement";
 import DynamicFormWithAuth from "@/components/shared/formio/DynamicFormWithAuth";
 import { useSmartFetch } from "@/hooks/useSmartFetch";
 import { useQuery } from "@tanstack/react-query";
@@ -50,7 +51,21 @@ export default function SubmissionPreview(props: {
         enabled: !!session.data?.user.formioToken,
     });
 
-    if (isLoadingSubmission || isLoadingForm)
+    const {
+        data: user,
+        isLoading: isLoadingUser,
+        isError: isErrorUser,
+        error: errorUser,
+        refetch: refetchUser,
+    } = useQuery({
+        ...usersQuery.detail(
+            session.data?.user.formioToken!,
+            submission?.owner!
+        ),
+        enabled: !!session.data?.user.formioToken && !!submission,
+    });
+
+    if (isLoadingSubmission || isLoadingForm || isLoadingUser)
         return (
             <div className="position-absolute top-50 start-50 translate-middle">
                 <Spinner animation="border" role="status">
@@ -59,9 +74,10 @@ export default function SubmissionPreview(props: {
             </div>
         );
 
-    if (isErrorSubmission || isErrorForm) {
+    if (isErrorSubmission || isErrorForm || isErrorUser) {
         if (isErrorForm) console.error(errorForm);
-        else console.error(errorSubmission);
+        else if (isErrorSubmission) console.error(errorSubmission);
+        else if (isErrorUser) console.error(errorUser);
 
         return (
             <div className="d-flex justify-content-center">
@@ -73,7 +89,8 @@ export default function SubmissionPreview(props: {
                         <Button
                             onClick={() => {
                                 if (isErrorSubmission) refetchSubmission();
-                                else refetchForm();
+                                else if (isErrorForm) refetchForm();
+                                else if (isErrorUser) refetchUser();
                             }}
                         >
                             Zkusit znovu
@@ -107,6 +124,13 @@ export default function SubmissionPreview(props: {
     return (
         <>
             <h1>Náhled odevzdání formuláře - {form.title}</h1>
+            <p>
+                <i className="bi bi-person" style={{ marginRight: "5px" }}></i>
+                Autor: {user?.data.id ?? "Uživatel nenalezen"}
+                <span style={{ fontWeight: 100, margin: "0 6px" }}>|</span>
+                <i className="bi bi-clock" style={{ marginRight: "5px" }}></i>
+                Datum odevzdání: {new Date(submission.created).toLocaleString()}
+            </p>
             <DynamicFormWithAuth
                 relativeFormPath={`/form/${props.formId}`}
                 modifyFormBeforeRender={(form) => {

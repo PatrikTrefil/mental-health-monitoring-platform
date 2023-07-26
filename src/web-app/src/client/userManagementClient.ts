@@ -26,6 +26,36 @@ export async function loadUsers(formioToken: string): Promise<User[]> {
 }
 
 /**
+ * Load user based on user ID
+ * @param formioToken JWT token for formio
+ * @returns user or null if the user does not exist
+ * @throws {RequestError} if the returned http status is not OK (and not 404)
+ * @throws {TypeError} if the response is not valid json or when a network error is encountered or CORS is misconfigured on the server-side
+ */
+export async function loadUser(
+    formioToken: string,
+    userSubmissionId: string
+): Promise<User | null> {
+    let response: Response;
+    try {
+        response = await safeFetch(
+            `${getFormioUrl()}/klientpacient/submission/${userSubmissionId}`,
+            {
+                headers: {
+                    "x-jwt-token": formioToken,
+                },
+            }
+        );
+    } catch (e) {
+        if (e instanceof RequestError && e.status === 404) {
+            return null;
+        }
+        throw e;
+    }
+    return (await response.json()) as User;
+}
+
+/**
  * Delete user from the user management system.
  * @param formioToken JWT token for formio
  * @param userSubmissionId id of the user submission to delete
