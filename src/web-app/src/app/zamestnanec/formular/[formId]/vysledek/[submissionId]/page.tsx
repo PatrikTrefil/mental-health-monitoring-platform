@@ -2,7 +2,7 @@ import { Metadata } from "next";
 import SubmissionPreview from "./SubmissionPreview";
 
 export const metadata: Metadata = {
-    title: "Náhled odevzdaného formuláře",
+    title: "Náhled odevzdání formuláře",
 };
 
 /**
