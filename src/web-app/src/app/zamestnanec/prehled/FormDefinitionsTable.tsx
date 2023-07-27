@@ -1,11 +1,11 @@
 "use client";
 
 import ExportButton from "@/app/zamestnanec/prehled/ExportButton";
-import { deleteForm } from "@/client/formManagementClient";
+import { deleteFormById } from "@/client/formManagementClient";
 import { formsQuery } from "@/client/queries/formManagement";
 import SimplePagination from "@/components/shared/SimplePagination";
 import { Form as FormDefinition } from "@/types/formManagement/forms";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
     createColumnHelper,
     flexRender,
@@ -21,6 +21,44 @@ import { toast } from "react-toastify";
 export default function FormDefinitionsTable() {
     const queryClient = useQueryClient();
     const session = useSession();
+
+    const { mutate: deleteFormMutate } = useMutation({
+        mutationFn: async ({
+            formId,
+            formioToken,
+        }: {
+            formId: string;
+            formioToken: string;
+        }) => {
+            await deleteFormById(formioToken, formId);
+        },
+        onMutate: ({ formId }) => {
+            console.debug("Deleting form...", { formPath: formId });
+        },
+        onError: (e: unknown, { formId }) => {
+            console.error("Failed to delete form.", {
+                error: e,
+                formPath: formId,
+            });
+            toast.error("Smazání formuláře selhalo.");
+        },
+        onSuccess: (_, { formId }) => {
+            console.debug("Form deleted.", { formId });
+            toast.success("Formulář byl smazán");
+            queryClient.invalidateQueries({
+                queryKey: formsQuery.list(
+                    session.data?.user.formioToken!,
+                    session.data?.user.data.id!
+                ).queryKey,
+            });
+            queryClient.invalidateQueries({
+                queryKey: formsQuery.detail(
+                    session.data?.user.formioToken!,
+                    formId
+                ).queryKey,
+            });
+        },
+    });
 
     const columnHelper = createColumnHelper<FormDefinition>();
     const columns = useMemo(
@@ -51,20 +89,12 @@ export default function FormDefinitionsTable() {
                             Upravit
                         </Button>
                         <Button
-                            disabled={!session.data?.user.formioToken}
+                            disabled={!session.data}
                             onClick={async () => {
-                                try {
-                                    await deleteForm(
-                                        session.data!.user.formioToken,
-                                        props.row.original.path
-                                    );
-                                } catch (e) {
-                                    console.error(e);
-                                    toast.error("Smazání formuláře selhalo");
-                                    return;
-                                }
-                                toast.success("Formulář byl smazán");
-                                await queryClient.invalidateQueries(["forms"]);
+                                deleteFormMutate({
+                                    formioToken: session.data!.user.formioToken,
+                                    formId: props.row.original._id,
+                                });
                             }}
                             variant="danger"
                         >
@@ -81,7 +111,7 @@ export default function FormDefinitionsTable() {
                 ),
             }),
         ],
-        [columnHelper, queryClient, session.data]
+        [columnHelper, deleteFormMutate, session.data]
     );
 
     const { isLoading, isError, error, data } = useQuery({

@@ -10,7 +10,7 @@ import DynamicFormWithAuth from "@/components/shared/formio/DynamicFormWithAuth"
 import { UserIDRolePrefixes } from "@/constants/userIDRolePrefixes";
 import UserRoleTitles from "@/constants/userRoleTitles";
 import { User } from "@/types/userManagement/user";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
     createColumnHelper,
     flexRender,
@@ -36,6 +36,48 @@ export default function EmployeeTable() {
         formPath: string;
         employeeId: string;
     }>();
+
+    const { mutate: deleteEmployeeMutate } = useMutation({
+        mutationFn: async ({
+            userSubmissionId,
+            userId,
+            formioToken,
+        }: {
+            userSubmissionId: string;
+            userId: string;
+            formioToken: string;
+        }) => {
+            if (userId.startsWith(UserIDRolePrefixes.SPRAVCE_DOTAZNIKU))
+                await deleteSpravceDotazniku(formioToken, userSubmissionId);
+            else if (userId.startsWith(UserIDRolePrefixes.ZADAVATEL_DOTAZNIKU))
+                await deleteZadavatelDotazniku(formioToken, userSubmissionId);
+            else throw new Error("Unknown user role.");
+        },
+        onMutate: ({ userSubmissionId }) => {
+            console.debug("Deleting employee ...", {
+                userSubmissionId,
+            });
+        },
+        onError: (e: unknown, { userSubmissionId }) => {
+            console.error("Failed to delete employee.", {
+                userSubmissionId,
+                error: e,
+            });
+
+            toast.error("Smazání účtu selhalo.");
+        },
+        onSuccess: (_, { userSubmissionId }) => {
+            console.debug("Employees deleted.", {
+                userSubmissionId,
+            });
+            queryClient.invalidateQueries({
+                queryKey: employeesQuery.list(
+                    session.data!.user.formioToken,
+                    session.data!.user.data.id
+                ).queryKey,
+            });
+        },
+    });
 
     const columnHelper = createColumnHelper<User>();
     const columns = useMemo(
@@ -87,53 +129,17 @@ export default function EmployeeTable() {
                         deleteButton = (
                             <Button
                                 variant="danger"
+                                disabled={!session.data}
                                 onClick={async () => {
-                                    const userSubmissionId =
-                                        props.row.original._id;
-                                    console.debug("Deleting employee ...", {
-                                        userSubmissionId,
+                                    deleteEmployeeMutate({
+                                        userSubmissionId:
+                                            props.row.original._id,
+                                        userId: props.row.original.data.id,
+                                        formioToken:
+                                            session.data!.user.formioToken,
                                     });
-                                    try {
-                                        if (
-                                            props.row.original.data.id.startsWith(
-                                                UserIDRolePrefixes.SPRAVCE_DOTAZNIKU
-                                            )
-                                        )
-                                            await deleteSpravceDotazniku(
-                                                session.data?.user.formioToken!,
-                                                userSubmissionId
-                                            );
-                                        else if (
-                                            props.row.original.data.id.startsWith(
-                                                UserIDRolePrefixes.ZADAVATEL_DOTAZNIKU
-                                            )
-                                        )
-                                            await deleteZadavatelDotazniku(
-                                                session.data?.user.formioToken!,
-                                                userSubmissionId
-                                            );
-                                        else
-                                            throw new Error(
-                                                "Unknown user role."
-                                            );
-                                    } catch (e) {
-                                        console.error(
-                                            "Failed to delete employee.",
-                                            {
-                                                userSubmissionId,
-                                                error: e,
-                                            }
-                                        );
-                                        toast.error("Smazání účtu selhalo.");
-                                        return;
-                                    }
-                                    console.debug("Employee deleted.", {
-                                        userSubmissionId,
-                                    });
+
                                     if (isOwnAccount) await signOut();
-                                    await queryClient.invalidateQueries([
-                                        "employees",
-                                    ]);
                                 }}
                             >
                                 Smazat {isOwnAccount && "vlastní účet"}
@@ -175,7 +181,7 @@ export default function EmployeeTable() {
                 },
             }),
         ],
-        [columnHelper, queryClient, session.data]
+        [columnHelper, deleteEmployeeMutate, session.data]
     );
 
     const [
