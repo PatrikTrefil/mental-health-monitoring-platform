@@ -114,9 +114,7 @@ export default function TaskTable() {
 
     if (isError) {
         console.error(error);
-        return (
-            <Alert variant="danger">Načítání seznamu uživatelů selhalo.</Alert>
-        );
+        return <Alert variant="danger">Načítání seznamu úkolů selhalo.</Alert>;
     }
 
     return (
