@@ -70,6 +70,9 @@ export default function Login() {
             });
             if (result?.error) throw result.error;
         },
+        onMutate: () => {
+            console.debug("Signing in...");
+        },
         onError: (e: SignInResponse["error"] & { error: string }) => {
             let msg: string;
             if (e === "CredentialsSignin")
@@ -79,6 +82,9 @@ export default function Login() {
                 msg = "Nastala neočekávaná chyba.";
             }
             toast.error(msg);
+        },
+        onSuccess: () => {
+            console.debug("Signed in.");
         },
     });
 
