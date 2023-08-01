@@ -14,7 +14,7 @@ import DynamicForm from "./DynamicForm";
 /**
  * Change event produced by the {@link DynamicForm} component.
  */
-type ChangeEvent = {
+export type ChangeEvent = {
     changed?: { component: Component; value: DataValue };
     data: { [key: string]: unknown };
 };

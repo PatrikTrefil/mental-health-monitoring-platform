@@ -1,7 +1,7 @@
 import { MiddlewareWrapper } from "./types";
 
 /**
- * Middleware for logging requests in format: "{METHOD} {PATHNAME}"
+ * Middleware for logging requests in format: "\{METHOD\} \{PATHNAME\}"
  */
 const withLogging: MiddlewareWrapper = (middlewareToWrap) => {
     return async (request, _next) => {

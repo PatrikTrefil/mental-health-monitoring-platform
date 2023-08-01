@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 
-type BaseState = {
+export type BaseState = {
     refetch: () => Promise<void>;
 };
 
@@ -13,6 +13,7 @@ export type LoadingState = BaseState & {
     error: null;
     isError: false;
 };
+
 export type SuccessState<TData> = BaseState & {
     status: "success";
     data: TData;
