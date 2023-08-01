@@ -67,7 +67,7 @@ Rel(spravaNedokoncenychVyplneni, spravaNedokoncenychVyplneniDb, "Ukládá data",
 Rel(webApp, spravaFormularu, "Používá", "gateway")
 Rel(webApp, spravaUkolu, "Používá")
 Rel(webApp, manazerUzivatelu, "Spravuje uživatele a autorizuje akce")
-Rel(spravaFormularu, formulareDb, "Ukládá data")
+Rel(spravaFormularu, formulareDb, "Ukládá data", "gateway")
 Rel(spravaFormularu, manazerUzivatelu, "Autorizuje akce", "gateway")
 BiRel(spravaFormularu, spravaUkolu, "Synchronizují stavy", "gateway")
 Rel(spravaUkolu, manazerUzivatelu, "Autorizuje akce", "gateway")

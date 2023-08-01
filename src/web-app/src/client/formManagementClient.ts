@@ -332,8 +332,7 @@ export async function loadSubmissions(
 /**
  * Update submission in the form management system
  * @param formPath path of the form of which to update the submission
- * @param submissionId id of the submission to update
- * @param data data to update the submission with
+ * @param updatedSubmission updated submission (used to replace submission with the same _id)
  * @param formioToken JWT token for formio
  * @returns updated submission
  * @throws {RequestError} if the http request fails
@@ -341,21 +340,17 @@ export async function loadSubmissions(
  */
 export async function updateSubmission(
     formPath: string,
-    submissionId: string,
-    data: unknown,
+    updatedSubmission: Partial<Submission> & Pick<Submission, "data" | "_id">,
     formioToken: string
 ): Promise<Submission> {
     const response = await safeFetch(
-        `${getFormioUrl()}/${formPath}/submission/${submissionId}`,
+        `${getFormioUrl()}${formPath}/submission/${updatedSubmission._id}`,
         {
             headers: {
                 "x-jwt-token": formioToken,
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify({
-                _id: submissionId,
-                data,
-            }),
+            body: JSON.stringify(updatedSubmission),
             method: "PUT",
         }
     );

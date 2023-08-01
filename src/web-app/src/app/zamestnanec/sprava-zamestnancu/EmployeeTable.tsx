@@ -1,14 +1,13 @@
 "use client";
 
-import { employeesQuery } from "@/client/queries/userManagement";
-import {
-    deleteSpravceDotazniku,
-    deleteZadavatelDotazniku,
-} from "@/client/userManagementClient";
+import { employeesQuery, rolesQuery } from "@/client/queries/userManagement";
+import { deleteUser } from "@/client/userManagementClient";
+import ChangePasswordUser from "@/components/shared/ChangePasswordUser";
+import CreateUser from "@/components/shared/CreateUser";
 import SimplePagination from "@/components/shared/SimplePagination";
-import DynamicFormWithAuth from "@/components/shared/formio/DynamicFormWithAuth";
-import { UserIDRolePrefixes } from "@/constants/userIDRolePrefixes";
 import UserRoleTitles from "@/constants/userRoleTitles";
+import { UserRoleTitle } from "@/types/userManagement/UserRoleTitle";
+import { Role } from "@/types/userManagement/role";
 import { User } from "@/types/userManagement/user";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -22,7 +21,12 @@ import { signOut, useSession } from "next-auth/react";
 import { useMemo, useState } from "react";
 import { Alert, Button, Form, Modal, Spinner, Table } from "react-bootstrap";
 import { toast } from "react-toastify";
-import EditEmployee from "./EditEmployee";
+
+function roleIdToRoleTitle(roleId: string, roles: Role[]): UserRoleTitle {
+    const role = roles.find((role) => role._id === roleId);
+    if (!role) throw new Error("Unknown role ID.");
+    return role.title;
+}
 
 /**
  * Page for managing employee accounts.
@@ -33,25 +37,28 @@ export default function EmployeeTable() {
 
     const [userToEdit, setUserToEdit] = useState<{
         submissionId: string;
-        formPath: string;
-        employeeId: string;
+        userId: string;
+        roleTitle: UserRoleTitle;
     }>();
+
+    const { data: roles } = useQuery({
+        ...rolesQuery.list(session.data?.user.formioToken!),
+        enabled: !!session.data
+    });
+
+    const roleTitlesCurrentUser = session.data?.user.roleTitles;
 
     const { mutate: deleteEmployeeMutate } = useMutation({
         mutationFn: async ({
             userSubmissionId,
-            userId,
             formioToken,
+            userRoleTitle,
         }: {
             userSubmissionId: string;
-            userId: string;
             formioToken: string;
+            userRoleTitle: UserRoleTitle;
         }) => {
-            if (userId.startsWith(UserIDRolePrefixes.SPRAVCE_DOTAZNIKU))
-                await deleteSpravceDotazniku(formioToken, userSubmissionId);
-            else if (userId.startsWith(UserIDRolePrefixes.ZADAVATEL_DOTAZNIKU))
-                await deleteZadavatelDotazniku(formioToken, userSubmissionId);
-            else throw new Error("Unknown user role.");
+            deleteUser(formioToken, userSubmissionId, userRoleTitle);
         },
         onMutate: ({ userSubmissionId }) => {
             console.debug("Deleting employee ...", {
@@ -71,10 +78,8 @@ export default function EmployeeTable() {
                 userSubmissionId,
             });
             queryClient.invalidateQueries({
-                queryKey: employeesQuery.list(
-                    session.data!.user.formioToken,
-                    session.data!.user.data.id
-                ).queryKey,
+                queryKey: employeesQuery.list(session.data!.user.formioToken)
+                    .queryKey,
             });
         },
     });
@@ -84,46 +89,73 @@ export default function EmployeeTable() {
         () => [
             columnHelper.accessor("data.id", {
                 header: "ID",
+                cell: (props) => {
+                    if (roles === undefined) return null;
+
+                    const userRoles = props.row.original.roles;
+                    const roleTitles = userRoles.map((role) =>
+                        roleIdToRoleTitle(role, roles)
+                    );
+                    let mainRoleTitle: UserRoleTitle | undefined = undefined;
+                    if (roleTitles.includes(UserRoleTitles.SPRAVCE_DOTAZNIKU))
+                        mainRoleTitle = UserRoleTitles.SPRAVCE_DOTAZNIKU;
+                    else if (
+                        roleTitles.includes(UserRoleTitles.ZADAVATEL_DOTAZNIKU)
+                    )
+                        mainRoleTitle = UserRoleTitles.ZADAVATEL_DOTAZNIKU;
+
+                    return (
+                        <>
+                            {props.row.original.data.id}{" "}
+                            <i>({mainRoleTitle ?? "-"})</i>
+                        </>
+                    );
+                },
             }),
             columnHelper.accessor("created", {
                 header: "Vytvořeno dne",
                 cell: (props) =>
                     new Date(props.row.original.created).toLocaleString(),
             }),
-            columnHelper.accessor("roles", {
-                header: "Role",
-                cell: (props) => {
-                    if (
-                        props.row.original.data.id.startsWith(
-                            UserIDRolePrefixes.SPRAVCE_DOTAZNIKU
-                        )
-                    )
-                        return UserRoleTitles.SPRAVCE_DOTAZNIKU;
-                    else if (
-                        props.row.original.data.id.startsWith(
-                            UserIDRolePrefixes.ZADAVATEL_DOTAZNIKU
-                        )
-                    )
-                        return UserRoleTitles.ZADAVATEL_DOTAZNIKU;
-                    else return "-";
-                },
-            }),
             columnHelper.display({
                 id: "actions",
                 header: "Akce",
                 cell: (props) => {
+                    if (
+                        roles === undefined ||
+                        roleTitlesCurrentUser === undefined
+                    )
+                        return null;
                     const isOwnAccount =
                         props.row.original._id === session?.data?.user._id;
                     let deleteButton: React.ReactNode | null;
+
+                    const userRoles = props.row.original.roles;
+                    const roleTitlesRow = userRoles.map((role) =>
+                        roleIdToRoleTitle(role, roles)
+                    );
+                    let mainUserRoleTitle: UserRoleTitle;
                     if (
-                        session?.data?.user.data.id.startsWith(
-                            UserIDRolePrefixes.SPRAVCE_DOTAZNIKU
+                        roleTitlesRow.includes(UserRoleTitles.SPRAVCE_DOTAZNIKU)
+                    )
+                        mainUserRoleTitle = UserRoleTitles.SPRAVCE_DOTAZNIKU;
+                    else if (
+                        roleTitlesRow.includes(
+                            UserRoleTitles.ZADAVATEL_DOTAZNIKU
+                        )
+                    )
+                        mainUserRoleTitle = UserRoleTitles.ZADAVATEL_DOTAZNIKU;
+                    else throw new Error("Unknown user role.");
+
+                    if (
+                        roleTitlesCurrentUser.includes(
+                            UserRoleTitles.SPRAVCE_DOTAZNIKU
                         ) ||
-                        (session?.data?.user.data.id.startsWith(
-                            UserIDRolePrefixes.ZADAVATEL_DOTAZNIKU
+                        (roleTitlesCurrentUser.includes(
+                            UserRoleTitles.ZADAVATEL_DOTAZNIKU
                         ) &&
-                            props.row.original.data.id.startsWith(
-                                UserIDRolePrefixes.ZADAVATEL_DOTAZNIKU
+                            roleTitlesRow.includes(
+                                UserRoleTitles.ZADAVATEL_DOTAZNIKU
                             ))
                     )
                         deleteButton = (
@@ -134,7 +166,7 @@ export default function EmployeeTable() {
                                     deleteEmployeeMutate({
                                         userSubmissionId:
                                             props.row.original._id,
-                                        userId: props.row.original.data.id,
+                                        userRoleTitle: mainUserRoleTitle,
                                         formioToken:
                                             session.data!.user.formioToken,
                                     });
@@ -150,27 +182,10 @@ export default function EmployeeTable() {
                             {deleteButton}
                             <Button
                                 onClick={() => {
-                                    let formPath: string;
-                                    if (
-                                        props.row.original.data.id.startsWith(
-                                            "SD"
-                                        )
-                                    )
-                                        formPath =
-                                            "/spravce-dotazniku/register";
-                                    else if (
-                                        props.row.original.data.id.startsWith(
-                                            "ZD"
-                                        )
-                                    )
-                                        formPath =
-                                            "/zadavatel-dotazniku/register";
-                                    else throw new Error("Unknown user prefix");
-
                                     setUserToEdit({
                                         submissionId: props.row.original._id,
-                                        employeeId: props.row.original.data.id,
-                                        formPath,
+                                        userId: props.row.original.data.id,
+                                        roleTitle: mainUserRoleTitle,
                                     });
                                 }}
                             >
@@ -181,7 +196,13 @@ export default function EmployeeTable() {
                 },
             }),
         ],
-        [columnHelper, deleteEmployeeMutate, session.data]
+        [
+            columnHelper,
+            roles,
+            session.data,
+            roleTitlesCurrentUser,
+            deleteEmployeeMutate,
+        ]
     );
 
     const [
@@ -195,10 +216,7 @@ export default function EmployeeTable() {
     ] = useState(false);
 
     const { isLoading, isError, error, data } = useQuery({
-        ...employeesQuery.list(
-            session.data?.user.formioToken!,
-            session.data?.user.data.id!
-        ),
+        ...employeesQuery.list(session.data?.user.formioToken!),
         enabled: !!session.data?.user.formioToken,
     });
 
@@ -323,21 +341,11 @@ export default function EmployeeTable() {
                     </Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    <DynamicFormWithAuth
-                        relativeFormPath={`/spravce-dotazniku/register`}
-                        onSubmitDone={() => {
-                            setShowCreateSpravceDotaznikuModal(false);
-                            toast.success(
-                                "Správce dotazníků byl úspěšně zaregistrován"
-                            );
-                            queryClient.invalidateQueries(["employees"]);
-                        }}
-                        onSubmitFail={() => {
-                            toast.error("Registrování zaměstnance selhalo.");
-                        }}
-                        defaultValues={{
-                            id: "SD-",
-                        }}
+                    <CreateUser
+                        userRoleTitle={UserRoleTitles.SPRAVCE_DOTAZNIKU}
+                        onChangeDone={() =>
+                            setShowCreateSpravceDotaznikuModal(false)
+                        }
                     />
                 </Modal.Body>
             </Modal>
@@ -351,16 +359,11 @@ export default function EmployeeTable() {
                     </Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    <DynamicFormWithAuth
-                        relativeFormPath={`/zadavatel-dotazniku/register`}
-                        onSubmitDone={() => {
-                            setShowCreateZadavatelDotaznikuModal(false);
-                            toast.success(
-                                "Zadavatel dotazníků byl úspěšně zaregistrován"
-                            );
-                            queryClient.invalidateQueries(["employees"]);
-                        }}
-                        defaultValues={{ id: "ZD-" }}
+                    <CreateUser
+                        userRoleTitle={UserRoleTitles.ZADAVATEL_DOTAZNIKU}
+                        onChangeDone={() =>
+                            setShowCreateZadavatelDotaznikuModal(false)
+                        }
                     />
                 </Modal.Body>
             </Modal>
@@ -369,7 +372,14 @@ export default function EmployeeTable() {
                     <Modal.Title>Úprava zaměstnance</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    {userToEdit && <EditEmployee {...userToEdit} />}
+                    {userToEdit && (
+                        <ChangePasswordUser
+                            submissionId={userToEdit.submissionId}
+                            userId={userToEdit.userId}
+                            userRoleTitle={userToEdit.roleTitle}
+                            onChangeDone={() => setUserToEdit(undefined)}
+                        />
+                    )}
                 </Modal.Body>
             </Modal>
         </>

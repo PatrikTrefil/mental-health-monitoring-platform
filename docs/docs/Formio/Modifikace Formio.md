@@ -15,12 +15,8 @@ Roli lze k uživateli přiřadit pouze skrze action, která je přiřazena k res
 Proto je potřeba vytvořit resource pro každou kombinaci roli, kterou chceme
 vytvořit. Vzhledem k tomu, že jsou resource oddělené, nelze jednoduše validovat
 (při tvorbě uživatelského účtu), že má každý uživatel unikátní ID pro
-přihlášení. Abychom předešli bezpečnostním problémům a zmatení uživatele
-vytvoříme omezení na ID každého resource. Pro každý resource vytvoříme prefix
-ID, který musí každé ID obsahovat. Pokud bude mít každý resource unikátní prefix
-a každý resource bude dohlížet na unikátnost ID svých uživatelů, tak budou mít
-všichni uživatelé unikátní ID. Například klient/pacient, který měl původně ID
-`123` bude mít ID `U-123`, kde prefix je `U-`.
+přihlášení. Abychom předešli zmatení uživatelů, v uživatelském rohraní
+vždy k ID přidáme i roli, která je uživateli přiřazena.
 
 ## Webhook action
 
@@ -31,3 +27,22 @@ funkcionalitu potřebujeme, jelikož chceme přeposílat autentifikační hlavi�
 komunikaci s komponentou spravující úkoly uživatelů. Proto jsem upravil tuto
 action tak, aby bylo lze nastavit zda-li má akce přeposílat autentifikační
 hlavičky.
+
+## Imutabilita ID uživatele
+
+Motivaci ke zmeně naleznete v sekci [Autentifikace](Autentifikace.md).
+
+Pokud se uživatel pokusí změnit své ID, tak se změna neprovede. Toto řešení
+spoléhá na to, že přístup k databázi uživatelů děláme pouze skrze knihovnu
+Mongoose, která imutabilitu zajišťuje (MongoDB samotnés neumožňuje nastavit
+imutabilitu položek). Nevýhodou tohoto řešení je, že vytváří zvláštní omezení na
+všechny položky s klíčem "id" ve všech odevzdáních, ale zásadní výhodou je
+jednoduchost.
+
+Alternativní řešení by bylo vytvořit autorizační proxy mezi klientem a správcem
+uživatelů či mezi správcem uživatelů a databází, ale toto řešení je
+komplikované, pravděpodobně by vyžadovalo další kontejner a má netriviální
+implementaci, která není odolná vůči změnám (Pokud máme více koncových bodů API,
+které umožňují modifikovat entitu uživatele, je třeba myslet na zabezpečení
+všech koncových bodů. V případě přidání nového bodu, je vždy potřeba myslet na
+úpravy autorizační proxy.).
