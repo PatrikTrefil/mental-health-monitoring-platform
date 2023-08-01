@@ -142,6 +142,7 @@ export default function ResultTable({ formId }: { formId: string }) {
 
     return (
         <>
+            <h1>Výsledky formuláře - {form.title}</h1>
             <FrequencyVisualization
                 data={submissions.map((s) => s.data)}
                 labelKeyMap={Object.fromEntries(
@@ -153,20 +154,6 @@ export default function ResultTable({ formId }: { formId: string }) {
                 )}
             />
 
-            <p>Název formuláře: {form.title}</p>
-            <Form.Select
-                className="my-2"
-                value={table.getState().pagination.pageSize}
-                onChange={(e) => {
-                    table.setPageSize(Number(e.target.value));
-                }}
-            >
-                {[10, 20, 30].map((pageSize: number) => (
-                    <option key={pageSize} value={pageSize}>
-                        Zobrazit {pageSize}
-                    </option>
-                ))}
-            </Form.Select>
             <div className="my-2 d-block text-nowrap overflow-auto w-100">
                 <Table striped bordered hover>
                     <thead>
@@ -202,7 +189,20 @@ export default function ResultTable({ formId }: { formId: string }) {
                     </tbody>
                 </Table>
             </div>
-            <div className="d-flex justify-content-center align-items-center">
+            <div className="d-flex justify-content-between align-items-center">
+                <Form.Select
+                    className="my-2 w-auto"
+                    value={table.getState().pagination.pageSize}
+                    onChange={(e) => {
+                        table.setPageSize(Number(e.target.value));
+                    }}
+                >
+                    {[10, 20, 30].map((pageSize: number) => (
+                        <option key={pageSize} value={pageSize}>
+                            Zobrazit {pageSize}
+                        </option>
+                    ))}
+                </Form.Select>
                 <SimplePagination
                     pageIndex={table.getState().pagination.pageIndex}
                     totalPages={table.getPageCount()}

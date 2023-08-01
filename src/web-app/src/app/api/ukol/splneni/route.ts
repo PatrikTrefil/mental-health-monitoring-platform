@@ -1,4 +1,5 @@
 import { loadFormById, loadSubmission } from "@/client/formManagementClient";
+import { loginAdmin } from "@/client/userManagementClient";
 import { prisma } from "@/server/db";
 import { Prisma, TaskState } from "@prisma/client";
 import { z } from "zod";
@@ -141,15 +142,30 @@ async function validateRequest(
         return false;
     }
 
+    let adminToken: string;
+    try {
+        adminToken = await loginAdmin(
+            process.env.FORMIO_ROOT_EMAIL,
+            process.env.FORMIO_ROOT_PASSWORD
+        );
+    } catch (e) {
+        console.error("Failed to login as admin", e);
+        return false;
+    }
+
     let trustedSubmission: Awaited<ReturnType<typeof loadSubmission>>;
     try {
         trustedSubmission = await loadSubmission(
             form.path,
             submissionId,
-            formioToken
+            adminToken // needs to be admin token, because user's can't read their own submissions (see issue #158)
         );
     } catch (e) {
         console.error("Loading submission failed", e);
+        return false;
+    }
+    if (trustedSubmission === null) {
+        console.error("Loading submission failed (not found)");
         return false;
     }
 

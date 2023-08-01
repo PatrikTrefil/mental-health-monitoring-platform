@@ -2,7 +2,6 @@
 
 import { createAction, createForm } from "@/client/formManagementClient";
 import { loadRoles } from "@/client/userManagementClient";
-import DynamicFormBuilder from "@/components/shared/formio/DynamicFormBuilder";
 import DynamicFormEdit from "@/components/shared/formio/DynamicFormEdit";
 import UserRoleTitles from "@/constants/userRoleTitles";
 import { useSmartFetch } from "@/hooks/useSmartFetch";
@@ -75,6 +74,7 @@ export default function CreateForm() {
             properties: {},
             isNew: false,
             lockKey: true,
+            disabled: false,
         };
 
         const startingFormSchema = {
@@ -224,9 +224,7 @@ export default function CreateForm() {
                     // Make clients/patients able to fill out the form
                     // and make the employees able to see their submissions
                     form={startingFormSchema}
-                >
-                    <DynamicFormBuilder />
-                </DynamicFormEdit>
+                />
             </>
         );
     }

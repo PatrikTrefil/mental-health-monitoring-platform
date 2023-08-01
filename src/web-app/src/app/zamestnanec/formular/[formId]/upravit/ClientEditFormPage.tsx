@@ -1,6 +1,6 @@
 "use client";
+
 import { loadFormById, updateForm } from "@/client/formManagementClient";
-import DynamicFormBuilder from "@/components/shared/formio/DynamicFormBuilder";
 import DynamicFormEdit from "@/components/shared/formio/DynamicFormEdit";
 import { useSmartFetch } from "@/hooks/useSmartFetch";
 import { Form } from "@/types/formManagement/forms";
@@ -107,9 +107,7 @@ export default function ClientEditFormPage({ formId }: { formId: string }) {
                     setEditStatus(EditStatus.EDIT_SUCCEEDED);
                 }}
                 form={form}
-            >
-                <DynamicFormBuilder />
-            </DynamicFormEdit>
+            />
             <Modal show={editStatus === EditStatus.EDIT_FAILED}>
                 <ModalHeader>
                     <ModalTitle>Úprava selhala</ModalTitle>

@@ -77,7 +77,7 @@ export default function TaskTable() {
                                             : "secondary"
                                     }
                                     as="a"
-                                    href={`/uzivatel/formular/vyplnit/${props.row.original.formId}?taskId=${props.row.original.id}`}
+                                    href={`/uzivatel/formular/${props.row.original.formId}/vyplnit?taskId=${props.row.original.id}`}
                                     disabled={
                                         props.row.original.state !==
                                         TaskState.READY
@@ -114,9 +114,7 @@ export default function TaskTable() {
 
     if (isError) {
         console.error(error);
-        return (
-            <Alert variant="danger">Načítání seznamu uživatelů selhalo.</Alert>
-        );
+        return <Alert variant="danger">Načítání seznamu úkolů selhalo.</Alert>;
     }
 
     return (

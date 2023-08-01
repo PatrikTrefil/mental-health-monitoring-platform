@@ -1,10 +1,11 @@
 "use client";
 
-import { deleteUser, loadUsers } from "@/client/userManagementClient";
+import { usersQuery } from "@/client/queries/userManagement";
+import { deleteUser } from "@/client/userManagementClient";
 import SimplePagination from "@/components/shared/SimplePagination";
 import DynamicFormWithAuth from "@/components/shared/formio/DynamicFormWithAuth";
 import { User } from "@/types/userManagement/user";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
     createColumnHelper,
     flexRender,
@@ -29,6 +30,48 @@ export default function ClientPatientTable() {
         submissionId: string;
         id: string;
     }>();
+
+    const { mutate: deleteUserMutate } = useMutation({
+        mutationFn: async ({
+            formioToken,
+            userSubmissionId,
+        }: {
+            formioToken: string;
+            userSubmissionId: string;
+        }) => {
+            await deleteUser(formioToken, userSubmissionId);
+        },
+        onError: (e: unknown, { userSubmissionId }) => {
+            console.error("Failed to delete user.", {
+                userSubmissionId,
+                error: e,
+            });
+
+            toast.error("Smazání účtu selhalo.");
+        },
+        onSuccess: (_, { userSubmissionId }) => {
+            console.debug("User deleted.", {
+                userSubmissionId,
+            });
+            queryClient.invalidateQueries({
+                queryKey: usersQuery.list(
+                    session.data!.user.formioToken,
+                    session.data!.user.data.id
+                ).queryKey,
+            });
+            queryClient.invalidateQueries({
+                queryKey: usersQuery.detail(
+                    session.data!.user.formioToken,
+                    userSubmissionId
+                ).queryKey,
+            });
+        },
+        onMutate: ({ userSubmissionId }) => {
+            console.debug("Deleting user ...", {
+                userSubmissionId,
+            });
+        },
+    });
 
     const columnHelper = createColumnHelper<User>();
     const columns = useMemo(
@@ -59,28 +102,13 @@ export default function ClientPatientTable() {
                         </Button>
                         <Button
                             variant="danger"
+                            disabled={!session.data}
                             onClick={async () => {
                                 const userSubmissionId = props.row.original._id;
-                                console.debug("Deleting user ...", {
+                                deleteUserMutate({
+                                    formioToken: session.data!.user.formioToken,
                                     userSubmissionId,
                                 });
-                                try {
-                                    deleteUser(
-                                        session.data!.user.formioToken,
-                                        userSubmissionId
-                                    );
-                                } catch (e) {
-                                    console.error("Failed to delete user.", {
-                                        userSubmissionId,
-                                        error: e,
-                                    });
-                                    toast.error("Smazání účtu selhalo.");
-                                    return;
-                                }
-                                console.debug("User deleted.", {
-                                    userSubmissionId,
-                                });
-                                await queryClient.invalidateQueries(["users"]);
                             }}
                         >
                             Smazat
@@ -89,14 +117,16 @@ export default function ClientPatientTable() {
                 ),
             }),
         ],
-        [columnHelper, queryClient, session.data]
+        [columnHelper, session.data, deleteUserMutate]
     );
 
     const [showCreateUserModal, setShowCreateUserModal] = useState(false);
 
     const { isLoading, isError, error, data } = useQuery({
-        queryKey: ["users", session.data],
-        queryFn: () => loadUsers(session.data!.user.formioToken),
+        ...usersQuery.list(
+            session.data?.user.formioToken!,
+            session.data?.user.data.id!
+        ),
         enabled: !!session.data?.user.formioToken,
     });
 

@@ -19,6 +19,7 @@ type ComponentBase = {
     label: string;
     key: string;
     defaultValue?: DataValue;
+    disabled: boolean;
 };
 
 type HiddenComponent = ComponentBase & {
@@ -43,6 +44,7 @@ type ButtonComponent = ComponentBase & {
     type: "button";
     action: "saveState" | "submit";
     theme: "primary" | "secondary" | "success" | "info" | "warning" | "danger";
+    leftIcon: string;
 };
 
 type StringResultComponent = ComponentBase & {

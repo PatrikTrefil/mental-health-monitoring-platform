@@ -26,6 +26,7 @@ slug: stakeholders-a-jejich-zajmy
 -   Dobře nastavené procesy pro prevenci chyb (testy, kontinuální integrace,
     ...)
 -   Jednoduchá rozšiřitelnost aplikace
+-   Vysoká modifikovalelnost aplikace
 
 ## Provozovatel (správce) software
 

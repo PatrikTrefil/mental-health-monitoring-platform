@@ -1,15 +1,19 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
-export type LoadingState = {
+type BaseState = {
+    refetch: () => Promise<void>;
+};
+
+export type LoadingState = BaseState & {
     status: "loading";
     data: null;
     isLoading: true;
     error: null;
     isError: false;
 };
-export type SuccessState<TData> = {
+export type SuccessState<TData> = BaseState & {
     status: "success";
     data: TData;
     isLoading: false;
@@ -17,7 +21,7 @@ export type SuccessState<TData> = {
     isError: false;
 };
 
-export type ErrorState<TError> = {
+export type ErrorState<TError> = BaseState & {
     status: "error";
     error: TError;
     data: null;
@@ -35,7 +39,7 @@ export function useSmartFetch<TData, TError = unknown>({
     enabled = true,
 }: {
     queryFn: () => Promise<TData>;
-    enabled: boolean;
+    enabled?: boolean;
 }): SmartFetchState<TData, TError> {
     const [data, setData] = useState<TData>();
     const [status, setStatus] =
@@ -46,21 +50,25 @@ export function useSmartFetch<TData, TError = unknown>({
         if (error) setStatus("error");
     }, [error]);
 
+    const fetchData = useCallback(async () => {
+        try {
+            const result = await queryFn();
+            setData(result);
+        } catch (error) {
+            setError(error as TError);
+            return;
+        }
+
+        setStatus("success");
+    }, [queryFn]);
+
     useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const result = await queryFn();
-                setData(result);
-            } catch (error) {
-                setError(error as TError);
-                return;
-            }
-
-            setStatus("success");
-        };
-
         if (enabled && status === "loading") fetchData();
-    }, [queryFn, enabled, status]);
+    }, [fetchData, enabled, status]);
+
+    const baseState = {
+        refetch: fetchData,
+    };
 
     if (status === "loading")
         return {
@@ -69,6 +77,7 @@ export function useSmartFetch<TData, TError = unknown>({
             status,
             error: null,
             isError: false,
+            ...baseState,
         };
     if (status === "error")
         return {
@@ -77,6 +86,7 @@ export function useSmartFetch<TData, TError = unknown>({
             status,
             error: error as TError,
             isError: true,
+            ...baseState,
         };
     return {
         data: data!,
@@ -84,5 +94,6 @@ export function useSmartFetch<TData, TError = unknown>({
         status,
         error: null,
         isError: false,
+        ...baseState,
     };
 }

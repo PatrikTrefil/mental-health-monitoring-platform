@@ -10,10 +10,5 @@ export default function FormResultPage({
 }: {
     params: { formId: string };
 }) {
-    return (
-        <>
-            <h1>Výsledky formuláře</h1>
-            <ResultTable formId={params.formId} />
-        </>
-    );
+    return <ResultTable formId={params.formId} />;
 }
