@@ -4,6 +4,7 @@ import { trpc } from "@/client/trpcClient";
 import SimplePagination from "@/components/shared/SimplePagination";
 import TaskStateBadge from "@/components/shared/TaskStateBadge";
 import { AppRouter } from "@/server/routers/root";
+import { TaskState } from "@prisma/client";
 import {
     createColumnHelper,
     flexRender,
@@ -13,7 +14,15 @@ import {
 } from "@tanstack/react-table";
 import { inferProcedureOutput } from "@trpc/server";
 import { useMemo } from "react";
-import { Alert, Button, Form, Spinner, Table } from "react-bootstrap";
+import {
+    Alert,
+    Button,
+    Form,
+    OverlayTrigger,
+    Spinner,
+    Table,
+    Tooltip,
+} from "react-bootstrap";
 import { toast } from "react-toastify";
 
 /**
@@ -67,14 +76,38 @@ export default function TaskTable() {
                 id: "actions",
                 header: "Akce",
                 cell: (props) => (
-                    <Button
-                        variant="danger"
-                        onClick={() =>
-                            deleteTodo.mutate({ id: props.row.original.id })
-                        }
-                    >
-                        Smazat
-                    </Button>
+                    <div className="d-flex gap-2">
+                        <Button
+                            variant="danger"
+                            onClick={() =>
+                                deleteTodo.mutate({ id: props.row.original.id })
+                            }
+                        >
+                            Smazat
+                        </Button>
+                        <OverlayTrigger
+                            overlay={
+                                props.row.original.state !==
+                                TaskState.COMPLETED ? (
+                                    <Tooltip>
+                                        Formulář ještě nebyl vyplněn.
+                                    </Tooltip>
+                                ) : (
+                                    <></>
+                                )
+                            }
+                        >
+                            <span className="d-inline-block">
+                                <Button
+                                    as="a"
+                                    href={`/zamestnanec/formular/${props.row.original.formId}/vysledek/${props.row.original.submissionId}`}
+                                    disabled={!props.row.original.submissionId}
+                                >
+                                    Zobrazit odevzdání
+                                </Button>
+                            </span>
+                        </OverlayTrigger>
+                    </div>
                 ),
             }),
         ],

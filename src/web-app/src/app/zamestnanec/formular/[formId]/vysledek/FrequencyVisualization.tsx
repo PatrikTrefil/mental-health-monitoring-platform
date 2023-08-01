@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Alert, Button, Form, Modal } from "react-bootstrap";
+import { Alert, Button, Col, Form, Modal, Row } from "react-bootstrap";
 import DataVisualization, { ChartType, ChartTypes } from "./DataVisualization";
 import { LabeledDataValue } from "./ResultTable";
 import stringifyResult from "./stringifyResult";
@@ -50,6 +50,12 @@ export default function FrequencyVisualization({
                 variant="primary"
                 onClick={() => setIsVisualizationModalShowing(true)}
             >
+                <i
+                    className="bi bi-graph-up"
+                    style={{
+                        paddingRight: "5px",
+                    }}
+                ></i>
                 Vizualizovat frekvence hodnot
             </Button>
             <Modal
@@ -61,49 +67,57 @@ export default function FrequencyVisualization({
                     <Modal.Title>Vizualizace frekvence hodnot</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    <div>
-                        <Form.Label htmlFor="field-to-visualize">
-                            Vizualizované pole
-                        </Form.Label>
-                        <Form.Select
-                            value={fieldToVisualize}
-                            onChange={(e) =>
-                                setFieldToVisualize(e.target.value)
-                            }
-                            id="field-to-visualize"
-                        >
-                            {Object.entries(labelKeyMap).map(([k, v]) => (
-                                <option key={k} value={k}>
-                                    {v}
-                                </option>
-                            ))}
-                        </Form.Select>
-                        <Form.Label htmlFor="chart-type">Typ grafu</Form.Label>
-                        <Form.Select
-                            value={selectedChartType}
-                            onChange={(e) =>
-                                setSelectedChartType(
-                                    e.target.value as ChartType
-                                )
-                            }
-                            id="chart-type"
-                        >
-                            {Object.values(ChartTypes).map((v) => (
-                                <option key={v} value={v}>
-                                    {v}
-                                </option>
-                            ))}
-                        </Form.Select>
+                    <Row>
+                        <Col>
+                            <Form.Label htmlFor="field-to-visualize">
+                                Vizualizované pole
+                            </Form.Label>
+                            <Form.Select
+                                value={fieldToVisualize}
+                                onChange={(e) =>
+                                    setFieldToVisualize(e.target.value)
+                                }
+                                id="field-to-visualize"
+                            >
+                                {Object.entries(labelKeyMap).map(([k, v]) => (
+                                    <option key={k} value={k}>
+                                        {v}
+                                    </option>
+                                ))}
+                            </Form.Select>
+                        </Col>
+                        <Col>
+                            <Form.Label htmlFor="chart-type">
+                                Typ grafu
+                            </Form.Label>
+                            <Form.Select
+                                value={selectedChartType}
+                                onChange={(e) =>
+                                    setSelectedChartType(
+                                        e.target.value as ChartType
+                                    )
+                                }
+                                id="chart-type"
+                            >
+                                {Object.values(ChartTypes).map((v) => (
+                                    <option key={v} value={v}>
+                                        {v}
+                                    </option>
+                                ))}
+                            </Form.Select>
+                        </Col>
+                    </Row>
+                    <div className="mt-2">
+                        <DataVisualization
+                            data={Array.from(valueFrequencies.entries()).map(
+                                ([k, v]) => ({
+                                    name: k,
+                                    value: v,
+                                })
+                            )}
+                            chartType={selectedChartType}
+                        />
                     </div>
-                    <DataVisualization
-                        data={Array.from(valueFrequencies.entries()).map(
-                            ([k, v]) => ({
-                                name: k,
-                                value: v,
-                            })
-                        )}
-                        chartType={selectedChartType}
-                    />
                 </Modal.Body>
             </Modal>
         </>

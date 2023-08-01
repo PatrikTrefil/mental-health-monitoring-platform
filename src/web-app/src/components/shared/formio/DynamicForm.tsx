@@ -1,6 +1,6 @@
 "use client";
 
-import csTranslation from "@/lib/formioTranslation";
+import { formCsTranslation as csTranslation } from "@/lib/formioTranslation";
 import { FormioComponentLoader } from "@/lib/formiojsWrapper";
 import { FormProps, Options } from "@formio/react/lib/components/Form";
 import { useMemo } from "react";
@@ -42,19 +42,20 @@ export default function DynamicForm({
         // should not change (if it changed, it would result in the user losing their input)
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
-    // add the cs translation if it is not already there
-    if (props.options) {
-        if (props.options.i18n)
-            (props.options.i18n as { [key: string]: unknown }).cs ??=
-                csTranslation;
-        else props.options.i18n = { cs: csTranslation };
-    } else props.options = { i18n: { cs: csTranslation } };
-
-    // set the language to cs if it is not set
     const language = props.language ?? "cs";
-    if (props.options)
+
+    if (props.options) {
+        props.language ??= language;
+
         // @ts-expect-error
-        props.options.language = language;
+        if (props.options.language === "cs") {
+            if (props.options.i18n)
+                (props.options.i18n as { [key: string]: unknown }).cs ??=
+                    csTranslation;
+            else props.options.i18n = { cs: csTranslation };
+        }
+        // @ts-expect-error
+    } else props.options = { i18n: { cs: csTranslation }, language };
 
     return <Component {...props} />;
 }
