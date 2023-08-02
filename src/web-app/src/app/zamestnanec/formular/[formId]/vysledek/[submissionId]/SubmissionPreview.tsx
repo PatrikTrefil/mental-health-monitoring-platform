@@ -11,6 +11,9 @@ import { Alert, Button, Spinner } from "react-bootstrap";
 
 /**
  * Preview of a single submission with given formId and submissionId.
+ * @param props - Props for this component.
+ * @param props.formId - Id of the form to which the submission belongs.
+ * @param props.submissionId - Id of the submission to preview.
  */
 export default function SubmissionPreview(props: {
     /**

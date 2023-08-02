@@ -5,6 +5,9 @@ import { useSession } from "next-auth/react";
 import { usePathname } from "next/navigation";
 import { Container, Nav, Navbar, Spinner } from "react-bootstrap";
 
+/**
+ * Navigation bar for pages accessible to employees.
+ */
 export default function NavigationBarEmployee() {
     const { data } = useSession();
 

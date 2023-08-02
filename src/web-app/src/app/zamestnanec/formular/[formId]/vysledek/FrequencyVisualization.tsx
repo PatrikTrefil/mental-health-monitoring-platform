@@ -10,6 +10,9 @@ import stringifyResult from "./stringifyResult";
  * Shows a button that opens a modal with a visualization of the frequency of values.
  * The user may select any field from the data to visualize. The user may select from
  * different chart types.
+ * @param root0 - Props for the component.
+ * @param root0.data - Data to visualize.
+ * @param root0.labelKeyMap - Map of labels to keys in the data.
  */
 export default function FrequencyVisualization({
     data,
@@ -124,6 +127,10 @@ export default function FrequencyVisualization({
     );
 }
 
+/**
+ * Calculates frequencies of values.
+ * @param values - Values to calculate frequencies of.
+ */
 function calculateFrequencies<TValue>(values: TValue[]) {
     const valueFrequencies = new Map<TValue, number>();
     for (const value of values) {

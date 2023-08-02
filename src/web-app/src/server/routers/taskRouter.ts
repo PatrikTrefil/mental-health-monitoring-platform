@@ -1,7 +1,7 @@
 import { loadFormById } from "@/client/formManagementClient";
 import { loadUsers } from "@/client/userManagementClient";
 import UserRoleTitles from "@/constants/userRoleTitles";
-import { Prisma } from "@prisma/client";
+import { Prisma, type Task } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
@@ -11,7 +11,7 @@ const taskRouter = createTRPCRouter({
      * Get list of all tasks. If user is {@link UserRoleTitles.ZADAVATEL_DOTAZNIKU}, return all tasks.
      * If user is {@link UserRoleTitles.KLIENT_PACIENT}, return only tasks for them.
      */
-    listTasks: protectedProcedure.query((opts) => {
+    listTasks: protectedProcedure.query((opts): Promise<Task[]> => {
         const userRoleTitles = opts.ctx.session.user.roleTitles;
         if (userRoleTitles.includes(UserRoleTitles.ZADAVATEL_DOTAZNIKU)) {
             return opts.ctx.prisma.task.findMany();
@@ -25,14 +25,13 @@ const taskRouter = createTRPCRouter({
     }),
     /**
      * Get task by id.
-     *
-     * @throws {TRPCError} FORBIDDEN if the user is not a {@link UserRoleTitles.ZADAVATEL_DOTAZNIKU}
-     * or {@link UserRoleTitles.KLIENT_PACIENT}
-     * @throws {TRPCError} FORBIDDEN if the user is not an {@link UserRoleTitles.ZADAVATEL_DOTAZNIKU}
-     * and the task is not assigned to them
-     * @throws {TRPCError} NOT_FOUND if the task does not exist
-     *
-     * @returns {Prisma.Task} the task with given id
+     * @returns The task with given id.
+     * @throws {TRPCError}
+     * FORBIDDEN if the user is not a {@link UserRoleTitles.ZADAVATEL_DOTAZNIKU} or {@link UserRoleTitles.KLIENT_PACIENT}.
+     * @throws {TRPCError}
+     * FORBIDDEN if the user is not an {@link UserRoleTitles.ZADAVATEL_DOTAZNIKU} and the task is not assigned to them.
+     * @throws {TRPCError}
+     * NOT_FOUND if the task does not exist.
      */
     getTask: protectedProcedure
         .input(
@@ -40,7 +39,7 @@ const taskRouter = createTRPCRouter({
                 id: z.string(),
             })
         )
-        .query(async (opts) => {
+        .query(async (opts): Promise<Task> => {
             const userRoleTitles = opts.ctx.session.user.roleTitles;
 
             if (
@@ -66,15 +65,19 @@ const taskRouter = createTRPCRouter({
         }),
     /**
      * Create new task.
-     *
-     * @throws {TRPCError} FORBIDDEN if the user is not an {@link UserRoleTitles.ZADAVATEL_DOTAZNIKU}
-     * @throws {TRPCError} CONFLICT if the form with given formId does not exist
-     * @throws {TRPCError} CONFLICT if the user with given forUserId does not exist
-     * @throws {TRPCError} INTERNAL_SERVER_ERROR if the checking of form existence fails
-     * @throws {TRPCError} INTERNAL_SERVER_ERROR if the creation of task fails
-     * @throws {TRPCError} INTERNAL_SERVER_ERROR if the loading of users fails
-     *
-     * @returns {Prisma.Task} the created task
+     * @returns The created task.
+     * @throws {TRPCError}
+     * FORBIDDEN if the user is not an {@link UserRoleTitles.ZADAVATEL_DOTAZNIKU}.
+     * @throws {TRPCError}
+     * CONFLICT if the form with given formId does not exist.
+     * @throws {TRPCError}
+     * CONFLICT if the user with given forUserId does not exist.
+     * @throws {TRPCError}
+     * INTERNAL_SERVER_ERROR if the checking of form existence fails.
+     * @throws {TRPCError}
+     * INTERNAL_SERVER_ERROR if the creation of task fails.
+     * @throws {TRPCError}
+     * INTERNAL_SERVER_ERROR if the loading of users fails.
      */
     createTask: protectedProcedure
         .input(
@@ -85,7 +88,7 @@ const taskRouter = createTRPCRouter({
                 formId: z.string().nonempty(),
             })
         )
-        .mutation(async (opts) => {
+        .mutation(async (opts): Promise<Task> => {
             if (
                 !opts.ctx.session.user.roleTitles.includes(
                     UserRoleTitles.ZADAVATEL_DOTAZNIKU
@@ -138,9 +141,10 @@ const taskRouter = createTRPCRouter({
         }),
     /**
      * Delete task by id.
-     *
-     * @throws {TRPCError} FORBIDDEN if the user is not an {@link UserRoleTitles.ZADAVATEL_DOTAZNIKU}
-     * @throws {TRPCError} NOT_FOUND if the task with given id does not exist
+     * @throws {TRPCError}
+     * FORBIDDEN if the user is not an {@link UserRoleTitles.ZADAVATEL_DOTAZNIKU}.
+     * @throws {TRPCError}
+     * NOT_FOUND if the task with given id does not exist.
      */
     deleteTask: protectedProcedure
         .input(
@@ -148,7 +152,7 @@ const taskRouter = createTRPCRouter({
                 id: z.string(),
             })
         )
-        .mutation(async (opts) => {
+        .mutation(async (opts): Promise<void> => {
             if (
                 !opts.ctx.session.user.roleTitles.includes(
                     UserRoleTitles.ZADAVATEL_DOTAZNIKU

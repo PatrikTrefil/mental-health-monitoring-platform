@@ -15,14 +15,14 @@ export type Component =
     | HiddenComponent
     | ButtonComponent;
 
-type ComponentBase = {
+export type ComponentBase = {
     label: string;
     key: string;
     defaultValue?: DataValue;
     disabled: boolean;
 };
 
-type HiddenComponent = ComponentBase & {
+export type HiddenComponent = ComponentBase & {
     input: boolean;
     tableView: boolean;
     protected: boolean;
@@ -40,18 +40,18 @@ type HiddenComponent = ComponentBase & {
     lockKey: boolean;
 };
 
-type ButtonComponent = ComponentBase & {
+export type ButtonComponent = ComponentBase & {
     type: "button";
     action: "saveState" | "submit";
     theme: "primary" | "secondary" | "success" | "info" | "warning" | "danger";
     leftIcon: string;
 };
 
-type StringResultComponent = ComponentBase & {
+export type StringResultComponent = ComponentBase & {
     type: "checkbox" | "textarea" | "radio" | "number" | "textfield";
 };
 
-type SelectBoxesComponent = ComponentBase & {
+export type SelectBoxesComponent = ComponentBase & {
     type: "selectboxes";
     values: { label: string; value: string }[];
 };

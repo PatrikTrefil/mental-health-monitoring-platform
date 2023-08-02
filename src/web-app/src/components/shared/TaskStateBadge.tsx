@@ -5,6 +5,8 @@ import { Badge } from "react-bootstrap";
 
 /**
  * Component that displays a badge with the given task state.
+ * @param root0 - Props.
+ * @param root0.taskState - Task state to display.
  */
 export default function TaskStateBadge({
     taskState,

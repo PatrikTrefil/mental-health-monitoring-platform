@@ -23,6 +23,9 @@ import {
 } from "react-bootstrap";
 import { OverlayChildren } from "react-bootstrap/esm/Overlay";
 
+/**
+ * Table of tasks of the current user.
+ */
 export default function TaskTable() {
     const columnHelper = createColumnHelper<Task>();
     const columns = useMemo(

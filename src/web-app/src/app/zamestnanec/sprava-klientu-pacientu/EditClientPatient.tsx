@@ -6,6 +6,12 @@ import { useSession } from "next-auth/react";
 import { Alert, Spinner } from "react-bootstrap";
 import { toast } from "react-toastify";
 
+/**
+ * Form for editing a client/patient.
+ * @param root0 - Props.
+ * @param root0.userId - ID of the client/patient to edit.
+ * @param root0.submissionId - ID of the submission that represents the client/patient.
+ */
 export default function EditClientPatient({
     userId,
     submissionId,

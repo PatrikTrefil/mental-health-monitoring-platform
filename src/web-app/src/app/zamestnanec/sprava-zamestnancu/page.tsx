@@ -5,6 +5,9 @@ export const metadata: Metadata = {
     title: "Správa zaměstnanců",
 };
 
+/**
+ * Employee management page.
+ */
 export default function SpravaZamestnancuPage() {
     return (
         <>

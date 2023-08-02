@@ -5,6 +5,9 @@ export const metadata: Metadata = {
     title: "Vytvořit formulář",
 };
 
+/**
+ * Page for creating a new form.
+ */
 export default function CreateFormPage() {
     return (
         <>

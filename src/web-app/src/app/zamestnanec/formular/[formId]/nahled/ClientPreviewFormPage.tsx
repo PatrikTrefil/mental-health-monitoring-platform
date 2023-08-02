@@ -7,7 +7,9 @@ import { useSession } from "next-auth/react";
 import { Alert, Spinner } from "react-bootstrap";
 
 /**
- * Page for previewing form with given form id (from url)
+ * Page for previewing form with given form id (from url).
+ * @param root0 - Props.
+ * @param root0.formId - ID of the form to preview.
  */
 export default function ClientPreviewFormPage({ formId }: { formId: string }) {
     const session = useSession();

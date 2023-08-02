@@ -3,6 +3,11 @@ import { Spinner } from "react-bootstrap";
 
 let hasBaseUrlBeenSet = false;
 
+/**
+ * Create a new Formio instance. Prefer this function over the Formio constructor.
+ * @param url - URL of the formio instance.
+ * @param options - Options for the formio instance.
+ */
 export async function CreateFormio(url: string, options?: Object | undefined) {
     const { Formio } = await import("formiojs");
 
@@ -21,10 +26,9 @@ export async function CreateFormio(url: string, options?: Object | undefined) {
 
 /**
  * Loader which takes care of setting the base URL of the Formio library automatically.
- *
- * @param loader loader of the formio component
- * @param loading element to display while the component is loading
- * @returns the dynamically loaded component
+ * @param loader - Loader of the formio component.
+ * @param loading - Element to display while the component is loading.
+ * @returns The dynamically loaded component.
  */
 export function FormioComponentLoader<T>(
     loader: () => LoaderComponent<T>,
