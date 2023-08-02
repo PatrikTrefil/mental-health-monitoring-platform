@@ -42,7 +42,7 @@ declare module "next-auth/jwt" {
 }
 
 /**
- * In miliseconds
+ * In miliseconds.
  */
 const formioTokenExpirationTime = 5 * 60 * 1000; // 5 minutes (default in formio)
 
@@ -52,7 +52,7 @@ export const authOptions: AuthOptions = {
         CredentialsProvider({
             name: "Credentials",
             /**
-             * Used to create a login page and used as a param of the authorize function
+             * Used to create a login page and used as a param of the authorize function.
              */
             credentials: {
                 ID: { label: "ID", type: "text", placeholder: "1234" },
@@ -60,7 +60,8 @@ export const authOptions: AuthOptions = {
             },
             /**
              * Called when initializing a session. The returned object will be passed to the jwt callback.
-             * @returns Promise<null> if the credentials are invalid, otherwise Promise<User>
+             * @param credentials - The credentials provided by the user.
+             * @returns Null if the credentials are invalid, otherwise Promise<User>.
              */
             async authorize(credentials) {
                 if (!credentials) return null; // invalid credentials because they were not provided
@@ -112,19 +113,24 @@ export const authOptions: AuthOptions = {
     callbacks: {
         /**
          * Creates the JWT token on the server.
+         * @param root0 - The token and the user object.
+         * @param root0.token - The authentication token object.
+         * @param root0.user - The user object, which is available only
+         * in the first call of the session. (initial sign in).
+         * @returns The token object.
          */
         async jwt({ token, user }) {
-            // the user is available only in the first call
-            // initial sign in
-            if (user) {
+            const isInitialSignIn = !!user;
+            if (isInitialSignIn) {
                 token.user = user;
             } else {
                 if (!token.user) throw new Error("No user in token");
-                // update the formio token (may throw)
-                if (
+
+                const needToRefreshToken =
                     Date.now() - token.user.formioTokenExpiration >
-                    3 * 60 * 1000 // 3 minutes have passed
-                ) {
+                    3 * 60 * 1000; // 3 minutes have passed
+
+                if (needToRefreshToken) {
                     const newToken = await refreshToken(token.user.formioToken);
                     token.user.formioToken = newToken;
                 }
@@ -134,6 +140,10 @@ export const authOptions: AuthOptions = {
         },
         /**
          * Creates the session object on the server, which is sent to the client.
+         * @param root0 - The session and the token object.
+         * @param root0.session - The session object.
+         * @param root0.token - The token object.
+         * @returns The session object passed to the client.
          */
         async session({ session, token }) {
             // make user information available in the session (used in client)
@@ -152,7 +162,10 @@ export const authOptions: AuthOptions = {
 
 /**
  * Wrapper for `getServerSession` so that you don't need to import the `authOptions` in every file.
- *
+ * @param ctx - Current context.
+ * @param ctx.req - The request object.
+ * @param ctx.res - The response object.
+ * @returns The server session.
  * @see https://next-auth.js.org/configuration/nextjs
  */
 export const getServerAuthSession = (ctx: {

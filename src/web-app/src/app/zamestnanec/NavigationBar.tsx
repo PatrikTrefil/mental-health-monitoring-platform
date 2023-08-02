@@ -17,6 +17,9 @@ import {
     Spinner,
 } from "react-bootstrap";
 
+/**
+ * Navigation bar for pages accessible to employees.
+ */
 export default function NavigationBarEmployee() {
     const { data } = useSession();
     const [isAccountDetailShowing, setIsAccountDetailShowing] = useState(false);

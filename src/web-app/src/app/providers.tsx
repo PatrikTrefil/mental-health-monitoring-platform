@@ -7,6 +7,11 @@ import { ToastContainer } from "react-toastify";
 
 // react query provider is in the trpc client provider
 
+/**
+ * All providers used in the app.
+ * @param root0 - Props.
+ * @param root0.children - Child components.
+ */
 export function Providers({ children }: { children?: React.ReactNode }) {
     return (
         <TrpcAndReactQueryClientProvider>

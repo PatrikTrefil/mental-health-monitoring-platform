@@ -22,6 +22,8 @@ export interface TaskCreationProps {
 
 /**
  * Component for creating tasks.
+ * @param root0 - Props for the component.
+ * @param root0.onSettled - Callback called when the task is created or the creation is cancelled.
  */
 export default function TaskCreation({ onSettled }: TaskCreationProps) {
     const session = useSession();

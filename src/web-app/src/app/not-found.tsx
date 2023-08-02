@@ -5,6 +5,9 @@ export const metadata: Metadata = {
     title: "Chyba 404",
 };
 
+/**
+ * Page for 404 errors.
+ */
 export default function NotFound() {
     return (
         <div className="d-flex align-items-center justify-content-center vh-100">

@@ -18,6 +18,9 @@ import { useMemo } from "react";
 import { Alert, Button, Form, Spinner, Table } from "react-bootstrap";
 import { toast } from "react-toastify";
 
+/**
+ * Table of form definitions available to clients/patients.
+ */
 export default function FormDefinitionsTable() {
     const queryClient = useQueryClient();
     const session = useSession();

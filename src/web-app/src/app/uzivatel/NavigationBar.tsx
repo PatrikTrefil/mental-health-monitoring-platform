@@ -17,6 +17,9 @@ import {
     Spinner,
 } from "react-bootstrap";
 
+/**
+ * Navigation bar for pages accessible to clients and patients.
+ */
 export default function NavigationBarClientPatient() {
     const { data } = useSession();
     const [isAccountDetailShowing, setIsAccountDetailShowing] = useState(false);

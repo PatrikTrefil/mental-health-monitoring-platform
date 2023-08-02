@@ -17,6 +17,13 @@ export const ChartTypes = {
     pie: "Koláčový graf",
 } as const;
 
+/**
+ * Component for visualizing data.
+ * @param root0 - Props.
+ * @param root0.data - Data to visualize.
+ * @param root0.chartType - Type of chart to use.
+ * @throws {Error} - If the chart type is unsupported. Should not happen if the {@link ChartType} type is used.
+ */
 export default function DataVisualization({
     data,
     chartType: selectedChartType,

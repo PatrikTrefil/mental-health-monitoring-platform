@@ -8,6 +8,8 @@ import { toast } from "react-toastify";
 
 /**
  * Button for exporting a form submissions as CSV. On failure, an error modal is shown.
+ * @param root0 - Props for the component.
+ * @param root0.formId - Form ID of the form to export.
  */
 export default function ExportButton({ formId }: ExportButtonProps) {
     const session = useSession();
@@ -41,11 +43,11 @@ export default function ExportButton({ formId }: ExportButtonProps) {
 }
 
 /**
- * Props for {@link ExportButton}
+ * Props for {@link ExportButton}.
  */
 export interface ExportButtonProps {
     /**
-     * Form ID of the form to export
+     * Form ID of the form to export.
      */
     formId: string;
 }

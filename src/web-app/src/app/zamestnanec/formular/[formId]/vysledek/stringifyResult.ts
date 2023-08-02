@@ -1,8 +1,8 @@
 import { LabeledDataValue } from "./ResultTable";
 
 /**
- * Converts value to human readable string
- * @param labeledValue value of labeled data value to be stringified
+ * Converts value to human readable string.
+ * @param labeledValue - Value of labeled data value to be stringified.
  */
 export default function stringifyResult(
     labeledValue: LabeledDataValue["value"]

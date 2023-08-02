@@ -22,6 +22,13 @@ import { useMemo, useState } from "react";
 import { Alert, Button, Form, Modal, Spinner, Table } from "react-bootstrap";
 import { toast } from "react-toastify";
 
+/**
+ * Convert ID of a role to its title.
+ * @param roleId - Role id to convert.
+ * @param roles - List of role objects.
+ * @returns Role title of the role with the given ID.
+ * @throws Error if the role ID is unknown.
+ */
 function roleIdToRoleTitle(roleId: string, roles: Role[]): UserRoleTitle {
     const role = roles.find((role) => role._id === roleId);
     if (!role) throw new Error("Unknown role ID.");

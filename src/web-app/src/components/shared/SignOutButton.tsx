@@ -7,6 +7,7 @@ import { toast } from "react-toastify";
 
 /**
  * Bootstrap button with sign out functionality. The onClick and disabled props are already handled.
+ * @param props - Props to pass to the button component without `onClick` (that is handled by this component).
  */
 export default function SignOutButton(
     props: Omit<ButtonProps, "onClick" | "disabled">

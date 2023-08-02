@@ -12,7 +12,7 @@ const postBodySchema = z.object({
         owner: z.string(),
         access: z.string().array(),
         /**
-         * Form id
+         * Form id.
          */
         form: z.string(),
     }),
@@ -22,7 +22,8 @@ const postBodySchema = z.object({
 });
 
 /**
- * Complete a task by providing a form submission
+ * Complete a task by providing a form submission.
+ * @param req - Request object.
  */
 export async function POST(req: Request) {
     // token is present and valid because of middleware checks
@@ -87,14 +88,13 @@ export async function POST(req: Request) {
  * This is done by loading the submission from Formio (the provided
  * input can not be trusted) and checking that the submission exists,
  * is associated with the same form that the task is associated with.
- * We also check that the task exists;
- *
- * @param formId id of the form assigned to the task
- * @param formioToken JWT token for formio
- * @param taskId id of the task to be completed
- * @param submissionId id of the submission used to complete the task
- * @param userId id of the user that is completing the task
- * @returns true if the submission is valid for the task
+ * We also check that the task exists;.
+ * @param formId - Id of the form assigned to the task.
+ * @param formioToken - JWT token for formio.
+ * @param taskId - Id of the task to be completed.
+ * @param submissionId - Id of the submission used to complete the task.
+ * @param userId - Id of the user that is completing the task.
+ * @returns True if the submission is valid for the task.
  */
 async function validateRequest(
     formId: string,
@@ -102,7 +102,7 @@ async function validateRequest(
     taskId: string,
     submissionId: string,
     userId: string
-) {
+): Promise<boolean> {
     // make sure the task exists and that it is for the correct form
     let task: { formId: string } | null;
     try {

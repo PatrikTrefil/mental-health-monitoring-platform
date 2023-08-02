@@ -23,6 +23,12 @@ type FormInputs = z.infer<typeof userDataSchema>;
 
 /**
  * Form for changing password of a user.
+ * @param root0 - Props.
+ * @param root0.userId - ID of the user to change password for.
+ * @param root0.submissionId - ID of the submission representing the user to change password for.
+ * @param root0.onChangeDone - Callback to call when the password is changed.
+ * @param root0.userRoleTitle - Title of the role of the user to change password for.
+ * @param root0.isIDFieldShowing - Whether the ID field should be shown.
  */
 export default function ChangePasswordUser({
     userId,

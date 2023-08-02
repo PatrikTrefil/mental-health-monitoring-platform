@@ -43,6 +43,9 @@ type FormInputs = z.infer<typeof userDataSchema>;
 
 /**
  * Form for creating a user.
+ * @param root0 - Props.
+ * @param root0.onChangeDone - Callback to call when the password is changed.
+ * @param root0.userRoleTitle - Title of the role to assign to the created user.
  */
 export default function CreateUser({
     onChangeDone,

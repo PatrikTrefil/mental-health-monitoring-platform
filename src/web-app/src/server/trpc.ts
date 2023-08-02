@@ -6,7 +6,7 @@ import superjson from "superjson";
 import { getServerAuthSession } from "./auth";
 
 /**
- * Options of {@link createInnerTRPCContext}
+ * Options of {@link createInnerTRPCContext}.
  */
 export type CreateContextOptions = {
     session: Session | null;
@@ -18,8 +18,9 @@ export type CreateContextOptions = {
  *
  * Examples of things you may need it for:
  * - testing, so we don't have to mock Next.js' req/res
- * - tRPC's `createSSGHelpers`, where we don't have req/res
- *
+ * - tRPC's `createSSGHelpers`, where we don't have req/res.
+ * @param opts - Options for the context.
+ * @returns The internals of a tRPC context object.
  * @see https://create.t3.gg/en/usage/trpc#-serverapitrpcts
  */
 export const createInnerTRPCContext = (opts: CreateContextOptions) => {
@@ -32,7 +33,8 @@ export const createInnerTRPCContext = (opts: CreateContextOptions) => {
 /**
  * This is the actual context you will use in your router. It will be used to process every request
  * that goes through your tRPC endpoint.
- *
+ * @param opts - Options for the context.
+ * @returns A tRPC context.
  * @see https://trpc.io/docs/context
  */
 export const createTRPCContext = async (opts: CreateNextContextOptions) => {
@@ -56,7 +58,6 @@ const t = initTRPC.context<typeof createTRPCContext>().create({
 
 /**
  * This is how you create new routers and sub-routers in your tRPC API.
- *
  * @see https://trpc.io/docs/router
  */
 export const createTRPCRouter = t.router;
@@ -76,11 +77,10 @@ const enforceUserIsAuthed = t.middleware(({ ctx, next }) => {
 });
 
 /**
- * Protected (authenticated) procedure
+ * Protected (authenticated) procedure.
  *
  * If you want a query or mutation to ONLY be accessible to logged in users, use this. It verifies
  * the session is valid and guarantees `ctx.session.user` is not null.
- *
  * @see https://trpc.io/docs/procedures
  */
 export const protectedProcedure = t.procedure.use(enforceUserIsAuthed);

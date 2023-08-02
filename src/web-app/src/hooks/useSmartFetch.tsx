@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 
-type BaseState = {
+export type BaseState = {
     refetch: () => Promise<void>;
 };
 
@@ -13,6 +13,7 @@ export type LoadingState = BaseState & {
     error: null;
     isError: false;
 };
+
 export type SuccessState<TData> = BaseState & {
     status: "success";
     data: TData;
@@ -34,6 +35,12 @@ export type SmartFetchState<TData, TError> =
     | SuccessState<TData>
     | ErrorState<TError>;
 
+/**
+ * Simple hook for fetching data once.
+ * @param root0 - Options object.
+ * @param root0.queryFn - Query function to wrap with smart fetch.
+ * @param root0.enabled - Whether the query should be executed.
+ */
 export function useSmartFetch<TData, TError = unknown>({
     queryFn,
     enabled = true,

@@ -1,14 +1,14 @@
 export interface Submission {
     /**
-     * ID of the submission
+     * ID of the submission.
      */
     _id: string;
     /**
-     * ID of the form to which this submission belongs
+     * ID of the form to which this submission belongs.
      */
     form: string;
     /**
-     * ID of the user who owns this submission
+     * ID of the user who owns this submission.
      */
     owner: string;
     access: string[];
@@ -19,7 +19,7 @@ export interface Submission {
         [key: string]: unknown;
     };
     /**
-     * ISO 8601 date string
+     * ISO 8601 date string.
      */
     created: string;
 }
