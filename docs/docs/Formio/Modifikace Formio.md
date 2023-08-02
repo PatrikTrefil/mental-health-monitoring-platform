@@ -15,8 +15,8 @@ Roli lze k uživateli přiřadit pouze skrze action, která je přiřazena k res
 Proto je potřeba vytvořit resource pro každou kombinaci roli, kterou chceme
 vytvořit. Vzhledem k tomu, že jsou resource oddělené, nelze jednoduše validovat
 (při tvorbě uživatelského účtu), že má každý uživatel unikátní ID pro
-přihlášení. Abychom předešli zmatení uživatelů, v uživatelském rohraní
-vždy k ID přidáme i roli, která je uživateli přiřazena.
+přihlášení. Abychom předešli zmatení uživatelů, v uživatelském rohraní vždy k ID
+přidáme i roli, která je uživateli přiřazena.
 
 ## Webhook action
 

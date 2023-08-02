@@ -43,7 +43,7 @@ export default function EmployeeTable() {
 
     const { data: roles } = useQuery({
         ...rolesQuery.list(session.data?.user.formioToken!),
-        enabled: !!session.data
+        enabled: !!session.data,
     });
 
     const roleTitlesCurrentUser = session.data?.user.roleTitles;
