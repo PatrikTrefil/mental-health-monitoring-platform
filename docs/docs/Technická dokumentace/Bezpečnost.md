@@ -18,3 +18,5 @@ Každá změna v softwaru prochází bezpečnostní statickou analýzou nástroj
 Probíhá pravidená kontrola závislostí nástrojem
 [Dependabot](https://github.com/dependabot), který upozorňuje na známé
 bezpečnostní chyby v závislostech.
+
+Po všech uživatelích vyžadujeme silná hesla, která jsou bezpečně uložena.

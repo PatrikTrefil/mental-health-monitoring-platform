@@ -1,5 +1,5 @@
 import { loadFormById } from "@/client/formManagementClient";
-import { loadUsers } from "@/client/userManagementClient";
+import { loadClientPatient } from "@/client/userManagementClient";
 import UserRoleTitles from "@/constants/userRoleTitles";
 import { prisma } from "@/server/__mocks__/db";
 import { appRouter, type AppRouter } from "@/server/routers/root";
@@ -48,7 +48,7 @@ vi.mock("@/client/formManagementClient", () => ({
 
 vi.mock("@/client/userManagementClient", () => ({
     loadUsers: vi.fn(async () => {
-        const mockUsers: Awaited<ReturnType<typeof loadUsers>> = [
+        const mockUsers: Awaited<ReturnType<typeof loadClientPatient>> = [
             {
                 _id: "12324",
                 data: { id: "123" },
@@ -80,7 +80,7 @@ describe("todo functionality", () => {
             submissionAccess: [],
             components: [],
         });
-        vi.mocked(loadUsers).mockResolvedValueOnce([
+        vi.mocked(loadClientPatient).mockResolvedValueOnce([
             {
                 _id: faker.string.uuid(),
                 data: { id: mockInputTask.forUserId },
@@ -291,7 +291,7 @@ describe("todo functionality", () => {
                 UserRoleTitles.ZADAVATEL_DOTAZNIKU,
             ])
         );
-        vi.mocked(loadUsers).mockImplementationOnce(async () => []);
+        vi.mocked(loadClientPatient).mockImplementationOnce(async () => []);
         expect(
             caller.task.createTask(mockInputTask)
         ).rejects.toMatchInlineSnapshot(
@@ -385,7 +385,7 @@ describe("todo when formio is down", () => {
     });
 
     it("throws when creating a todo when loadUsers fails", async () => {
-        vi.mocked(loadUsers).mockImplementationOnce(throwFn);
+        vi.mocked(loadClientPatient).mockImplementationOnce(throwFn);
         const caller = appRouter.createCaller(
             createInnerTRPCContextMockSession([
                 UserRoleTitles.ZADAVATEL_DOTAZNIKU,

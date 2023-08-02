@@ -49,10 +49,8 @@ export default function FormDefinitionsTable() {
             console.debug("Form deleted.", { formId });
             toast.success("Formulář byl smazán");
             queryClient.invalidateQueries({
-                queryKey: formsQuery.list(
-                    session.data?.user.formioToken!,
-                    session.data?.user.data.id!
-                ).queryKey,
+                queryKey: formsQuery.list(session.data?.user.formioToken!)
+                    .queryKey,
             });
             queryClient.invalidateQueries({
                 queryKey: formsQuery.detail(
@@ -118,11 +116,7 @@ export default function FormDefinitionsTable() {
     );
 
     const { isLoading, isError, error, data } = useQuery({
-        ...formsQuery.list(
-            session.data?.user.formioToken!,
-            session.data?.user.data.id!,
-            ["klientPacient"]
-        ),
+        ...formsQuery.list(session.data?.user.formioToken!, ["klientPacient"]),
         enabled: !!session.data?.user.formioToken,
     });
 
