@@ -19,11 +19,11 @@ import Alert from "react-bootstrap/Alert";
 import Spinner from "react-bootstrap/Spinner";
 
 /**
- * Status of form edit
+ * Status of form edit.
  */
 enum EditStatus {
     /**
-     * User has not attempted to save form yet (or has reset the status)
+     * User has not attempted to save form yet (or has reset the status).
      */
     NOT_SUBMITTED,
     /**
@@ -36,7 +36,9 @@ enum EditStatus {
     EDIT_SUCCEEDED,
 }
 /**
- * Page for editing form with given form id (from url)
+ * Page for editing form with given form id (from url).
+ * @param root0 - Props.
+ * @param root0.formId - ID of the form to edit.
  */
 export default function ClientEditFormPage({ formId }: { formId: string }) {
     const router = useRouter();

@@ -6,7 +6,7 @@ export const metadata: Metadata = {
 };
 
 /**
- * Prehled (dashboard) page for clients/patients.
+ * Dashboard page for clients/patients.
  */
 export default function PrehledPage() {
     return (

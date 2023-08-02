@@ -25,14 +25,13 @@ const taskRouter = createTRPCRouter({
     }),
     /**
      * Get task by id.
-     *
+     * @returns The task with given id.
      * @throws {TRPCError}
-     * FORBIDDEN if the user is not a {@link UserRoleTitles.ZADAVATEL_DOTAZNIKU} or {@link UserRoleTitles.KLIENT_PACIENT}
+     * FORBIDDEN if the user is not a {@link UserRoleTitles.ZADAVATEL_DOTAZNIKU} or {@link UserRoleTitles.KLIENT_PACIENT}.
      * @throws {TRPCError}
-     * FORBIDDEN if the user is not an {@link UserRoleTitles.ZADAVATEL_DOTAZNIKU} and the task is not assigned to them
+     * FORBIDDEN if the user is not an {@link UserRoleTitles.ZADAVATEL_DOTAZNIKU} and the task is not assigned to them.
      * @throws {TRPCError}
-     * NOT_FOUND if the task does not exist
-     * @returns the task with given id
+     * NOT_FOUND if the task does not exist.
      */
     getTask: protectedProcedure
         .input(
@@ -66,20 +65,19 @@ const taskRouter = createTRPCRouter({
         }),
     /**
      * Create new task.
-     *
+     * @returns The created task.
      * @throws {TRPCError}
-     FORBIDDEN if the user is not an {@link UserRoleTitles.ZADAVATEL_DOTAZNIKU}
+     * FORBIDDEN if the user is not an {@link UserRoleTitles.ZADAVATEL_DOTAZNIKU}.
      * @throws {TRPCError}
-     * CONFLICT if the form with given formId does not exist
+     * CONFLICT if the form with given formId does not exist.
      * @throws {TRPCError}
-     * CONFLICT if the user with given forUserId does not exist
+     * CONFLICT if the user with given forUserId does not exist.
      * @throws {TRPCError}
-     * INTERNAL_SERVER_ERROR if the checking of form existence fails
+     * INTERNAL_SERVER_ERROR if the checking of form existence fails.
      * @throws {TRPCError}
-     * INTERNAL_SERVER_ERROR if the creation of task fails
+     * INTERNAL_SERVER_ERROR if the creation of task fails.
      * @throws {TRPCError}
-     * INTERNAL_SERVER_ERROR if the loading of users fails
-     * @returns the created task
+     * INTERNAL_SERVER_ERROR if the loading of users fails.
      */
     createTask: protectedProcedure
         .input(
@@ -143,11 +141,10 @@ const taskRouter = createTRPCRouter({
         }),
     /**
      * Delete task by id.
-     *
      * @throws {TRPCError}
-     * FORBIDDEN if the user is not an {@link UserRoleTitles.ZADAVATEL_DOTAZNIKU}
+     * FORBIDDEN if the user is not an {@link UserRoleTitles.ZADAVATEL_DOTAZNIKU}.
      * @throws {TRPCError}
-     * NOT_FOUND if the task with given id does not exist
+     * NOT_FOUND if the task with given id does not exist.
      */
     deleteTask: protectedProcedure
         .input(

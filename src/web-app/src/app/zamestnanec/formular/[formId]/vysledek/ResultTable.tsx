@@ -24,7 +24,9 @@ import FrequencyVisualization from "./FrequencyVisualization";
 import stringifyResult from "./stringifyResult";
 
 /**
- * Display table with results from form with given formId
+ * Display table with results from form with given formId.
+ * @param root0 - Props for the component.
+ * @param root0.formId - ID of the form to display results of.
  */
 export default function ResultTable({ formId }: { formId: string }) {
     const { data } = useSession();
@@ -224,10 +226,11 @@ export type LabeledDataValue = {
 };
 
 /**
- * Add human readable labels to every data entry of every submission
- * @param submissions submissions to add labels to
- * @param form form to get labels from
- * @returns submissions where every data entry has a label
+ * Adds human readable labels to every data entry of every submission.
+ * The value is replaced by an object containing the value and the label.
+ * @param submissions - Submissions to which the labels are added to.
+ * @param form - Form to get the labels from.
+ * @returns Submissions where every data entry has a label.
  */
 function addHumanReadableLabelsToSubmissionData(
     submissions: Submission[],

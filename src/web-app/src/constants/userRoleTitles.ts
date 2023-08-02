@@ -1,5 +1,5 @@
 /**
- * User role string constants
+ * User role string constants.
  */
 const UserRoleTitles = {
     ADMIN: "Administrator",

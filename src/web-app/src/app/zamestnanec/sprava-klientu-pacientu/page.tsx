@@ -5,6 +5,9 @@ export const metadata: Metadata = {
     title: "Správa klientů a pacientů",
 };
 
+/**
+ * Client/patient management page.
+ */
 export default function SpravaKlientuPacientuPage() {
     return (
         <>

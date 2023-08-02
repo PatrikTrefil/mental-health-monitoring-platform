@@ -6,6 +6,9 @@ export const metadata: Metadata = {
     description: "Platforma pro monitorování mentálního zdraví",
 };
 
+/**
+ * Home page of the application.
+ */
 export default function HomePage() {
     return (
         <main className="vh-100 d-flex flex-column justify-content-center align-items-center px-5">

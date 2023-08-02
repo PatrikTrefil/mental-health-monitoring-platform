@@ -5,6 +5,9 @@ import { useSession } from "next-auth/react";
 import { Button } from "react-bootstrap";
 import FormDefinitionsTable from "./FormDefinitionsTable";
 
+/**
+ * Component for managing forms.
+ */
 export default function FormManagement() {
     const { data } = useSession();
 

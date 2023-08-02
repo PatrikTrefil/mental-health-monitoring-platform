@@ -7,6 +7,13 @@ import { createTRPCReact } from "@trpc/react-query";
 import { useState } from "react";
 import superjson from "superjson";
 
+/**
+ * Get the base URL for the TRPC client.
+ * @returns Base URL if running on the server, empty string if running in the browser,
+ * because the browser should use relative paths.
+ * @example
+ * May return "http://localhost:3000" or "https://example.com".
+ */
 function getBaseUrl() {
     if (typeof window !== "undefined")
         // browser should use relative path
@@ -26,7 +33,7 @@ function getBaseUrl() {
 // In the future, it might be worth it to switch to the Next.js integration.
 
 /**
- * tRPC client instance
+ * TRPC client instance.
  */
 export const trpc = createTRPCReact<AppRouter>({
     unstable_overrides: {
@@ -40,7 +47,9 @@ export const trpc = createTRPCReact<AppRouter>({
 });
 
 /**
- * Wrap the whole app in this provider to use trpc
+ * Wrap the whole app in this provider to use trpc.
+ * @param props - Props object.
+ * @param props.children - Child elements.
  */
 export function ClientProvider(props: { children: React.ReactNode }) {
     // The reason for using useState in the creation of the queryClient

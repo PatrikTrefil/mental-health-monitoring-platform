@@ -21,7 +21,7 @@ export type ChangeEvent = {
 
 /**
  * A dynamic form that uses the user's formio token to authenticate.
- * @param formProps most of the props are passed to the Form component from `@react/formio`
+ * @param formProps - Most of the props are passed to the Form component from `@react/formio`
  * but there are a few changes. The `src` prop and the `form` prop are removed.
  * The new `relativeFormPath` prop will be used to manually fetch the form from the formio API and the result
  * will be passed to the Form component using the `form` prop. The `onSubmitDone` prop is required,
@@ -29,7 +29,6 @@ export type ChangeEvent = {
  * prop is required, to force notification of the user and it is run after the form is unsuccessfully submitted.
  * By default the form is submitted to the `formProps.absoluteSrc` using a POST request. You can override this
  * behavior by providing your own `formProps.onSubmit` function.
- *
  * @see DynamicForm
  */
 export default function DynamicFormWithAuth(
@@ -45,7 +44,7 @@ export default function DynamicFormWithAuth(
          * server and before it is rendered. These values override the default values from the form.
          *
          * This can be useful if you want to prefill the form with some data.
-         * This prefill won't trigger validation (no validation errors will be shown)
+         * This prefill won't trigger validation (no validation errors will be shown).
          */
         defaultValues?: Record<string, DataValue>;
         /**

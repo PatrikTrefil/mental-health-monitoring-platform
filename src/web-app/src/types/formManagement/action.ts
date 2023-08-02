@@ -8,7 +8,7 @@ export interface Action<TSettings> {
      */
     name: string;
     /**
-     * The title of the action (displayed in the UI)
+     * The title of the action (displayed in the UI).
      */
     title: string;
     /**
