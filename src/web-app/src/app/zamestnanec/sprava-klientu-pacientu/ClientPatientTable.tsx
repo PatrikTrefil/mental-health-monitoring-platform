@@ -1,7 +1,7 @@
 "use client";
 
 import { usersQuery } from "@/client/queries/userManagement";
-import { deleteKlientPacient } from "@/client/userManagementClient";
+import { deleteClientPacient } from "@/client/userManagementClient";
 import ChangePasswordUser from "@/components/shared/ChangePasswordUser";
 import CreateUser from "@/components/shared/CreateUser";
 import SimplePagination from "@/components/shared/SimplePagination";
@@ -40,7 +40,7 @@ export default function ClientPatientTable() {
             formioToken: string;
             userSubmissionId: string;
         }) => {
-            await deleteKlientPacient(formioToken, userSubmissionId);
+            await deleteClientPacient(formioToken, userSubmissionId);
         },
         onError: (e: unknown, { userSubmissionId }) => {
             console.error("Failed to delete user.", {

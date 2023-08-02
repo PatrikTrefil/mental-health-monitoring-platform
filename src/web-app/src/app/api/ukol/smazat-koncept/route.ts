@@ -1,4 +1,4 @@
-import { loadUsers, loginAdmin } from "@/client/userManagementClient";
+import { loadClientPatient, loginAdmin } from "@/client/userManagementClient";
 import { prisma } from "@/server/db";
 import { Prisma } from "@prisma/client";
 import { z } from "zod";
@@ -38,7 +38,7 @@ export async function POST(req: Request) {
         process.env.FORMIO_ROOT_EMAIL,
         process.env.FORMIO_ROOT_PASSWORD
     );
-    const users = await loadUsers(adminToken);
+    const users = await loadClientPatient(adminToken);
     const user = users.find((u) => u._id === body.data.request.owner);
     if (!user)
         return new Response(JSON.stringify({ error: "User not found" }), {

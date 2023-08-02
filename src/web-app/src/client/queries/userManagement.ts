@@ -1,9 +1,8 @@
 import { createQueryKeys } from "@lukemorales/query-key-factory";
 import {
+    loadClientPatient,
     loadEmployees,
     loadRoles,
-    loadUser,
-    loadUsers,
 } from "../userManagementClient";
 
 export const usersQuery = createQueryKeys("users", {
@@ -11,13 +10,13 @@ export const usersQuery = createQueryKeys("users", {
         // We don't include the token in the query key, because the result does not depend on it
         // eslint-disable-next-line @tanstack/query/exhaustive-deps
         queryKey: ["usersList"],
-        queryFn: () => loadUsers(formioToken),
+        queryFn: () => loadClientPatient(formioToken),
     }),
     detail: (formioToken: string, userSubmissionId: string) => ({
         // We don't include the token in the query key, because the result does not depend on it
         // eslint-disable-next-line @tanstack/query/exhaustive-deps
         queryKey: [userSubmissionId],
-        queryFn: () => loadUser(formioToken, userSubmissionId),
+        queryFn: () => loadClientPatient(formioToken, userSubmissionId),
     }),
 });
 

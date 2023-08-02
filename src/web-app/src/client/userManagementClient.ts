@@ -17,7 +17,9 @@ import safeFetch from "./safeFetch";
  * @throws {TypeError}
  * If the response is not valid json or when a network error is encountered or CORS is misconfigured on the server-side.
  */
-export async function loadUsers(formioToken: string): Promise<User[]> {
+export async function loadClientsAndPatients(
+    formioToken: string
+): Promise<User[]> {
     const response = await safeFetch(
         `${getFormioUrl()}/klientpacient/submission`,
         {
@@ -39,7 +41,7 @@ export async function loadUsers(formioToken: string): Promise<User[]> {
  * @throws {TypeError}
  * If the response is not valid json or when a network error is encountered or CORS is misconfigured on the server-side.
  */
-export async function loadUser(
+export async function loadClientPatient(
     formioToken: string,
     userSubmissionId: string
 ): Promise<User | null> {
@@ -71,7 +73,7 @@ export async function loadUser(
  * @throws {TypeError}
  * When a network error is encountered or CORS is misconfigured on the server-side.
  */
-export async function deleteKlientPacient(
+export async function deleteClientPacient(
     formioToken: string,
     userSubmissionId: string
 ): Promise<void> {
@@ -145,7 +147,7 @@ export async function loadEmployees(formioToken: string): Promise<User[]> {
  * @throws {TypeError}
  * When a network error is encountered or CORS is misconfigured on the server-side.
  */
-export async function deleteSpravceDotazniku(
+async function deleteSpravceDotazniku(
     formioToken: string,
     userSubmissionId: string
 ): Promise<void> {
@@ -179,7 +181,7 @@ export async function deleteUser(
             await deleteZadavatelDotazniku(formioToken, userSubmissionId);
             break;
         case UserRoleTitles.KLIENT_PACIENT:
-            await deleteKlientPacient(formioToken, userSubmissionId);
+            await deleteClientPacient(formioToken, userSubmissionId);
             break;
         default:
             throw new Error(`Unknown user role title: ${userRoleTitle}`);
@@ -195,7 +197,7 @@ export async function deleteUser(
  * @throws {TypeError}
  * When a network error is encountered or CORS is misconfigured on the server-side.
  */
-export async function deleteZadavatelDotazniku(
+async function deleteZadavatelDotazniku(
     formioToken: string,
     userSubmissionId: string
 ): Promise<void> {
@@ -341,7 +343,7 @@ export async function updateUser(
             await updateSpravceDotazniku(submissionId, data, formioToken);
             break;
         case UserRoleTitles.ZADAVATEL_DOTAZNIKU:
-            await updateSpravceDotazniku(submissionId, data, formioToken);
+            await updateZadavatelDotazniku(submissionId, data, formioToken);
             break;
         default:
             throw new Error("Unknown user role title.");
@@ -361,7 +363,7 @@ export async function updateUser(
  * @throws {TypeError}
  * If the response is not valid json or when a network error is encountered or CORS is misconfigured on the server-side.
  */
-export async function updateKlientPacient(
+async function updateKlientPacient(
     submisionId: string,
     data: { id: string; password: string },
     formioToken: string
@@ -372,6 +374,7 @@ export async function updateKlientPacient(
         formioToken
     );
 }
+
 /**
  * Update form manager's account (submission).
  * @param submisionId - Id of the submission to update.
@@ -383,7 +386,7 @@ export async function updateKlientPacient(
  * @throws {RequestError} If the returned http status is not OK.
  * @throws {TypeError} If the response is not valid json or when a network error is encountered or CORS is misconfigured on the server-side.
  */
-export async function updateSpravceDotazniku(
+function updateSpravceDotazniku(
     submisionId: string,
     data: { id: string; password: string },
     formioToken: string
@@ -394,6 +397,7 @@ export async function updateSpravceDotazniku(
         formioToken
     );
 }
+
 /**
  * Update form assigner's account (submission).
  * @param submisionId - Id of the submission to update.
@@ -405,7 +409,7 @@ export async function updateSpravceDotazniku(
  * @throws {RequestError} If the returned http status is not OK.
  * @throws {TypeError} If the response is not valid json or when a network error is encountered or CORS is misconfigured on the server-side.
  */
-export async function updateZadavatelDotazniku(
+async function updateZadavatelDotazniku(
     submisionId: string,
     data: { id: string; password: string },
     formioToken: string
@@ -469,7 +473,7 @@ export async function createUser(
  * @param formioToken - JWT token for formio.
  * @returns Representing the user.
  */
-export async function createKlientPacient(
+async function createKlientPacient(
     data: { id: string; password: string },
     formioToken: string
 ): Promise<Submission> {
@@ -499,7 +503,7 @@ export async function createKlientPacient(
  * @param formioToken - JWT token for formio.
  * @returns Representing the user.
  */
-export async function createSpravceDotazniku(
+async function createSpravceDotazniku(
     data: { id: string; password: string },
     formioToken: string
 ): Promise<Submission> {
@@ -529,7 +533,7 @@ export async function createSpravceDotazniku(
  * @param formioToken - JWT token for formio.
  * @returns Representing the user.
  */
-export async function createZadavatelDotazniku(
+async function createZadavatelDotazniku(
     data: { id: string; password: string },
     formioToken: string
 ): Promise<Submission> {
