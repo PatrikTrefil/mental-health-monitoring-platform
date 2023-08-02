@@ -8,7 +8,7 @@ export interface Action<TSettings> {
      */
     name: string;
     /**
-     * The title of the action (displayed in the UI)
+     * The title of the action (displayed in the UI).
      */
     title: string;
     /**
@@ -25,7 +25,7 @@ export interface Action<TSettings> {
     settings: TSettings;
 }
 
-interface WebhookActionSettings {
+export interface WebhookActionSettings {
     /**
      * If true, the request will be blocked until the webhook returns.
      */

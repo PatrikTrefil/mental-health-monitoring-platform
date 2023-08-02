@@ -8,11 +8,13 @@ import DynamicFormWithAuth from "./DynamicFormWithAuth";
 
 /**
  * This component is used to dynamically load the Formio Form component.
- * Use this for all forms, because the "@formio/react" library does not support
+ * Use this for all forms, because the "\@formio/react" library does not support
  * server-side rendering.
  *
  * Prefer using the {@link DynamicFormWithAuth} component to take care of the
  * authentication (required to load the form).
+ * @param root0 - Props.
+ * @param root0.loading - An element to be displayed while the form is loading.
  */
 export default function DynamicForm({
     loading,

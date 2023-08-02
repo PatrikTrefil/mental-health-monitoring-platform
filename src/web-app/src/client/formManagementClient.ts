@@ -7,11 +7,11 @@ import safeFetch from "./safeFetch";
 
 /**
  * Load form with given path from formio.
- * @param relativeFormPath relative path to the form (including leading slash)
- * @param token JWT token for formio
- * @returns form with given path or null if not found
- * @throws {RequestError} if the returned http status is not OK
- * @throws {TypeError} if the response is not valid json or when a network error is encountered or CORS is misconfigured on the server-side
+ * @param relativeFormPath - Relative path to the form (including leading slash).
+ * @param token - JWT token for formio.
+ * @returns Form with given path or null if not found.
+ * @throws {RequestError} If the returned http status is not OK.
+ * @throws {TypeError} If the response is not valid json or when a network error is encountered or CORS is misconfigured on the server-side.
  */
 export async function loadFormByPath(
     relativeFormPath: string,
@@ -43,11 +43,11 @@ export async function loadFormByPath(
 
 /**
  * Load form with given id from formio.
- * @param formId id of the form to load
- * @param token JWT token for formio
- * @returns form with given id or null if not found
- * @throws {RequestError} if the http request fails
- * @throws {TypeError} if the response is not valid json or when a network error is encountered or CORS is misconfigured on the server-side
+ * @param formId - Id of the form to load.
+ * @param token - JWT token for formio.
+ * @returns Form with given id or null if not found.
+ * @throws {RequestError} If the http request fails.
+ * @throws {TypeError} If the response is not valid json or when a network error is encountered or CORS is misconfigured on the server-side.
  */
 export async function loadFormById(
     formId: string,
@@ -76,11 +76,11 @@ export async function loadFormById(
 
 /**
  * Submit form to formio.
- * @param formioToken JWT token for formio
- * @param formSchema schema of the form to submit
- * @returns created form
- * @throws {RequestError} if the http request fails
- * @throws {TypeError} if the response is not valid json or when a network error is encountered or CORS is misconfigured on the server-side
+ * @param formioToken - JWT token for formio.
+ * @param formSchema - Schema of the form to submit.
+ * @returns Created form.
+ * @throws {RequestError} If the http request fails.
+ * @throws {TypeError} If the response is not valid json or when a network error is encountered or CORS is misconfigured on the server-side.
  */
 export async function createForm(
     formioToken: string,
@@ -101,12 +101,12 @@ export async function createForm(
 
 /**
  * Make a submission to a formio form.
- * @param formioToken JWT token for formio
- * @param formPath path of the form to submit to (including leading slash)
- * @param submissionData submission data
- * @return created submission
- * @throws {RequestError} if the http request fails
- * @throws {TypeError} if the response is not valid json or when a network error is encountered or CORS is misconfigured on the server-side
+ * @param formioToken - JWT token for formio.
+ * @param formPath - Path of the form to submit to (including leading slash).
+ * @param submissionData - Form data to submit.
+ * @returns Created submission.
+ * @throws {RequestError} If the http request fails.
+ * @throws {TypeError} If the response is not valid json or when a network error is encountered or CORS is misconfigured on the server-side.
  */
 export async function submitForm(
     formioToken: string,
@@ -128,12 +128,12 @@ export async function submitForm(
 
 /**
  * Export form submissions from formio.
- * @param formioToken JWT token for formio
- * @param formId id of the form to export
- * @param format format of the exported data
- * @returns blob with exported data in given format
- * @throws {RequestError} if the http request fails
- * @throws {TypeError} when a network error is encountered or CORS is misconfigured on the server-side
+ * @param formioToken - JWT token for formio.
+ * @param formId - Id of the form to export.
+ * @param format - Format of the exported data.
+ * @returns Blob with exported data in given format.
+ * @throws {RequestError} If the http request fails.
+ * @throws {TypeError} When a network error is encountered or CORS is misconfigured on the server-side.
  */
 export async function exportFormSubmissions(
     formioToken: string,
@@ -153,10 +153,10 @@ export async function exportFormSubmissions(
 
 /**
  * Delete form from the form management system.
- * @param formioToken JWT token for formio
- * @param formPath path of the form to delete
- * @throws {RequestError} if the http request fails
- * @throws {TypeError} when a network error is encountered or CORS is misconfigured on the server-side
+ * @param formioToken - JWT token for formio.
+ * @param formPath - Path of the form to delete.
+ * @throws {RequestError} If the http request fails.
+ * @throws {TypeError} When a network error is encountered or CORS is misconfigured on the server-side.
  */
 export async function deleteForm(
     formioToken: string,
@@ -172,10 +172,10 @@ export async function deleteForm(
 
 /**
  * Delete form from the form management system.
- * @param formioToken JWT token for formio
- * @param formId id of the form to delete
- * @throws {RequestError} if the http request fails
- * @throws {TypeError} when a network error is encountered or CORS is misconfigured on the server-side
+ * @param formioToken - JWT token for formio.
+ * @param formId - Id of the form to delete.
+ * @throws {RequestError} If the http request fails.
+ * @throws {TypeError} When a network error is encountered or CORS is misconfigured on the server-side.
  */
 export async function deleteFormById(
     formioToken: string,
@@ -191,10 +191,10 @@ export async function deleteFormById(
 
 /**
  * Load forms from the form management system.
- * @param formioToken JWT token for formio
- * @param tags list of tags which must be present on the form
- * @return list of forms
- * @throws {TypeError} if the response is not valid json or when a network error is encountered or CORS is misconfigured on the server-side
+ * @param formioToken - JWT token for formio.
+ * @param tags - List of tags which must be present on the form.
+ * @returns List of forms.
+ * @throws {TypeError} If the response is not valid json or when a network error is encountered or CORS is misconfigured on the server-side.
  */
 export async function loadForms(
     formioToken: string,
@@ -216,10 +216,11 @@ export async function loadForms(
 
 /**
  * Update form in the form management system.
- * @param formSchema Form schema to save to server
- * @returns updated form
- * @throws {RequestError} if the http request fails
- * @throws {TypeError} if the response is not valid json or when a network error is encountered or CORS is misconfigured on the server-side
+ * @param formSchema - Form schema to save to server.
+ * @param formioToken - JWT token for formio.
+ * @returns Updated form.
+ * @throws {RequestError} If the http request fails.
+ * @throws {TypeError} If the response is not valid json or when a network error is encountered or CORS is misconfigured on the server-side.
  */
 export async function updateForm(
     formSchema: Form,
@@ -241,11 +242,11 @@ export async function updateForm(
 
 /**
  * Create action attached to a form in formio.
- * @param formId id of the form to create action for
- * @param action definition of the action to create
- * @param formioToken JWT token for formio
- * @throws {RequestError} if the http request fails
- * @throws {TypeError} if the response is not valid json or when a network error is encountered or CORS is misconfigured on the server-side
+ * @param formId - Id of the form to create action for.
+ * @param action - Definition of the action to create.
+ * @param formioToken - JWT token for formio.
+ * @throws {RequestError} If the http request fails.
+ * @throws {TypeError} If the response is not valid json or when a network error is encountered or CORS is misconfigured on the server-side.
  */
 export async function createAction<TSettings>(
     formId: string,
@@ -268,12 +269,12 @@ export async function createAction<TSettings>(
 
 /**
  * Load submissions from formio.
- * @param formPath path of the form to load submissions from
- * @param submissionId id of the submission to load
- * @param formioToken JWT token for formio
- * @throws {RequestError} if the http request fails
- * @throws {TypeError} if the response is not valid json or when a network error is encountered or CORS is misconfigured on the server-side
- * @returns submission or null if the returned status is 404
+ * @param formPath - Path of the form to load submissions from.
+ * @param submissionId - Id of the submission to load.
+ * @param formioToken - JWT token for formio.
+ * @returns Submission or null if the returned status is 404.
+ * @throws {RequestError} If the http request fails.
+ * @throws {TypeError} If the response is not valid json or when a network error is encountered or CORS is misconfigured on the server-side.
  */
 export async function loadSubmission(
     formPath: string,
@@ -304,12 +305,12 @@ export async function loadSubmission(
 }
 
 /**
- * Get submissions of a form
- * @param formId id of the form to load submissions from
- * @param formioToken JWT token for formio
- * @returns list of submissions
- * @throws {RequestError} if the http request fails
- * @throws {TypeError} if the response is not valid json or when a network error is encountered or CORS is misconfigured on the server-side
+ * Get submissions of a form.
+ * @param formId - Id of the form to load submissions from.
+ * @param formioToken - JWT token for formio.
+ * @returns List of submissions.
+ * @throws {RequestError} If the http request fails.
+ * @throws {TypeError} If the response is not valid json or when a network error is encountered or CORS is misconfigured on the server-side.
  */
 export async function loadSubmissions(
     formId: string,
@@ -330,14 +331,14 @@ export async function loadSubmissions(
 }
 
 /**
- * Update submission in the form management system
- * @param formPath path of the form of which to update the submission
- * @param submissionId id of the submission to update
- * @param data data to update the submission with
- * @param formioToken JWT token for formio
- * @returns updated submission
- * @throws {RequestError} if the http request fails
- * @throws {TypeError} if the response is not valid json or when a network error is encountered or CORS is misconfigured on the server-side
+ * Update submission in the form management system.
+ * @param formPath - Path of the form of which to update the submission.
+ * @param submissionId - Id of the submission to update.
+ * @param data - Data to update the submission with.
+ * @param formioToken - JWT token for formio.
+ * @returns Updated submission.
+ * @throws {RequestError} If the http request fails.
+ * @throws {TypeError} If the response is not valid json or when a network error is encountered or CORS is misconfigured on the server-side.
  */
 export async function updateSubmission(
     formPath: string,

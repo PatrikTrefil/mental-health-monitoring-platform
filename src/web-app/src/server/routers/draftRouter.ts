@@ -1,5 +1,5 @@
 import UserRoleTitles from "@/constants/userRoleTitles";
-import { Prisma } from "@prisma/client";
+import { Prisma, type Draft } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
@@ -11,15 +11,15 @@ const draftDataSchema = z.record(z.string(), z.unknown());
 const draftRouter = createTRPCRouter({
     /**
      * Update or insert a draft.
-     *
-     * @param {string} input.formId the if of the form to update/insert a draft for
-     * @param {unknown} input.data the draft data
-     *
-     * @throws {TRPCError} FORBIDDEN if the user is not a {@link UserRoleTitles.KLIENT_PACIENT}
-     * @throws {TRPCError} INTERNAL_SERVER_ERROR if the database operation fails
-     * @throws {TRPCError} CUSTOM if the data can not be stringified to JSON
-     *
-     * @returns {Prisma.Draft} the updated/inserted draft
+     * @param string - Input.formId the if of the form to update/insert a draft for.
+     * @param unknown - Input.data the draft data.
+     * @returns The updated/inserted draft.
+     * @throws {TRPCError}
+     * FORBIDDEN if the user is not a {@link UserRoleTitles.KLIENT_PACIENT}.
+     * @throws {TRPCError}
+     * INTERNAL_SERVER_ERROR if the database operation fails.
+     * @throws {TRPCError}
+     * CUSTOM if the data can not be stringified to JSON.
      */
     upsertDraft: protectedProcedure
         .input(
@@ -38,7 +38,7 @@ const draftRouter = createTRPCRouter({
                 }),
             })
         )
-        .mutation(async (opts) => {
+        .mutation(async (opts): Promise<Draft> => {
             if (
                 !opts.ctx.session.user.roleTitles.includes(
                     UserRoleTitles.KLIENT_PACIENT
@@ -70,18 +70,23 @@ const draftRouter = createTRPCRouter({
         }),
     /**
      * Get a draft by form id.
-     *
-     * @param {string} input.formId the id of the form to get the draft for
-     *
-     * @throws {TRPCError} FORBIDDEN if the user is not a {@link UserRoleTitles.KLIENT_PACIENT}
-     * @throws {TRPCError} INTERNAL_SERVER_ERROR if the database operation fails
-     * @throws {TRPCError} NOT_FOUND if the draft does not exist
-     *
-     * @returns {Prisma.Draft} the draft
+     * @param string - Input.formId the id of the form to get the draft for.
+     * @returns The requested draft.
+     * @throws {TRPCError}
+     * FORBIDDEN if the user is not a {@link UserRoleTitles.KLIENT_PACIENT}.
+     * @throws {TRPCError}
+     * INTERNAL_SERVER_ERROR if the database operation fails.
+     * @throws {TRPCError}
+     * NOT_FOUND if the draft does not exist.
      */
-    getDraft: protectedProcedure
-        .input(z.object({ formId: z.string() }))
-        .query(async (opts) => {
+    getDraft: protectedProcedure.input(z.object({ formId: z.string() })).query(
+        async (
+            opts
+        ): Promise<{
+            formId: string;
+            userId: string;
+            data: z.infer<typeof draftDataSchema>;
+        }> => {
             if (
                 !opts.ctx.session.user.roleTitles.includes(
                     UserRoleTitles.KLIENT_PACIENT
@@ -112,19 +117,21 @@ const draftRouter = createTRPCRouter({
                     typeof draftDataSchema
                 >,
             };
-        }),
+        }
+    ),
     /**
      * Delete a draft by form id.
-     *
-     * @param {string} input.formId the id of the form to delete the draft for
-     *
-     * @throws {TRPCError} FORBIDDEN if the user is not a {@link UserRoleTitles.KLIENT_PACIENT}
-     * @throws {TRPCError} INTERNAL_SERVER_ERROR if the database operation fails
-     * @throws {TRPCError} NOT_FOUND if the draft does not exist
+     * @param string - Input.formId the id of the form to delete the draft for.
+     * @throws {TRPCError}
+     * FORBIDDEN if the user is not a {@link UserRoleTitles.KLIENT_PACIENT}.
+     * @throws {TRPCError}
+     * INTERNAL_SERVER_ERROR if the database operation fails.
+     * @throws {TRPCError}
+     * NOT_FOUND if the draft does not exist.
      */
     deleteDraft: protectedProcedure
         .input(z.object({ formId: z.string() }))
-        .mutation(async (opts) => {
+        .mutation(async (opts): Promise<Draft> => {
             if (
                 !opts.ctx.session.user.roleTitles.includes(
                     UserRoleTitles.KLIENT_PACIENT

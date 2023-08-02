@@ -12,15 +12,16 @@ const postBodySchema = z.object({
         owner: z.string(),
         access: z.string().array(),
         /**
-         * Form id
+         * Form id.
          */
         form: z.string(),
     }),
 });
 
 /**
- * Complete a task by providing a form submission
- * @returns 200 if successful
+ * Complete a task by providing a form submission.
+ * @param req - Request object.
+ * @returns Status 200 if successful.
  */
 export async function POST(req: Request) {
     // route is protected by middleware

@@ -14,14 +14,15 @@ const postBodySchema = z.object({
         ),
         owner: z.string(),
         /**
-         * Form id
+         * Form id.
          */
         form: z.string(),
     }),
 });
 
 /**
- * Remove draft for form submission
+ * Remove draft for form submission.
+ * @param req - Request object.
  */
 export async function POST(req: Request) {
     const body = postBodySchema.safeParse(await req.json());

@@ -3,7 +3,7 @@
 import { Pagination } from "react-bootstrap";
 
 /**
- * Props for {@link SimplePagination}
+ * Props for {@link SimplePagination}.
  */
 export interface PaginationProps {
     /**
@@ -22,6 +22,10 @@ export interface PaginationProps {
 
 /**
  * Simple pagination component.
+ * @param root0 - Props.
+ * @param root0.pageIndex - Index of the current page (starting from 0).
+ * @param root0.totalPages - Total number of pages.
+ * @param root0.setPageIndex - Function to set the current page index.
  */
 export default function SimplePagination({
     pageIndex,

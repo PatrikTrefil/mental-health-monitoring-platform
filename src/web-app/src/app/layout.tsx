@@ -7,6 +7,11 @@ import "react-toastify/dist/ReactToastify.min.css";
 import { CookieConsent } from "../components/ClientCookieConsent";
 import { Providers } from "./providers";
 
+/**
+ * Root layout for all pages.
+ * @param root0 - Props.
+ * @param root0.children - Child components.
+ */
 export default function RootLayout({
     // Layouts must accept a children prop.
     // This will be populated with nested layouts or pages

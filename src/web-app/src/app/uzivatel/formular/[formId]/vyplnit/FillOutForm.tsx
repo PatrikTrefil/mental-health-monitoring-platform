@@ -14,7 +14,9 @@ import { Alert, Spinner } from "react-bootstrap";
 import { toast } from "react-toastify";
 
 /**
- * Page for filling out form with given form id (from url)
+ * Page for filling out form with given form id (from url).
+ * @param root0 - Props.
+ * @param root0.formId - ID of the form to fill out.
  */
 export default function FillOutForm({ formId }: { formId: string }) {
     let progressToast = useRef<ReturnType<typeof toast> | null>(null);
@@ -206,6 +208,10 @@ export default function FillOutForm({ formId }: { formId: string }) {
     );
 }
 
+/**
+ * Prevents the user from closing the tab or browser window using a `beforeunload` event listener.
+ * @param isPreventionActive - Whether the prevention should be active.
+ */
 function usePreventClose(isPreventionActive: boolean) {
     const closeHandler = useMemo(() => {
         return (e: BeforeUnloadEvent) => {

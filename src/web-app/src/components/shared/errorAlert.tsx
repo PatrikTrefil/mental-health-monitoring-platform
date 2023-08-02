@@ -8,6 +8,9 @@ import { Alert, Button } from "react-bootstrap";
 
 /**
  * Generic error alert component. Expected to be used by error boundaries.
+ * @param root0 - Props.
+ * @param root0.error - Error to display.
+ * @param root0.reset - Function to try loading the page again.
  */
 export default function ErrorAlert({ error, reset }: ErrorProps) {
     useEffect(() => {

@@ -6,6 +6,13 @@ import { useSession } from "next-auth/react";
 import { Alert, Spinner } from "react-bootstrap";
 import { toast } from "react-toastify";
 
+/**
+ * Form for editing an employee.
+ * @param root0 - Props.
+ * @param root0.employeeId - ID of the employee to edit.
+ * @param root0.submissionId - ID of the submission that represents the employee.
+ * @param root0.formPath - Path to the form where the submission is stored.
+ */
 export default function EditEmployee({
     employeeId,
     submissionId,

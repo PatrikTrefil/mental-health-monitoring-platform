@@ -11,6 +11,7 @@ import { MiddlewareWrapper } from "./types";
 
 /**
  * Middleware for checking if user is authenticated.
+ * @param middlewareToWrap - Middleware to wrap around.
  */
 const withAuth: MiddlewareWrapper = (middlewareToWrap) => {
     return async (req, event) => {
@@ -46,6 +47,7 @@ const nextAuthMiddleware = withAuthNextAuth(
 /**
  * Middleware for checking if user has sufficient privileges to access a webpage.
  * This is not used for API routes.
+ * @param req - Request to authorize.
  */
 function webpageMiddleware(req: NextRequestWithAuth) {
     if (
@@ -62,10 +64,16 @@ function webpageMiddleware(req: NextRequestWithAuth) {
     }
 }
 
+/**
+ * Checks if user has sufficient privileges to access a webpage.
+ * @param webpagePathname - Pathname of the webpage to check.
+ * @param roleTitles - Role titles of the user.
+ * @returns True if user has sufficient privileges to access the webpage.
+ */
 function hasEnoughPrivilegesForWebpage(
     webpagePathname: string,
     roleTitles: UserRoleTitle[]
-) {
+): boolean {
     if (webpagePathname.startsWith("/zamestnanec/"))
         return (
             roleTitles.includes(UserRoleTitles.SPRAVCE_DOTAZNIKU) ||
@@ -74,6 +82,8 @@ function hasEnoughPrivilegesForWebpage(
 
     if (webpagePathname.startsWith("/uzivatel/"))
         return roleTitles.includes(UserRoleTitles.KLIENT_PACIENT);
+
+    return true;
 }
 
 /**
@@ -81,6 +91,7 @@ function hasEnoughPrivilegesForWebpage(
  * This is not used for webpages.
  *
  * This middleware does not use next auth. It only expects the formio token to be in the header.
+ * @param req - Request to process.
  */
 async function apiMiddleware(req: NextRequest) {
     if (req.nextUrl.pathname.startsWith("/api/ukol")) {

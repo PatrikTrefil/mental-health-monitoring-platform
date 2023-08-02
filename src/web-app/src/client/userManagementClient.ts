@@ -8,10 +8,12 @@ import safeFetch from "./safeFetch";
 
 /**
  * Load all users from the user management system.
- * @param formioToken JWT token for formio
- * @returns list of all users
- * @throws {RequestError} if the returned http status is not OK
- * @throws {TypeError} if the response is not valid json or when a network error is encountered or CORS is misconfigured on the server-side
+ * @param formioToken - JWT token for formio.
+ * @returns List of all users.
+ * @throws {RequestError}
+ * If the returned http status is not OK.
+ * @throws {TypeError}
+ * If the response is not valid json or when a network error is encountered or CORS is misconfigured on the server-side.
  */
 export async function loadUsers(formioToken: string): Promise<User[]> {
     const response = await safeFetch(
@@ -26,11 +28,14 @@ export async function loadUsers(formioToken: string): Promise<User[]> {
 }
 
 /**
- * Load user based on user ID
- * @param formioToken JWT token for formio
- * @returns user or null if the user does not exist
- * @throws {RequestError} if the returned http status is not OK (and not 404)
- * @throws {TypeError} if the response is not valid json or when a network error is encountered or CORS is misconfigured on the server-side
+ * Load user based on user ID.
+ * @param formioToken - JWT token for formio.
+ * @param userSubmissionId - Id of the submission that represents the user.
+ * @returns User or null if the user does not exist.
+ * @throws {RequestError}
+ * If the returned http status is not OK (and not 404).
+ * @throws {TypeError}
+ * If the response is not valid json or when a network error is encountered or CORS is misconfigured on the server-side.
  */
 export async function loadUser(
     formioToken: string,
@@ -57,10 +62,12 @@ export async function loadUser(
 
 /**
  * Delete user from the user management system.
- * @param formioToken JWT token for formio
- * @param userSubmissionId id of the user submission to delete
- * @throws {RequestError} if the returned http status is not OK
- * @throws {TypeError} when a network error is encountered or CORS is misconfigured on the server-side
+ * @param formioToken - JWT token for formio.
+ * @param userSubmissionId - Id of the user submission to delete.
+ * @throws {RequestError}
+ * If the returned http status is not OK.
+ * @throws {TypeError}
+ * When a network error is encountered or CORS is misconfigured on the server-side.
  */
 export async function deleteUser(
     formioToken: string,
@@ -78,10 +85,10 @@ export async function deleteUser(
 }
 /**
  * Load all roles from the user management system.
- * @param formioToken JWT token for formio
- * @returns list of all roles
- * @throws {RequestError} if the returned http status is not OK
- * @throws {TypeError} if the response is not valid json or when a network error is encountered or CORS is misconfigured on the server-side
+ * @param formioToken - JWT token for formio.
+ * @returns List of all roles.
+ * @throws {RequestError} If the returned http status is not OK.
+ * @throws {TypeError} If the response is not valid json or when a network error is encountered or CORS is misconfigured on the server-side.
  */
 export async function loadRoles(formioToken: string): Promise<Role[]> {
     const response = await safeFetch(`${getFormioUrl()}/role`, {
@@ -94,9 +101,11 @@ export async function loadRoles(formioToken: string): Promise<Role[]> {
 
 /**
  * Load employees from the user management system.
- * @param formioToken JWT token for formio
- * @throws {RequestError} if the returned http status is not OK
- * @throws {TypeError} if the response is not valid json or when a network error is encountered or CORS is misconfigured on the server-side
+ * @param formioToken - JWT token for formio.
+ * @throws {RequestError}
+ * If the returned http status is not OK.
+ * @throws {TypeError}
+ * If the response is not valid json or when a network error is encountered or CORS is misconfigured on the server-side.
  */
 export async function loadEmployees(formioToken: string): Promise<User[]> {
     const spravceDotaznikuResponse = await safeFetch(
@@ -127,10 +136,12 @@ export async function loadEmployees(formioToken: string): Promise<User[]> {
 /**
  * Delete an employee that is from the spravce dotazniku resource from
  * the user management system.
- * @param formioToken JWT token for formio
- * @param userSubmissionId id of the user submission to delete
- * @throws {RequestError} if the returned http status is not OK
- * @throws {TypeError} when a network error is encountered or CORS is misconfigured on the server-side
+ * @param formioToken - JWT token for formio.
+ * @param userSubmissionId - Id of the user submission to delete.
+ * @throws {RequestError}
+ * If the returned http status is not OK.
+ * @throws {TypeError}
+ * When a network error is encountered or CORS is misconfigured on the server-side.
  */
 export async function deleteSpravceDotazniku(
     formioToken: string,
@@ -149,10 +160,12 @@ export async function deleteSpravceDotazniku(
 
 /**
  * Delete employee that is from the zadavatel dotazniku resource from formio.
- * @param formioToken JWT token for formio
- * @param userSubmissionId id of the user submission to delete
- * @throws {RequestError} if the returned http status is not OK
- * @throws {TypeError} when a network error is encountered or CORS is misconfigured on the server-side
+ * @param formioToken - JWT token for formio.
+ * @param userSubmissionId - Id of the user submission to delete.
+ * @throws {RequestError}
+ * If the returned http status is not OK.
+ * @throws {TypeError}
+ * When a network error is encountered or CORS is misconfigured on the server-side.
  */
 export async function deleteZadavatelDotazniku(
     formioToken: string,
@@ -171,11 +184,13 @@ export async function deleteZadavatelDotazniku(
 
 /**
  * Logs in the admin account and returns the token.
- * @param email email of the admin account
- * @param password password of the admin account
- * @returns JWT token with admin privileges
- * @throws {RequestError} if the returned http status is not OK
- * @throws {TypeError} when a network error is encountered or CORS is misconfigured on the server-side
+ * @param email - Email of the admin account.
+ * @param password - Password of the admin account.
+ * @returns JWT token with admin privileges.
+ * @throws {RequestError}
+ * If the returned http status is not OK.
+ * @throws {TypeError}
+ * When a network error is encountered or CORS is misconfigured on the server-side.
  */
 export async function loginAdmin(
     email: string,
@@ -204,10 +219,12 @@ export async function loginAdmin(
 
 /**
  * Refreshes the token of a user.
- * @param currentToken current JWT token of the user
- * @returns new JWT token
- * @throws {RequestError} if the returned http status is not OK
- * @throws {TypeError} when a network error is encountered or CORS is misconfigured on the server-side
+ * @param currentToken - Current JWT token of the user.
+ * @returns New JWT token.
+ * @throws {RequestError}
+ * If the returned http status is not OK.
+ * @throws {TypeError}
+ * When a network error is encountered or CORS is misconfigured on the server-side.
  */
 export async function refreshToken(currentToken: string): Promise<string> {
     console.log("Refreshing token...");
@@ -226,12 +243,14 @@ export async function refreshToken(currentToken: string): Promise<string> {
 }
 
 /**
- * Log in as a user
- * @param id id of the user
- * @param password password of the user
- * @returns user and JWT token
- * @throws {RequestError} if the returned http status is not OK
- * @throws {TypeError} when a network error is encountered or CORS is misconfigured on the server-side
+ * Log in as a user.
+ * @param id - Id of the user.
+ * @param password - Password of the user.
+ * @returns User and JWT token.
+ * @throws {RequestError}
+ * If the returned http status is not OK.
+ * @throws {TypeError}
+ * When a network error is encountered or CORS is misconfigured on the server-side.
  */
 export async function loginUser(
     id: string,
@@ -269,13 +288,17 @@ export async function loginUser(
 }
 
 /**
- * Update user's account (submission)
- * @param submmisionId id of the submission to update
- * @param data new data to update the submission with
- * @param formioToken JWT token for formio
- * @returns updated submission
- * @throws {RequestError} if the returned http status is not OK
- * @throws {TypeError} if the response is not valid json or when a network error is encountered or CORS is misconfigured on the server-side
+ * Update user's account (submission).
+ * @param submisionId - Id of the submission to update.
+ * @param data - New data to update the submission with.
+ * @param data.id - Id of the user.
+ * @param data.password - New password of the user.
+ * @param formioToken - JWT token for formio.
+ * @returns Updated submission.
+ * @throws {RequestError}
+ * If the returned http status is not OK.
+ * @throws {TypeError}
+ * If the response is not valid json or when a network error is encountered or CORS is misconfigured on the server-side.
  */
 export async function updateUser(
     submisionId: string,
@@ -285,11 +308,13 @@ export async function updateUser(
     return updateSubmission("/klientpacient", submisionId, data, formioToken);
 }
 /**
- * Get current user
- * @param formioToken JWT token of the user
- * @returns current user
- * @throws {RequestError} if the returned http status is not OK
- * @throws {TypeError} if the response is not valid json or when a network error is encountered or CORS is misconfigured on the server-side
+ * Get current user.
+ * @param formioToken - JWT token of the user.
+ * @returns Current user.
+ * @throws {RequestError}
+ * If the returned http status is not OK.
+ * @throws {TypeError}
+ * If the response is not valid json or when a network error is encountered or CORS is misconfigured on the server-side.
  */
 export async function getCurrentUser(formioToken: string): Promise<User> {
     const response = await safeFetch(`${getFormioUrl()}/current`, {
