@@ -1,9 +1,11 @@
 "use client";
 
 import { usersQuery } from "@/client/queries/userManagement";
-import { deleteUser } from "@/client/userManagementClient";
+import { deleteClientPacient } from "@/client/userManagementClient";
+import ChangePasswordUser from "@/components/shared/ChangePasswordUser";
+import CreateUser from "@/components/shared/CreateUser";
 import SimplePagination from "@/components/shared/SimplePagination";
-import DynamicFormWithAuth from "@/components/shared/formio/DynamicFormWithAuth";
+import UserRoleTitles from "@/constants/userRoleTitles";
 import { User } from "@/types/userManagement/user";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -17,7 +19,6 @@ import { useSession } from "next-auth/react";
 import { useMemo, useState } from "react";
 import { Alert, Button, Form, Modal, Spinner, Table } from "react-bootstrap";
 import { toast } from "react-toastify";
-import EditClientPatient from "./EditClientPatient";
 
 /**
  * Page for managing users.
@@ -39,7 +40,7 @@ export default function ClientPatientTable() {
             formioToken: string;
             userSubmissionId: string;
         }) => {
-            await deleteUser(formioToken, userSubmissionId);
+            await deleteClientPacient(formioToken, userSubmissionId);
         },
         onError: (e: unknown, { userSubmissionId }) => {
             console.error("Failed to delete user.", {
@@ -54,10 +55,8 @@ export default function ClientPatientTable() {
                 userSubmissionId,
             });
             queryClient.invalidateQueries({
-                queryKey: usersQuery.list(
-                    session.data!.user.formioToken,
-                    session.data!.user.data.id
-                ).queryKey,
+                queryKey: usersQuery.list(session.data!.user.formioToken)
+                    .queryKey,
             });
             queryClient.invalidateQueries({
                 queryKey: usersQuery.detail(
@@ -123,10 +122,7 @@ export default function ClientPatientTable() {
     const [showCreateUserModal, setShowCreateUserModal] = useState(false);
 
     const { isLoading, isError, error, data } = useQuery({
-        ...usersQuery.list(
-            session.data?.user.formioToken!,
-            session.data?.user.data.id!
-        ),
+        ...usersQuery.list(session.data?.user.formioToken!),
         enabled: !!session.data?.user.formioToken,
     });
 
@@ -229,15 +225,15 @@ export default function ClientPatientTable() {
                     </Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    <DynamicFormWithAuth
-                        relativeFormPath={`/klientpacient/register`}
-                        onSubmitDone={() => {
+                    <CreateUser
+                        userRoleTitle={UserRoleTitles.KLIENT_PACIENT}
+                        onChangeDone={() => {
                             setShowCreateUserModal(false);
-                            queryClient.invalidateQueries(["users"]);
-                        }}
-                        onSubmitFail={() => {
-                            setShowCreateUserModal(false);
-                            toast.error("Registrování uživatele selhalo.");
+                            queryClient.invalidateQueries({
+                                queryKey: usersQuery.list(
+                                    session.data!.user.formioToken
+                                ).queryKey,
+                            });
                         }}
                     />
                 </Modal.Body>
@@ -248,9 +244,11 @@ export default function ClientPatientTable() {
                 </Modal.Header>
                 <Modal.Body>
                     {!!userToEdit && (
-                        <EditClientPatient
+                        <ChangePasswordUser
                             submissionId={userToEdit.submissionId}
                             userId={userToEdit.id}
+                            onChangeDone={() => setUserToEdit(undefined)}
+                            userRoleTitle={UserRoleTitles.KLIENT_PACIENT}
                         />
                     )}
                 </Modal.Body>

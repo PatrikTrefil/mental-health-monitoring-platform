@@ -47,6 +47,18 @@ programátory, kteří budou aplikaci v budoucnu rozšiřovat.
         kódu vrstvu abstrakce a tedy kód webové aplikace není závislý na
         konkrétním autetifikačním systému. NextAuth umožňuje vyměnit _providera_
         autetifikace bez změny klientského kódu.
+-   **[React hook form](https://react-hook-form.com/)** - pro validaci formulářů
+    -   Některé formuláře v aplikaci vyžadovaly složitější validaci a pro
+        zajištění dobré uživatelské zkušenosti jsem se rozhodl použít knihovnu,
+        která poskytuje větší flexibilitu než formuláře systému Formio. Knihovnu
+        použijeme společně s validační knihovnou [zod](https://zod.dev/), kterou
+        již používáme i pro jiné účely. Zvažoval jsem také knihovnu
+        [Formik](https://formik.org). Recenze na internetu byly stejně dobré
+        jako pro React hook form, ale integrace s validační knihovnou zod
+        existuje pouze jako
+        [komunitní balíček](https://github.com/robertLichtnow/zod-formik-adapter).
+        React hook form má oficiální integraci s validační knihovnou zod pomocí
+        [balíčku resolvers](https://github.com/react-hook-form/resolvers).
 
 ## Backend
 

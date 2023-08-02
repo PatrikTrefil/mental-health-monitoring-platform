@@ -1,5 +1,5 @@
 import { loadFormById } from "@/client/formManagementClient";
-import { loadUsers } from "@/client/userManagementClient";
+import { loadClientPatient } from "@/client/userManagementClient";
 import UserRoleTitles from "@/constants/userRoleTitles";
 import { Prisma, type Task } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
@@ -118,7 +118,9 @@ const taskRouter = createTRPCRouter({
                     message: "Form with given formId does not exist",
                 });
 
-            const users = await loadUsers(opts.ctx.session.user.formioToken);
+            const users = await loadClientPatient(
+                opts.ctx.session.user.formioToken
+            );
 
             if (
                 users.find((u) => u.data.id === opts.input.forUserId) ===

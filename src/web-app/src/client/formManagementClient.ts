@@ -333,30 +333,27 @@ export async function loadSubmissions(
 /**
  * Update submission in the form management system.
  * @param formPath - Path of the form of which to update the submission.
- * @param submissionId - Id of the submission to update.
- * @param data - Data to update the submission with.
+ * @param updatedSubmission - Updated submission (used to replace submission with the same _id).
  * @param formioToken - JWT token for formio.
  * @returns Updated submission.
- * @throws {RequestError} If the http request fails.
- * @throws {TypeError} If the response is not valid json or when a network error is encountered or CORS is misconfigured on the server-side.
+ * @throws {RequestError}
+ * If the http request fails.
+ * @throws {TypeError}
+ * If the response is not valid json or when a network error is encountered or CORS is misconfigured on the server-side.
  */
 export async function updateSubmission(
     formPath: string,
-    submissionId: string,
-    data: unknown,
+    updatedSubmission: Partial<Submission> & Pick<Submission, "data" | "_id">,
     formioToken: string
 ): Promise<Submission> {
     const response = await safeFetch(
-        `${getFormioUrl()}/${formPath}/submission/${submissionId}`,
+        `${getFormioUrl()}${formPath}/submission/${updatedSubmission._id}`,
         {
             headers: {
                 "x-jwt-token": formioToken,
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify({
-                _id: submissionId,
-                data,
-            }),
+            body: JSON.stringify(updatedSubmission),
             method: "PUT",
         }
     );

@@ -35,10 +35,7 @@ export default function TaskCreation({ onSettled }: TaskCreationProps) {
         data: userList,
         refetch: refetchUsers,
     } = useQuery({
-        ...usersQuery.list(
-            session.data?.user.formioToken!,
-            session.data?.user.data.id!
-        ),
+        ...usersQuery.list(session.data?.user.formioToken!),
         enabled: !!session.data?.user.formioToken,
     });
 
@@ -56,11 +53,7 @@ export default function TaskCreation({ onSettled }: TaskCreationProps) {
         data: forms,
         refetch: refetchForms,
     } = useQuery({
-        ...formsQuery.list(
-            session.data?.user.formioToken!,
-            session.data?.user.data.id!,
-            ["klientPacient"]
-        ),
+        ...formsQuery.list(session.data?.user.formioToken!, ["klientPacient"]),
         keepPreviousData: true,
         enabled: !!session.data?.user.formioToken,
     });
