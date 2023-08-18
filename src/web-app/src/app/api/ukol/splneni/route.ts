@@ -54,9 +54,10 @@ export async function POST(req: Request) {
     }
 
     try {
-        await prisma.task.update({
+        await prisma.task.updateMany({
             where: {
                 id: body.data.request.data.taskId,
+                state: TaskState.PARTIALLY_COMPLETED,
             },
             data: {
                 state: TaskState.COMPLETED,
