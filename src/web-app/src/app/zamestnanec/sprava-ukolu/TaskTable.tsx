@@ -46,9 +46,6 @@ export default function TaskTable() {
         >();
     const columns = useMemo(
         () => [
-            columnHelper.accessor("id", {
-                header: "ID",
-            }),
             columnHelper.accessor("name", {
                 header: "Název",
             }),
@@ -67,6 +64,22 @@ export default function TaskTable() {
                 cell: (props) => (
                     <TaskStateBadge taskState={props.row.original.state} />
                 ),
+            }),
+            columnHelper.accessor("deadline.dueDateTime", {
+                header: "Deadline",
+                cell: (props) =>
+                    props.row.original.deadline?.dueDateTime.toLocaleString() ??
+                    "-",
+            }),
+            columnHelper.accessor("deadline.canBeCompletedAfterDeadline", {
+                header: "Lze splnit po deadline?",
+                cell: (props) => {
+                    if (props.row.original.deadline === null) return "-";
+                    return props.row.original.deadline
+                        .canBeCompletedAfterDeadline
+                        ? "Ano"
+                        : "Ne";
+                },
             }),
             columnHelper.accessor("updatedAt", {
                 header: "Aktualizováno dne",

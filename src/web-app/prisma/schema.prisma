@@ -10,6 +10,8 @@ datasource db {
     url      = env("DATABASE_URL")
 }
 
+// TODO: Test deadlines
+
 model Task {
     /// Artificial ID of the task
     id                  String    @id @default(uuid())
@@ -31,6 +33,21 @@ model Task {
     formId              String
     /// ID of the submission that was used to complete this task
     submissionId        String?
+    /// Task deadline
+    deadline            Deadline?
+}
+
+// Deadline is defined as a separate entity, because the canBeCompletedAfterDeadline field
+// is required if and only if the dueDateTiem is set. This was the simplest way to model this.
+
+model Deadline {
+    /// Date and time when the task is due
+    dueDateTime                 DateTime
+    /// Whether the task can be completed after the deadline
+    canBeCompletedAfterDeadline Boolean
+    task                        Task     @relation(fields: [taskId], references: [id])
+    /// ID of the task to which the deadline belongs
+    taskId                      String   @unique
 }
 
 enum TaskState {

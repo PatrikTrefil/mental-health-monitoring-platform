@@ -37,30 +37,54 @@ export async function POST(req: Request) {
 
     // we need to check that this submission has not been used already to complete a task
     try {
-        // mark the task as completed
-        await prisma.task.updateMany({
+        // mark the task as completed if it is not already completed and the deadline
+        // is either not set, not "hard" (canBeCompletedAfterDeadline: true) or has not passed
+        const result = await prisma.task.updateMany({
             where: {
-                id: body.data.request.data.taskId,
-                state: TaskState.READY,
-                submissionId: null,
-                formId: body.data.request.form,
+                AND: [
+                    {
+                        id: body.data.request.data.taskId,
+                        state: TaskState.READY,
+                        submissionId: null,
+                        formId: body.data.request.form,
+                    },
+                    {
+                        OR: [
+                            {
+                                deadline: null,
+                            },
+                            {
+                                deadline: {
+                                    canBeCompletedAfterDeadline: {
+                                        equals: true,
+                                    },
+                                },
+                            },
+                            {
+                                deadline: {
+                                    dueDateTime: {
+                                        gte: new Date(),
+                                    },
+                                },
+                            },
+                        ],
+                    },
+                ],
             },
             data: {
                 state: TaskState.PARTIALLY_COMPLETED,
             },
         });
+        if (result.count === 0)
+            return new Response(
+                "Task either does not exist or was expecting a submission to a different form or was already completed or deadline has passed",
+                { status: 409 }
+            );
     } catch (e) {
         console.error(e);
-        if (e instanceof Prisma.PrismaClientKnownRequestError) {
-            const recordNotFoundCode = "P2018";
-            if (e.code === recordNotFoundCode)
-                return new Response(
-                    "Task either does not exist or was expecting a submission to a different form or was already completed",
-                    { status: 409 }
-                );
-        }
         return new Response("Failed to update task", { status: 500 });
     }
+
     console.log(
         `Task with id ${body.data.request.data.taskId} partially completed`
     );
