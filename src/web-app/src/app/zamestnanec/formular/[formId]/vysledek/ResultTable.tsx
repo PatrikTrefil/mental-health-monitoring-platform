@@ -1,7 +1,7 @@
 "use client";
 
 import { loadFormById, loadSubmissions } from "@/client/formManagementClient";
-import { loadClientPatient } from "@/client/userManagementClient";
+import { loadClientsAndPatients } from "@/client/userManagementClient";
 import SimplePagination from "@/components/shared/SimplePagination";
 import { useSmartFetch } from "@/hooks/useSmartFetch";
 import { Form as FormFormio } from "@/types/formManagement/forms";
@@ -37,7 +37,7 @@ export default function ResultTable({ formId }: { formId: string }) {
         isError: isErrorUsers,
         error: errorUsers,
     } = useSmartFetch({
-        queryFn: () => loadClientPatient(data!.user.formioToken),
+        queryFn: () => loadClientsAndPatients(data?.user.formioToken!),
         enabled: !!data,
     });
 

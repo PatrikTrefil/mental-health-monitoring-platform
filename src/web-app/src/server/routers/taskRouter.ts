@@ -1,24 +1,32 @@
 import { loadFormById } from "@/client/formManagementClient";
-import { loadClientPatient } from "@/client/userManagementClient";
+import { loadClientsAndPatients } from "@/client/userManagementClient";
 import UserRoleTitles from "@/constants/userRoleTitles";
-import { Prisma, type Task } from "@prisma/client";
+import { Prisma, type Deadline, type Task } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
+import { prisma } from "../db";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
+
+type TaskWithDeadline = Task & { deadline: Deadline | null };
 
 const taskRouter = createTRPCRouter({
     /**
      * Get list of all tasks. If user is {@link UserRoleTitles.ZADAVATEL_DOTAZNIKU}, return all tasks.
      * If user is {@link UserRoleTitles.KLIENT_PACIENT}, return only tasks for them.
      */
-    listTasks: protectedProcedure.query((opts): Promise<Task[]> => {
+    listTasks: protectedProcedure.query((opts): Promise<TaskWithDeadline[]> => {
         const userRoleTitles = opts.ctx.session.user.roleTitles;
         if (userRoleTitles.includes(UserRoleTitles.ZADAVATEL_DOTAZNIKU)) {
-            return opts.ctx.prisma.task.findMany();
+            return opts.ctx.prisma.task.findMany({
+                include: { deadline: true },
+            });
         } else if (userRoleTitles.includes(UserRoleTitles.KLIENT_PACIENT)) {
             return opts.ctx.prisma.task.findMany({
                 where: {
                     forUserId: opts.ctx.session.user.data.id,
+                },
+                include: {
+                    deadline: true,
                 },
             });
         } else throw new TRPCError({ code: "FORBIDDEN" });
@@ -39,7 +47,7 @@ const taskRouter = createTRPCRouter({
                 id: z.string(),
             })
         )
-        .query(async (opts): Promise<Task> => {
+        .query(async (opts): Promise<TaskWithDeadline> => {
             const userRoleTitles = opts.ctx.session.user.roleTitles;
 
             if (
@@ -51,6 +59,9 @@ const taskRouter = createTRPCRouter({
             const result = await opts.ctx.prisma.task.findUnique({
                 where: {
                     id: opts.input.id,
+                },
+                include: {
+                    deadline: true,
                 },
             });
             if (result === null) throw new TRPCError({ code: "NOT_FOUND" });
@@ -86,9 +97,15 @@ const taskRouter = createTRPCRouter({
                 forUserId: z.string().nonempty(),
                 description: z.string().optional(),
                 formId: z.string().nonempty(),
+                deadline: z
+                    .object({
+                        dueDateTime: z.date(),
+                        canBeCompletedAfterDeadline: z.boolean(),
+                    })
+                    .optional(),
             })
         )
-        .mutation(async (opts): Promise<Task> => {
+        .mutation(async (opts): Promise<TaskWithDeadline> => {
             if (
                 !opts.ctx.session.user.roleTitles.includes(
                     UserRoleTitles.ZADAVATEL_DOTAZNIKU
@@ -118,7 +135,7 @@ const taskRouter = createTRPCRouter({
                     message: "Form with given formId does not exist",
                 });
 
-            const users = await loadClientPatient(
+            const users = await loadClientsAndPatients(
                 opts.ctx.session.user.formioToken
             );
 
@@ -138,7 +155,9 @@ const taskRouter = createTRPCRouter({
                     forUserId: opts.input.forUserId,
                     description: opts.input.description,
                     formId: opts.input.formId,
+                    deadline: { create: opts.input.deadline },
                 },
+                include: { deadline: true },
             });
         }),
     /**
@@ -163,11 +182,20 @@ const taskRouter = createTRPCRouter({
                 throw new TRPCError({ code: "FORBIDDEN" });
 
             try {
-                await opts.ctx.prisma.task.delete({
-                    where: {
-                        id: opts.input.id,
-                    },
-                });
+                // https://www.prisma.io/docs/concepts/components/prisma-client/crud#cascading-deletes-deleting-related-records
+                await prisma.$transaction([
+                    // deleteMany will not fail even if there is nothing to delete (i.e. the task does not have a deadline)
+                    opts.ctx.prisma.deadline.deleteMany({
+                        where: {
+                            taskId: opts.input.id,
+                        },
+                    }),
+                    opts.ctx.prisma.task.delete({
+                        where: {
+                            id: opts.input.id,
+                        },
+                    }),
+                ]);
             } catch (e) {
                 if (
                     e instanceof Prisma.PrismaClientKnownRequestError &&
