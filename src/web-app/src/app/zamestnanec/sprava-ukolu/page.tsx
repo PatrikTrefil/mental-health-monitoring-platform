@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import TaskManagement from "./TaskManagement";
+import TaskTable from "./TaskTable";
 
 export const metadata: Metadata = {
     title: "Správa úkolů",
@@ -10,9 +10,9 @@ export const metadata: Metadata = {
  */
 export default function SpravaUkoluPage() {
     return (
-        <main>
+        <>
             <h1>Správa úkolů</h1>
-            <TaskManagement />
-        </main>
+            <TaskTable />
+        </>
     );
 }

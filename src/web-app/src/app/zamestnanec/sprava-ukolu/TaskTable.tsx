@@ -24,6 +24,7 @@ import {
     Tooltip,
 } from "react-bootstrap";
 import { toast } from "react-toastify";
+import TaskTableToolbar from "./TaskTableToolbar";
 
 /**
  * Table of tasks for employees (includes tasks of all users).
@@ -134,6 +135,11 @@ export default function TaskTable() {
         data: data ?? [],
         getCoreRowModel: getCoreRowModel(),
         getPaginationRowModel: getPaginationRowModel(),
+        initialState: {
+            columnVisibility: {
+                updatedAt: false,
+            },
+        },
     });
 
     if (isLoading)
@@ -154,6 +160,7 @@ export default function TaskTable() {
 
     return (
         <>
+            <TaskTableToolbar table={table} />
             <div className="mt-2 d-block text-nowrap overflow-auto">
                 <Table striped bordered hover>
                     <thead>
