@@ -3,14 +3,12 @@
 import UserRoleTitles from "@/constants/userRoleTitles";
 import { useSession } from "next-auth/react";
 import { Button } from "react-bootstrap";
-import FormDefinitionsTable from "./FormDefinitionsTable";
 
 /**
- * Component for managing forms.
+ *
  */
-export default function FormManagement() {
+export default function CreateFormToolbarItem() {
     const { data } = useSession();
-
     return (
         <>
             {data?.user.roleTitles.includes(
@@ -26,7 +24,6 @@ export default function FormManagement() {
                     Nový formulář
                 </Button>
             )}
-            <FormDefinitionsTable />
         </>
     );
 }

@@ -17,6 +17,7 @@ import { useSession } from "next-auth/react";
 import { useMemo } from "react";
 import { Alert, Button, Form, Spinner, Table } from "react-bootstrap";
 import { toast } from "react-toastify";
+import FormTableToolbar from "./FormTableToolbar";
 
 /**
  * Table of form definitions available to clients/patients.
@@ -145,6 +146,7 @@ export default function FormDefinitionsTable() {
 
     return (
         <>
+            <FormTableToolbar table={table} />
             <div className="mt-2 d-block text-nowrap overflow-auto w-100">
                 <Table striped bordered hover>
                     <thead>
