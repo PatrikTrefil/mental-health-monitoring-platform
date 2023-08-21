@@ -100,7 +100,7 @@ export default function TaskCreationForm({ onSettled }: TaskCreationFormProps) {
                 | { dueDateTime: Date; canBeCompletedAfterDeadline: boolean }
                 | undefined;
 
-            if (taskDueDate !== undefined) {
+            if (taskDueDate !== "") {
                 const dueDateTime = new Date(taskDueDate);
                 const [hours, minutes, seconds, milliseconds] =
                     taskDueTime.split(":");
