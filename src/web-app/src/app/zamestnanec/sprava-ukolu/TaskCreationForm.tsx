@@ -11,9 +11,9 @@ import Select from "react-select";
 import { toast } from "react-toastify";
 
 /**
- * Props for {@link TaskCreation}.
+ * Props for {@link TaskCreationForm}.
  */
-export interface TaskCreationProps {
+export interface TaskCreationFormProps {
     /**
      * Callback called when the task is created or the creation is cancelled.
      */
@@ -25,7 +25,7 @@ export interface TaskCreationProps {
  * @param root0 - Props for the component.
  * @param root0.onSettled - Callback called when the task is created or the creation is cancelled.
  */
-export default function TaskCreation({ onSettled }: TaskCreationProps) {
+export default function TaskCreationForm({ onSettled }: TaskCreationFormProps) {
     const session = useSession();
 
     const {
