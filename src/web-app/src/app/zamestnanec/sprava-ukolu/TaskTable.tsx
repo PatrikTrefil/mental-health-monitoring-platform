@@ -122,9 +122,12 @@ export default function TaskTable() {
                     <div className="d-flex gap-2">
                         <Button
                             variant="danger"
-                            onClick={() =>
-                                deleteTodo.mutate({ id: props.row.original.id })
-                            }
+                            onClick={() => {
+                                props.row.toggleSelected();
+                                deleteTodo.mutate({
+                                    id: props.row.original.id,
+                                });
+                            }}
                         >
                             Smazat
                         </Button>
