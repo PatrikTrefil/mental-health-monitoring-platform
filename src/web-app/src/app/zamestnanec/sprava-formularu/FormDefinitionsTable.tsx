@@ -48,7 +48,6 @@ export default function FormDefinitionsTable() {
         },
         onSuccess: (_, { formId }) => {
             console.debug("Form deleted.", { formId });
-            toast.success("Formulář byl smazán");
             queryClient.invalidateQueries({
                 queryKey: formsQuery.list(session.data?.user.formioToken!)
                     .queryKey,
@@ -59,12 +58,37 @@ export default function FormDefinitionsTable() {
                     formId
                 ).queryKey,
             });
+            toast.success("Formulář byl smazán");
         },
     });
 
     const columnHelper = createColumnHelper<FormDefinition>();
     const columns = useMemo(
         () => [
+            columnHelper.display({
+                id: "select",
+                header: ({ table }) => (
+                    <Form.Check
+                        checked={table.getIsAllPageRowsSelected()}
+                        onChange={(e) =>
+                            table.toggleAllPageRowsSelected(!!e.target.checked)
+                        }
+                        aria-label="Select all"
+                    />
+                ),
+                cell: ({ row }) => (
+                    <Form.Check
+                        checked={row.getIsSelected()}
+                        onChange={(e) => row.toggleSelected(!!e.target.checked)}
+                        aria-label="Select row"
+                    />
+                ),
+                enableSorting: false,
+                enableHiding: false,
+                meta: {
+                    isNarrow: true,
+                },
+            }),
             columnHelper.accessor("name", {
                 header: "Název",
             }),
@@ -93,6 +117,7 @@ export default function FormDefinitionsTable() {
                         <Button
                             disabled={!session.data}
                             onClick={async () => {
+                                props.row.toggleSelected(false);
                                 deleteFormMutate({
                                     formioToken: session.data!.user.formioToken,
                                     formId: props.row.original._id,
@@ -170,7 +195,22 @@ export default function FormDefinitionsTable() {
                         {table.getRowModel().rows.map((row) => (
                             <tr key={row.id}>
                                 {row.getVisibleCells().map((cell) => (
-                                    <td key={cell.id} className="align-middle">
+                                    <td
+                                        key={cell.id}
+                                        className="align-middle"
+                                        style={{
+                                            width:
+                                                typeof cell.column.columnDef
+                                                    .meta === "object" &&
+                                                "isNarrow" in
+                                                    cell.column.columnDef
+                                                        .meta &&
+                                                cell.column.columnDef.meta
+                                                    ?.isNarrow
+                                                    ? "0"
+                                                    : undefined,
+                                        }}
+                                    >
                                         {flexRender(
                                             cell.column.columnDef.cell,
                                             cell.getContext()
