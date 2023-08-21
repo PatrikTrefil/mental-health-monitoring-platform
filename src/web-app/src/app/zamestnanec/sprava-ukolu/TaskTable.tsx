@@ -67,6 +67,9 @@ export default function TaskTable() {
                 ),
                 enableSorting: false,
                 enableHiding: false,
+                meta: {
+                    isNarrow: true,
+                },
             }),
             columnHelper.accessor("name", {
                 id: "Název",
@@ -123,7 +126,7 @@ export default function TaskTable() {
                         <Button
                             variant="danger"
                             onClick={() => {
-                                props.row.toggleSelected();
+                                props.row.toggleSelected(false);
                                 deleteTodo.mutate({
                                     id: props.row.original.id,
                                 });
@@ -221,7 +224,22 @@ export default function TaskTable() {
                                 }`}
                             >
                                 {row.getVisibleCells().map((cell) => (
-                                    <td key={cell.id}>
+                                    <td
+                                        key={cell.id}
+                                        className="align-middle"
+                                        style={{
+                                            width:
+                                                typeof cell.column.columnDef
+                                                    .meta === "object" &&
+                                                "isNarrow" in
+                                                    cell.column.columnDef
+                                                        .meta &&
+                                                cell.column.columnDef.meta
+                                                    ?.isNarrow
+                                                    ? "0"
+                                                    : undefined,
+                                        }}
+                                    >
                                         {flexRender(
                                             cell.column.columnDef.cell,
                                             cell.getContext()
