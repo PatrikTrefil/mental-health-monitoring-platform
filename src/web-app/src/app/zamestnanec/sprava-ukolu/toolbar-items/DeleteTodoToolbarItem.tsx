@@ -31,7 +31,9 @@ export default function DeleteTodoToolbarItem({
         <Button
             variant="danger"
             className={`${
-                table.getIsSomeRowsSelected() ? "" : "visually-hidden"
+                table.getIsSomeRowsSelected() || table.getIsAllRowsSelected()
+                    ? ""
+                    : "visually-hidden"
             }`}
             onClick={() => {
                 for (const row of table.getSelectedRowModel().rows)
