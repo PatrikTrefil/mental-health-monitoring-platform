@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 export default function PrehledPage() {
     return (
         <main>
-            <h1>Přehled</h1>
+            <h1>Správa formulářů</h1>
             <FormManagement />
         </main>
     );

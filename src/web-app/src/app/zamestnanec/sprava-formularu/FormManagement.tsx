@@ -26,7 +26,6 @@ export default function FormManagement() {
                     Nový formulář
                 </Button>
             )}
-            <h2>Definice formulářů</h2>
             <FormDefinitionsTable />
         </>
     );

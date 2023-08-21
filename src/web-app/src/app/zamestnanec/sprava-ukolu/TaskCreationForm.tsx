@@ -139,8 +139,8 @@ export default function TaskCreationForm({ onSettled }: TaskCreationFormProps) {
                 <Button onClick={() => refetchUsers()}>
                     Zkusit načíst znovu
                 </Button>
-                <Button as="a" href="/zamestnanec/prehled" className="ms-2">
-                    Zpět na přehled
+                <Button as="a" href="/zamestnanec/" className="ms-2">
+                    Zpět
                 </Button>
             </>
         );
@@ -157,8 +157,8 @@ export default function TaskCreationForm({ onSettled }: TaskCreationFormProps) {
                 <Button onClick={() => refetchForms()}>
                     Zkusit načíst znovu
                 </Button>
-                <Button as="a" href="/zamestnanec/prehled" className="ms-2">
-                    Zpět na přehled
+                <Button as="a" href="/zamestnanec/" className="ms-2">
+                    Zpět
                 </Button>
             </>
         );

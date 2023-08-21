@@ -1,6 +1,6 @@
 "use client";
 
-import ExportButton from "@/app/zamestnanec/prehled/ExportButton";
+import ExportButton from "@/app/zamestnanec/sprava-formularu/ExportButton";
 import { deleteFormById } from "@/client/formManagementClient";
 import { formsQuery } from "@/client/queries/formManagement";
 import SimplePagination from "@/components/shared/SimplePagination";

@@ -157,7 +157,7 @@ export default function FillOutForm({ formId }: { formId: string }) {
                             finishLoadingToastWithSuccess();
                             // set this to remove the warning about unsaved changes
                             setIsFormStateDirty(false);
-                            router.push("/uzivatel/prehled");
+                            router.push("/uzivatel/");
                         } else if (submission.data.saveDraft) {
                             startLoadingToast();
                             try {
