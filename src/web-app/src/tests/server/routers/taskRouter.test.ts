@@ -1,5 +1,5 @@
 import { loadFormById } from "@/client/formManagementClient";
-import { loadUsers } from "@/client/userManagementClient";
+import { loadClientsAndPatients } from "@/client/userManagementClient";
 import UserRoleTitles from "@/constants/userRoleTitles";
 import { prisma } from "@/server/__mocks__/db";
 import { appRouter, type AppRouter } from "@/server/routers/root";
@@ -13,12 +13,14 @@ import {
 } from "./utility";
 
 type CreateTaskInput = inferProcedureInput<AppRouter["task"]["createTask"]>;
+
 const mockInputTask: CreateTaskInput & { description: string } = {
     name: "foo",
     forUserId: faker.string.uuid(),
     description: "bar",
     formId: faker.string.uuid(),
 };
+
 const mockOutputTaskExpectationTemplate = {
     ...mockInputTask,
     id: expect.any(String),
@@ -47,8 +49,8 @@ vi.mock("@/client/formManagementClient", () => ({
 }));
 
 vi.mock("@/client/userManagementClient", () => ({
-    loadUsers: vi.fn(async () => {
-        const mockUsers: Awaited<ReturnType<typeof loadUsers>> = [
+    loadClientsAndPatients: vi.fn(async () => {
+        const mockUsers: Awaited<ReturnType<typeof loadClientsAndPatients>> = [
             {
                 _id: "12324",
                 data: { id: "123" },
@@ -80,7 +82,7 @@ describe("todo functionality", () => {
             submissionAccess: [],
             components: [],
         });
-        vi.mocked(loadUsers).mockResolvedValueOnce([
+        vi.mocked(loadClientsAndPatients).mockResolvedValueOnce([
             {
                 _id: faker.string.uuid(),
                 data: { id: mockInputTask.forUserId },
@@ -173,7 +175,9 @@ describe("todo functionality", () => {
             });
         }
 
-        prisma.task.findMany.mockResolvedValueOnce(mockTasks);
+        prisma.task.findMany.mockResolvedValueOnce(
+            mockTasks.map((t) => ({ ...t, deadline: null }))
+        );
         const tasks = await caller.task.listTasks();
 
         if (!ctx.session?.user.data.id) throw new Error("Session is null");
@@ -191,6 +195,7 @@ describe("todo functionality", () => {
                 createdAt: expect.any(Date),
                 state: TaskState.READY,
                 submissionId: null,
+                deadline: null,
             };
             expect(tasks).toContainEqual(expectedTask);
         }
@@ -215,6 +220,7 @@ describe("todo functionality", () => {
                 submissionId: null,
                 description: "",
                 id: faker.string.uuid(),
+                deadline: null,
             };
         }
         // check that all tasks that were created are listed
@@ -291,7 +297,9 @@ describe("todo functionality", () => {
                 UserRoleTitles.ZADAVATEL_DOTAZNIKU,
             ])
         );
-        vi.mocked(loadUsers).mockImplementationOnce(async () => []);
+        vi.mocked(loadClientsAndPatients).mockImplementationOnce(
+            async () => []
+        );
         expect(
             caller.task.createTask(mockInputTask)
         ).rejects.toMatchInlineSnapshot(
@@ -385,7 +393,7 @@ describe("todo when formio is down", () => {
     });
 
     it("throws when creating a todo when loadUsers fails", async () => {
-        vi.mocked(loadUsers).mockImplementationOnce(throwFn);
+        vi.mocked(loadClientsAndPatients).mockImplementationOnce(throwFn);
         const caller = appRouter.createCaller(
             createInnerTRPCContextMockSession([
                 UserRoleTitles.ZADAVATEL_DOTAZNIKU,

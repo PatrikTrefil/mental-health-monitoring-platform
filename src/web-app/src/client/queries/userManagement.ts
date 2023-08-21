@@ -1,26 +1,40 @@
 import { createQueryKeys } from "@lukemorales/query-key-factory";
-import { loadEmployees, loadUser, loadUsers } from "../userManagementClient";
+import {
+    loadClientPatient,
+    loadClientsAndPatients,
+    loadEmployees,
+    loadRoles,
+} from "../userManagementClient";
 
 export const usersQuery = createQueryKeys("users", {
-    list: (formioToken: string, callerId: string) => ({
+    list: (formioToken: string) => ({
         // We don't include the token in the query key, because the result does not depend on it
         // eslint-disable-next-line @tanstack/query/exhaustive-deps
-        queryKey: [callerId],
-        queryFn: () => loadUsers(formioToken),
+        queryKey: ["usersList"],
+        queryFn: () => loadClientsAndPatients(formioToken),
     }),
     detail: (formioToken: string, userSubmissionId: string) => ({
         // We don't include the token in the query key, because the result does not depend on it
         // eslint-disable-next-line @tanstack/query/exhaustive-deps
         queryKey: [userSubmissionId],
-        queryFn: () => loadUser(formioToken, userSubmissionId),
+        queryFn: () => loadClientPatient(formioToken, userSubmissionId),
     }),
 });
 
 export const employeesQuery = createQueryKeys("employees", {
-    list: (formioToken: string, callerId: string) => ({
+    list: (formioToken: string) => ({
         // We don't include the token in the query key, because the result does not depend on it
         // eslint-disable-next-line @tanstack/query/exhaustive-deps
-        queryKey: [callerId],
+        queryKey: ["employeesList"],
         queryFn: () => loadEmployees(formioToken),
+    }),
+});
+
+export const rolesQuery = createQueryKeys("roles", {
+    list: (formioToken: string) => ({
+        // We don't include the token in the query key, because the result does not depend on it
+        // eslint-disable-next-line @tanstack/query/exhaustive-deps
+        queryKey: ["roles"], // Needs to be non-empty
+        queryFn: () => loadRoles(formioToken),
     }),
 });

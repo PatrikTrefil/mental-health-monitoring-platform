@@ -1,7 +1,9 @@
+import UserRoleTitles from "@/constants/userRoleTitles";
 import { Submission } from "@/types/formManagement/submission";
+import { UserRoleTitle } from "@/types/userManagement/UserRoleTitle";
 import { Role } from "@/types/userManagement/role";
 import { User } from "@/types/userManagement/user";
-import { updateSubmission } from "./formManagementClient";
+import { submitForm, updateSubmission } from "./formManagementClient";
 import getFormioUrl from "./formioUrl";
 import { RequestError } from "./requestError";
 import safeFetch from "./safeFetch";
@@ -15,7 +17,9 @@ import safeFetch from "./safeFetch";
  * @throws {TypeError}
  * If the response is not valid json or when a network error is encountered or CORS is misconfigured on the server-side.
  */
-export async function loadUsers(formioToken: string): Promise<User[]> {
+export async function loadClientsAndPatients(
+    formioToken: string
+): Promise<User[]> {
     const response = await safeFetch(
         `${getFormioUrl()}/klientpacient/submission`,
         {
@@ -37,7 +41,7 @@ export async function loadUsers(formioToken: string): Promise<User[]> {
  * @throws {TypeError}
  * If the response is not valid json or when a network error is encountered or CORS is misconfigured on the server-side.
  */
-export async function loadUser(
+export async function loadClientPatient(
     formioToken: string,
     userSubmissionId: string
 ): Promise<User | null> {
@@ -69,7 +73,7 @@ export async function loadUser(
  * @throws {TypeError}
  * When a network error is encountered or CORS is misconfigured on the server-side.
  */
-export async function deleteUser(
+export async function deleteClientPacient(
     formioToken: string,
     userSubmissionId: string
 ): Promise<void> {
@@ -143,7 +147,7 @@ export async function loadEmployees(formioToken: string): Promise<User[]> {
  * @throws {TypeError}
  * When a network error is encountered or CORS is misconfigured on the server-side.
  */
-export async function deleteSpravceDotazniku(
+async function deleteSpravceDotazniku(
     formioToken: string,
     userSubmissionId: string
 ): Promise<void> {
@@ -159,6 +163,32 @@ export async function deleteSpravceDotazniku(
 }
 
 /**
+ * Delete any user.
+ * @param formioToken - JWT token for formio.
+ * @param userSubmissionId - Id of the user submission to delete.
+ * @param userRoleTitle - Role of the user to delete.
+ */
+export async function deleteUser(
+    formioToken: string,
+    userSubmissionId: string,
+    userRoleTitle: UserRoleTitle
+): Promise<void> {
+    switch (userRoleTitle) {
+        case UserRoleTitles.SPRAVCE_DOTAZNIKU:
+            await deleteSpravceDotazniku(formioToken, userSubmissionId);
+            break;
+        case UserRoleTitles.ZADAVATEL_DOTAZNIKU:
+            await deleteZadavatelDotazniku(formioToken, userSubmissionId);
+            break;
+        case UserRoleTitles.KLIENT_PACIENT:
+            await deleteClientPacient(formioToken, userSubmissionId);
+            break;
+        default:
+            throw new Error(`Unknown user role title: ${userRoleTitle}`);
+    }
+}
+
+/**
  * Delete employee that is from the zadavatel dotazniku resource from formio.
  * @param formioToken - JWT token for formio.
  * @param userSubmissionId - Id of the user submission to delete.
@@ -167,7 +197,7 @@ export async function deleteSpravceDotazniku(
  * @throws {TypeError}
  * When a network error is encountered or CORS is misconfigured on the server-side.
  */
-export async function deleteZadavatelDotazniku(
+async function deleteZadavatelDotazniku(
     formioToken: string,
     userSubmissionId: string
 ): Promise<void> {
@@ -288,6 +318,39 @@ export async function loginUser(
 }
 
 /**
+ * Update any user's account.
+ * @param submissionId - Id of the submission to update.
+ * @param data - New data to update the submission with.
+ * @param data.id - Id of the user.
+ * @param data.password - New password of the user.
+ * @param roleTitle - Title of the role of the user.
+ * @param formioToken - JWT token for formio.
+ * @returns Updated submission.
+ * @throws {RequestError} If the returned http status is not OK.
+ * @throws {TypeError} If the response is not valid json or when a network error is encountered or CORS is misconfigured on the server-side.
+ */
+export async function updateUser(
+    submissionId: string,
+    data: { id: string; password: string },
+    roleTitle: UserRoleTitle,
+    formioToken: string
+) {
+    switch (roleTitle) {
+        case UserRoleTitles.KLIENT_PACIENT:
+            await updateKlientPacient(submissionId, data, formioToken);
+            break;
+        case UserRoleTitles.SPRAVCE_DOTAZNIKU:
+            await updateSpravceDotazniku(submissionId, data, formioToken);
+            break;
+        case UserRoleTitles.ZADAVATEL_DOTAZNIKU:
+            await updateZadavatelDotazniku(submissionId, data, formioToken);
+            break;
+        default:
+            throw new Error("Unknown user role title.");
+    }
+}
+
+/**
  * Update user's account (submission).
  * @param submisionId - Id of the submission to update.
  * @param data - New data to update the submission with.
@@ -300,13 +363,64 @@ export async function loginUser(
  * @throws {TypeError}
  * If the response is not valid json or when a network error is encountered or CORS is misconfigured on the server-side.
  */
-export async function updateUser(
+async function updateKlientPacient(
     submisionId: string,
     data: { id: string; password: string },
     formioToken: string
 ): Promise<Submission> {
-    return updateSubmission("/klientpacient", submisionId, data, formioToken);
+    return updateSubmission(
+        "/klientpacient",
+        { _id: submisionId, data },
+        formioToken
+    );
 }
+
+/**
+ * Update form manager's account (submission).
+ * @param submisionId - Id of the submission to update.
+ * @param data - New data to update the submission with.
+ * @param data.id - Id of the user to update.
+ * @param data.password - New password of the user.
+ * @param formioToken - JWT token for formio.
+ * @returns Updated submission.
+ * @throws {RequestError} If the returned http status is not OK.
+ * @throws {TypeError} If the response is not valid json or when a network error is encountered or CORS is misconfigured on the server-side.
+ */
+function updateSpravceDotazniku(
+    submisionId: string,
+    data: { id: string; password: string },
+    formioToken: string
+): Promise<Submission> {
+    return updateSubmission(
+        "/zamestnanec/spravce-dotazniku",
+        { _id: submisionId, data },
+        formioToken
+    );
+}
+
+/**
+ * Update form assigner's account (submission).
+ * @param submisionId - Id of the submission to update.
+ * @param data - New data to update the submission with.
+ * @param data.id - Id of the user to update.
+ * @param data.password - New password of the user.
+ * @param formioToken - JWT token for formio.
+ * @returns Updated submission.
+ * @throws {RequestError} If the returned http status is not OK.
+ * @throws {TypeError} If the response is not valid json or when a network error is encountered or CORS is misconfigured on the server-side.
+ */
+async function updateZadavatelDotazniku(
+    submisionId: string,
+    data: { id: string; password: string },
+    formioToken: string
+): Promise<Submission> {
+    return updateSubmission(
+        "/zamestnanec/zadavatel-dotazniku",
+        { _id: submisionId, data },
+        formioToken
+    );
+}
+
 /**
  * Get current user.
  * @param formioToken - JWT token of the user.
@@ -323,4 +437,120 @@ export async function getCurrentUser(formioToken: string): Promise<User> {
         },
     });
     return (await response.json()) as User;
+}
+
+/**
+ * Create a new user.
+ * @param data - User's login data.
+ * @param data.id - Id of the new user.
+ * @param data.password - Password of the new user.
+ * @param roleTitle - Role to assign to the user.
+ * @param formioToken - JWT token for formio.
+ * @returns Representing the user.
+ */
+export async function createUser(
+    data: { id: string; password: string },
+    roleTitle: UserRoleTitle,
+    formioToken: string
+): Promise<Submission> {
+    switch (roleTitle) {
+        case UserRoleTitles.KLIENT_PACIENT:
+            return createKlientPacient(data, formioToken);
+        case UserRoleTitles.SPRAVCE_DOTAZNIKU:
+            return createSpravceDotazniku(data, formioToken);
+        case UserRoleTitles.ZADAVATEL_DOTAZNIKU:
+            return createZadavatelDotazniku(data, formioToken);
+        default:
+            throw new Error("Unknown user role title.");
+    }
+}
+
+/**
+ * Create client/patient.
+ * @param data - User's login data.
+ * @param data.id - Id of the new user.
+ * @param data.password - Password of the new user.
+ * @param formioToken - JWT token for formio.
+ * @returns Representing the user.
+ */
+async function createKlientPacient(
+    data: { id: string; password: string },
+    formioToken: string
+): Promise<Submission> {
+    const submission = await submitForm(
+        formioToken,
+        "/klientpacient/register",
+        { data }
+    );
+    // set owner so that the user can change their password
+    await updateSubmission(
+        "/klientpacient",
+        {
+            _id: submission._id,
+            data,
+            owner: submission._id,
+        },
+        formioToken
+    );
+    return submission;
+}
+
+/**
+ * Create form manager.
+ * @param data - User's login data.
+ * @param data.id - Id of the new user.
+ * @param data.password - Password of the new user.
+ * @param formioToken - JWT token for formio.
+ * @returns Representing the user.
+ */
+async function createSpravceDotazniku(
+    data: { id: string; password: string },
+    formioToken: string
+): Promise<Submission> {
+    const submission = await submitForm(
+        formioToken,
+        "/zamestnanec/spravce-dotazniku/register",
+        { data }
+    );
+    // set owner so that the user can change their password
+    await updateSubmission(
+        "/zamestnanec/spravce-dotazniku",
+        {
+            _id: submission._id,
+            data,
+            owner: submission._id,
+        },
+        formioToken
+    );
+    return submission;
+}
+
+/**
+ * Create form assigner.
+ * @param data - User's login data.
+ * @param data.id - Id of the new user.
+ * @param data.password - Password of the new user.
+ * @param formioToken - JWT token for formio.
+ * @returns Representing the user.
+ */
+async function createZadavatelDotazniku(
+    data: { id: string; password: string },
+    formioToken: string
+): Promise<Submission> {
+    const submission = await submitForm(
+        formioToken,
+        "/zamestnanec/zadavatel-dotazniku/register",
+        { data }
+    );
+    // set owner so that the user can change their password
+    await updateSubmission(
+        "/zamestnanec/zadavatel-dotazniku",
+        {
+            _id: submission._id,
+            data,
+            owner: submission._id,
+        },
+        formioToken
+    );
+    return submission;
 }

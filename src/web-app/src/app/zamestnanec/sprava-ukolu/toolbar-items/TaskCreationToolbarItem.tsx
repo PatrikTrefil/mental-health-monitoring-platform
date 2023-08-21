@@ -2,15 +2,13 @@
 
 import { useState } from "react";
 import { Button, Modal } from "react-bootstrap";
-import TaskCreation from "./TaskCreation";
-import TaskTable from "./TaskTable";
+import TaskCreationForm from "../TaskCreationForm";
 
 /**
- * Component for managing tasks of users.
+ * Renders a button that opens a modal with a form for creating a new task.
  */
-export default function TaskManagement() {
+export default function TaskCreationToolbarItem() {
     const [showTaskCreationModal, setShowTaskCreationModal] = useState(false);
-
     return (
         <>
             <Button
@@ -25,7 +23,6 @@ export default function TaskManagement() {
                 ></i>
                 Nový úkol
             </Button>
-            <TaskTable />
             <Modal
                 show={showTaskCreationModal}
                 onHide={() => setShowTaskCreationModal(false)}
@@ -34,7 +31,7 @@ export default function TaskManagement() {
                     <Modal.Title>Zadání úkolu</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    <TaskCreation
+                    <TaskCreationForm
                         onSettled={() => setShowTaskCreationModal(false)}
                     />
                 </Modal.Body>

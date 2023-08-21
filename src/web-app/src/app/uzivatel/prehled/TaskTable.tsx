@@ -3,7 +3,8 @@
 import { trpc } from "@/client/trpcClient";
 import SimplePagination from "@/components/shared/SimplePagination";
 import TaskStateBadge from "@/components/shared/TaskStateBadge";
-import { Task, TaskState } from "@prisma/client";
+import { AppRouter } from "@/server/routers/root";
+import { TaskState } from "@prisma/client";
 import {
     createColumnHelper,
     flexRender,
@@ -11,6 +12,7 @@ import {
     getPaginationRowModel,
     useReactTable,
 } from "@tanstack/react-table";
+import { inferProcedureOutput } from "@trpc/server";
 import { useMemo } from "react";
 import {
     Alert,
@@ -27,7 +29,10 @@ import { OverlayChildren } from "react-bootstrap/esm/Overlay";
  * Table of tasks of the current user.
  */
 export default function TaskTable() {
-    const columnHelper = createColumnHelper<Task>();
+    const columnHelper =
+        createColumnHelper<
+            inferProcedureOutput<AppRouter["task"]["getTask"]>
+        >();
     const columns = useMemo(
         () => [
             columnHelper.accessor("name", {
@@ -42,6 +47,12 @@ export default function TaskTable() {
                 header: "Popis",
                 cell: (props) => props.row.original.description ?? "Bez popisu",
             }),
+            columnHelper.accessor("deadline", {
+                header: "Deadline",
+                cell: (props) =>
+                    props.row.original.deadline?.dueDateTime.toLocaleString() ??
+                    "-",
+            }),
             columnHelper.accessor("state", {
                 header: "Stav",
                 cell: (props) => (
@@ -53,10 +64,18 @@ export default function TaskTable() {
                 header: "Akce",
                 cell: (props) => {
                     const state = props.row.original.state;
+
+                    const deadline = props.row.original.deadline;
                     let tooltip: OverlayChildren;
                     switch (state) {
                         case TaskState.READY:
-                            tooltip = <></>;
+                            if (
+                                deadline !== null &&
+                                deadline.canBeCompletedAfterDeadline == false &&
+                                deadline.dueDateTime < new Date()
+                            )
+                                tooltip = <Tooltip>Již je po termínu</Tooltip>;
+                            else tooltip = <></>;
                             break;
                         case TaskState.COMPLETED:
                             tooltip = <Tooltip>Úkol je již splněn.</Tooltip>;
@@ -69,22 +88,23 @@ export default function TaskTable() {
                             );
                             break;
                     }
+                    const canTaskBeCompleted =
+                        state === TaskState.READY &&
+                        (deadline === null ||
+                            deadline.canBeCompletedAfterDeadline ||
+                            deadline.dueDateTime >= new Date());
                     return (
                         <OverlayTrigger overlay={tooltip}>
                             <span className="d-inline-block">
                                 <Button
                                     variant={
-                                        props.row.original.state ===
-                                        TaskState.READY
+                                        canTaskBeCompleted
                                             ? "primary"
                                             : "secondary"
                                     }
                                     as="a"
                                     href={`/uzivatel/formular/${props.row.original.formId}/vyplnit?taskId=${props.row.original.id}`}
-                                    disabled={
-                                        props.row.original.state !==
-                                        TaskState.READY
-                                    }
+                                    disabled={canTaskBeCompleted === false}
                                 >
                                     Splnit
                                 </Button>

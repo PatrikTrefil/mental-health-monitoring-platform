@@ -24,6 +24,7 @@ import {
     Tooltip,
 } from "react-bootstrap";
 import { toast } from "react-toastify";
+import TaskTableToolbar from "./TaskTableToolbar";
 
 /**
  * Table of tasks for employees (includes tasks of all users).
@@ -46,9 +47,6 @@ export default function TaskTable() {
         >();
     const columns = useMemo(
         () => [
-            columnHelper.accessor("id", {
-                header: "ID",
-            }),
             columnHelper.accessor("name", {
                 header: "Název",
             }),
@@ -67,6 +65,22 @@ export default function TaskTable() {
                 cell: (props) => (
                     <TaskStateBadge taskState={props.row.original.state} />
                 ),
+            }),
+            columnHelper.accessor("deadline.dueDateTime", {
+                header: "Deadline",
+                cell: (props) =>
+                    props.row.original.deadline?.dueDateTime.toLocaleString() ??
+                    "-",
+            }),
+            columnHelper.accessor("deadline.canBeCompletedAfterDeadline", {
+                header: "Lze splnit po deadline?",
+                cell: (props) => {
+                    if (props.row.original.deadline === null) return "-";
+                    return props.row.original.deadline
+                        .canBeCompletedAfterDeadline
+                        ? "Ano"
+                        : "Ne";
+                },
             }),
             columnHelper.accessor("updatedAt", {
                 header: "Aktualizováno dne",
@@ -121,6 +135,11 @@ export default function TaskTable() {
         data: data ?? [],
         getCoreRowModel: getCoreRowModel(),
         getPaginationRowModel: getPaginationRowModel(),
+        initialState: {
+            columnVisibility: {
+                updatedAt: false,
+            },
+        },
     });
 
     if (isLoading)
@@ -141,6 +160,7 @@ export default function TaskTable() {
 
     return (
         <>
+            <TaskTableToolbar table={table} />
             <div className="mt-2 d-block text-nowrap overflow-auto">
                 <Table striped bordered hover>
                     <thead>
