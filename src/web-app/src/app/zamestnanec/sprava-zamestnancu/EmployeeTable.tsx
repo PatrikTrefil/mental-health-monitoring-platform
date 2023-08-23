@@ -3,7 +3,6 @@
 import { employeesQuery, rolesQuery } from "@/client/queries/userManagement";
 import { deleteUser } from "@/client/userManagementClient";
 import ChangePasswordUser from "@/components/shared/ChangePasswordUser";
-import CreateUser from "@/components/shared/CreateUser";
 import SimplePagination from "@/components/shared/SimplePagination";
 import UserRoleTitles from "@/constants/userRoleTitles";
 import { UserRoleTitle } from "@/types/userManagement/UserRoleTitle";
@@ -21,6 +20,7 @@ import { signOut, useSession } from "next-auth/react";
 import { useMemo, useState } from "react";
 import { Alert, Button, Form, Modal, Spinner, Table } from "react-bootstrap";
 import { toast } from "react-toastify";
+import EmployeeTableToolbar from "./EmployeeTableToolbar";
 
 /**
  * Convert ID of a role to its title.
@@ -81,7 +81,7 @@ export default function EmployeeTable() {
             toast.error("Smazání účtu selhalo.");
         },
         onSuccess: (_, { userSubmissionId }) => {
-            console.debug("Employees deleted.", {
+            console.debug("Employee deleted.", {
                 userSubmissionId,
             });
             queryClient.invalidateQueries({
@@ -94,6 +94,30 @@ export default function EmployeeTable() {
     const columnHelper = createColumnHelper<User>();
     const columns = useMemo(
         () => [
+            columnHelper.display({
+                id: "select",
+                header: ({ table }) => (
+                    <Form.Check
+                        checked={table.getIsAllPageRowsSelected()}
+                        onChange={(e) =>
+                            table.toggleAllPageRowsSelected(!!e.target.checked)
+                        }
+                        aria-label="Select all"
+                    />
+                ),
+                cell: ({ row }) => (
+                    <Form.Check
+                        checked={row.getIsSelected()}
+                        onChange={(e) => row.toggleSelected(!!e.target.checked)}
+                        aria-label="Select row"
+                    />
+                ),
+                enableSorting: false,
+                enableHiding: false,
+                meta: {
+                    isNarrow: true,
+                },
+            }),
             columnHelper.accessor("data.id", {
                 header: "ID",
                 cell: (props) => {
@@ -212,16 +236,6 @@ export default function EmployeeTable() {
         ]
     );
 
-    const [
-        showCreateSpravceDotaznikuModal,
-        setShowCreateSpravceDotaznikuModal,
-    ] = useState(false);
-
-    const [
-        showCreateZadavatelDotaznikuModal,
-        setShowCreateZadavatelDotaznikuModal,
-    ] = useState(false);
-
     const { isLoading, isError, error, data } = useQuery({
         ...employeesQuery.list(session.data?.user.formioToken!),
         enabled: !!session.data?.user.formioToken,
@@ -254,37 +268,9 @@ export default function EmployeeTable() {
 
     return (
         <>
-            <div className="d-flex gap-2">
-                {session?.data?.user.roleTitles.includes(
-                    UserRoleTitles.SPRAVCE_DOTAZNIKU
-                ) && (
-                    <Button
-                        onClick={() => setShowCreateSpravceDotaznikuModal(true)}
-                    >
-                        <i
-                            className="bi bi-plus-lg"
-                            style={{
-                                paddingRight: "5px",
-                            }}
-                        ></i>
-                        Založit účet nového správce dotazníků
-                    </Button>
-                )}
-                <Button
-                    onClick={() => setShowCreateZadavatelDotaznikuModal(true)}
-                >
-                    <i
-                        className="bi bi-plus-lg"
-                        style={{
-                            paddingRight: "5px",
-                        }}
-                    ></i>
-                    Založit účet nového zadavatele dotazníků
-                </Button>
-            </div>
-
+            <EmployeeTableToolbar table={table} />
             <div className="my-2 d-block text-nowrap overflow-auto">
-                <Table striped bordered hover>
+                <Table bordered hover>
                     <thead>
                         {table.getHeaderGroups().map((headerGroup) => (
                             <tr key={headerGroup.id}>
@@ -304,9 +290,29 @@ export default function EmployeeTable() {
                     </thead>
                     <tbody>
                         {table.getRowModel().rows.map((row) => (
-                            <tr key={row.id}>
+                            <tr
+                                key={row.id}
+                                className={`${
+                                    row.getIsSelected() ? "table-active" : ""
+                                }`}
+                            >
                                 {row.getVisibleCells().map((cell) => (
-                                    <td key={cell.id} className="align-middle">
+                                    <td
+                                        key={cell.id}
+                                        className="align-middle"
+                                        style={{
+                                            width:
+                                                typeof cell.column.columnDef
+                                                    .meta === "object" &&
+                                                "isNarrow" in
+                                                    cell.column.columnDef
+                                                        .meta &&
+                                                cell.column.columnDef.meta
+                                                    ?.isNarrow
+                                                    ? "0"
+                                                    : undefined,
+                                        }}
+                                    >
                                         {flexRender(
                                             cell.column.columnDef.cell,
                                             cell.getContext()
@@ -338,42 +344,6 @@ export default function EmployeeTable() {
                     setPageIndex={table.setPageIndex}
                 />
             </div>
-            <Modal
-                show={showCreateSpravceDotaznikuModal}
-                onHide={() => setShowCreateSpravceDotaznikuModal(false)}
-            >
-                <Modal.Header closeButton>
-                    <Modal.Title>
-                        Založení nového účtu pro správce dotazníků
-                    </Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                    <CreateUser
-                        userRoleTitle={UserRoleTitles.SPRAVCE_DOTAZNIKU}
-                        onChangeDone={() =>
-                            setShowCreateSpravceDotaznikuModal(false)
-                        }
-                    />
-                </Modal.Body>
-            </Modal>
-            <Modal
-                show={showCreateZadavatelDotaznikuModal}
-                onHide={() => setShowCreateZadavatelDotaznikuModal(false)}
-            >
-                <Modal.Header closeButton>
-                    <Modal.Title>
-                        Založení nového účtu pro zadavatele dotazníků
-                    </Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                    <CreateUser
-                        userRoleTitle={UserRoleTitles.ZADAVATEL_DOTAZNIKU}
-                        onChangeDone={() =>
-                            setShowCreateZadavatelDotaznikuModal(false)
-                        }
-                    />
-                </Modal.Body>
-            </Modal>
             <Modal show={!!userToEdit} onHide={() => setUserToEdit(undefined)}>
                 <Modal.Header closeButton>
                     <Modal.Title>Úprava zaměstnance</Modal.Title>
