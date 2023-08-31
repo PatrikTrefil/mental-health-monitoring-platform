@@ -94,11 +94,15 @@ export default function DeleteEmployeeToolbarItem({
                 table.toggleAllPageRowsSelected(false);
                 // Invalidate after all changes are done
                 // need to set a delay because the server tends to return the old data
-                setTimeout(() => queryClient.invalidateQueries({
-                    queryKey: employeesQuery.list(
-                        session.data!.user.formioToken
-                    ).queryKey,
-                }), 500);
+                setTimeout(
+                    () =>
+                        queryClient.invalidateQueries({
+                            queryKey: employeesQuery.list(
+                                session.data!.user.formioToken
+                            ).queryKey,
+                        }),
+                    500
+                );
             }}
         >
             <i className="bi bi-trash"></i>
