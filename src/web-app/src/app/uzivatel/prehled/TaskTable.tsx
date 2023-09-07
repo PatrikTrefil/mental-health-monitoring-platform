@@ -47,6 +47,11 @@ export default function TaskTable() {
                 header: "Popis",
                 cell: (props) => props.row.original.description ?? "Bez popisu",
             }),
+            columnHelper.accessor("start", {
+                header: "Začátek",
+                cell: (props) =>
+                    props.row.original.start?.toLocaleString() ?? "-",
+            }),
             columnHelper.accessor("deadline", {
                 header: "Deadline",
                 cell: (props) =>
@@ -66,6 +71,7 @@ export default function TaskTable() {
                     const state = props.row.original.state;
 
                     const deadline = props.row.original.deadline;
+                    const start = props.row.original.start;
                     let tooltip: OverlayChildren;
                     switch (state) {
                         case TaskState.READY:
@@ -75,6 +81,10 @@ export default function TaskTable() {
                                 deadline.dueDateTime < new Date()
                             )
                                 tooltip = <Tooltip>Již je po termínu</Tooltip>;
+                            else if (start !== null)
+                                tooltip = (
+                                    <Tooltip>Úkol ještě nelze splnit.</Tooltip>
+                                );
                             else tooltip = <></>;
                             break;
                         case TaskState.COMPLETED:
@@ -92,7 +102,9 @@ export default function TaskTable() {
                         state === TaskState.READY &&
                         (deadline === null ||
                             deadline.canBeCompletedAfterDeadline ||
-                            deadline.dueDateTime >= new Date());
+                            deadline.dueDateTime >= new Date()) &&
+                        (start === null || start <= new Date());
+
                     return (
                         <OverlayTrigger overlay={tooltip}>
                             <span className="d-inline-block">

@@ -28,6 +28,15 @@ const formSchema = z.object({
     taskDescription: z.string(),
     taskUserIds: z.string().array(),
     taskFormId: z.string(),
+    start: z.string().refine(
+        (value) => {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const startDate = new Date(value);
+            return startDate >= today;
+        },
+        { message: "Začátek nemůže být v minulosti" }
+    ),
     repetition: z
         .object({
             frequency: z.object({
@@ -299,6 +308,7 @@ export default function TaskCreationForm() {
             taskName,
             taskUserIds,
             repetition,
+            start,
         } = preprocessFormData(data);
         for (const userId of taskUserIds) {
             if (deadline === undefined || repetition === undefined) {
@@ -308,6 +318,7 @@ export default function TaskCreationForm() {
                     forUserId: userId,
                     formId: taskFormId,
                     deadline,
+                    start,
                 });
             } else {
                 const currentDueDate = new Date(deadline.dueDateTime);
@@ -325,6 +336,7 @@ export default function TaskCreationForm() {
                             canBeCompletedAfterDeadline:
                                 deadline.canBeCompletedAfterDeadline,
                         },
+                        start,
                     });
                 }
             }
@@ -432,6 +444,23 @@ export default function TaskCreationForm() {
                 }}
                 {...restTaskFormIdField}
             />
+            <Form.Group controlId="start-date">
+                <Form.Label>
+                    Start <i>(nepovinné)</i>
+                </Form.Label>
+                <InputGroup hasValidation>
+                    <Form.Control
+                        type="date"
+                        // Today
+                        min={new Date().toISOString().split("T")[0]}
+                        {...register("start")}
+                        isInvalid={!!errors.start}
+                    />
+                    <Form.Control.Feedback type="invalid">
+                        {errors.start?.message}
+                    </Form.Control.Feedback>
+                </InputGroup>
+            </Form.Group>
             <Card
                 className="mt-3"
                 onClick={() => setShowDeadlineModal(true)}
@@ -489,6 +518,7 @@ export default function TaskCreationForm() {
                                             );
                                     },
                                 })}
+                                // Today
                                 min={new Date().toISOString().split("T")[0]}
                             />
                             <Form.Control.Feedback type="invalid">
@@ -787,8 +817,15 @@ function DeadlineText({
  * @param data - Form data to preprocess.
  */
 function preprocessFormData(data: FormInput) {
+    let start: Date | undefined = undefined;
+    if (data.start !== "") {
+        start = new Date(data.start);
+        start.setHours(0, 0, 0, 0);
+    }
+
     return {
         ...data,
+        start,
         repetition:
             data.repetition.count === ""
                 ? undefined
