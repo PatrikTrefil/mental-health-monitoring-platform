@@ -79,7 +79,7 @@ export default function ClientEditFormPage({ formId }: { formId: string }) {
                     <Button onClick={() => router.refresh()}>
                         Znovu načíst stránku
                     </Button>
-                    <Button href="/zamestnanec/prehled">Zpět na přehled</Button>
+                    <Button href="/zamestnanec/">Zpět na přehled</Button>
                 </div>
             </>
         );
@@ -132,7 +132,7 @@ export default function ClientEditFormPage({ formId }: { formId: string }) {
                 <ModalFooter>
                     <Button
                         variant="secondary"
-                        onClick={() => router.push("/zamestnanec/prehled")}
+                        onClick={() => router.push("/zamestnanec/")}
                     >
                         Zavřít
                     </Button>

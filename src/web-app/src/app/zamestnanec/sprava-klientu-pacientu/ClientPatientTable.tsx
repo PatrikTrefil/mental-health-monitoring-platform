@@ -3,7 +3,6 @@
 import { usersQuery } from "@/client/queries/userManagement";
 import { deleteClientPacient } from "@/client/userManagementClient";
 import ChangePasswordUser from "@/components/shared/ChangePasswordUser";
-import CreateUser from "@/components/shared/CreateUser";
 import SimplePagination from "@/components/shared/SimplePagination";
 import UserRoleTitles from "@/constants/userRoleTitles";
 import { User } from "@/types/userManagement/user";
@@ -19,6 +18,7 @@ import { useSession } from "next-auth/react";
 import { useMemo, useState } from "react";
 import { Alert, Button, Form, Modal, Spinner, Table } from "react-bootstrap";
 import { toast } from "react-toastify";
+import ClientPatientTableToolbar from "./ClientPatientTableToolbar";
 
 /**
  * Page for managing users.
@@ -75,6 +75,30 @@ export default function ClientPatientTable() {
     const columnHelper = createColumnHelper<User>();
     const columns = useMemo(
         () => [
+            columnHelper.display({
+                id: "select",
+                header: ({ table }) => (
+                    <Form.Check
+                        checked={table.getIsAllPageRowsSelected()}
+                        onChange={(e) =>
+                            table.toggleAllPageRowsSelected(!!e.target.checked)
+                        }
+                        aria-label="Select all"
+                    />
+                ),
+                cell: ({ row }) => (
+                    <Form.Check
+                        checked={row.getIsSelected()}
+                        onChange={(e) => row.toggleSelected(!!e.target.checked)}
+                        aria-label="Select row"
+                    />
+                ),
+                enableSorting: false,
+                enableHiding: false,
+                meta: {
+                    isNarrow: true,
+                },
+            }),
             columnHelper.accessor("data.id", {
                 header: "ID",
             }),
@@ -104,6 +128,7 @@ export default function ClientPatientTable() {
                             disabled={!session.data}
                             onClick={async () => {
                                 const userSubmissionId = props.row.original._id;
+                                props.row.toggleSelected(false);
                                 deleteUserMutate({
                                     formioToken: session.data!.user.formioToken,
                                     userSubmissionId,
@@ -118,8 +143,6 @@ export default function ClientPatientTable() {
         ],
         [columnHelper, session.data, deleteUserMutate]
     );
-
-    const [showCreateUserModal, setShowCreateUserModal] = useState(false);
 
     const { isLoading, isError, error, data } = useQuery({
         ...usersQuery.list(session.data?.user.formioToken!),
@@ -151,17 +174,9 @@ export default function ClientPatientTable() {
 
     return (
         <>
-            <Button onClick={() => setShowCreateUserModal(true)}>
-                <i
-                    className="bi bi-plus-lg"
-                    style={{
-                        paddingRight: "5px",
-                    }}
-                ></i>
-                Založit účet nového pacienta/klienta
-            </Button>
+            <ClientPatientTableToolbar table={table} />
             <div className="my-2 d-block text-nowrap overflow-auto">
-                <Table striped bordered hover>
+                <Table bordered hover>
                     <thead>
                         {table.getHeaderGroups().map((headerGroup) => (
                             <tr key={headerGroup.id}>
@@ -181,9 +196,29 @@ export default function ClientPatientTable() {
                     </thead>
                     <tbody>
                         {table.getRowModel().rows.map((row) => (
-                            <tr key={row.id}>
+                            <tr
+                                key={row.id}
+                                className={`${
+                                    row.getIsSelected() ? "table-active" : ""
+                                }`}
+                            >
                                 {row.getVisibleCells().map((cell) => (
-                                    <td key={cell.id}>
+                                    <td
+                                        key={cell.id}
+                                        className="align-middle"
+                                        style={{
+                                            width:
+                                                typeof cell.column.columnDef
+                                                    .meta === "object" &&
+                                                "isNarrow" in
+                                                    cell.column.columnDef
+                                                        .meta &&
+                                                cell.column.columnDef.meta
+                                                    ?.isNarrow
+                                                    ? "0"
+                                                    : undefined,
+                                        }}
+                                    >
                                         {flexRender(
                                             cell.column.columnDef.cell,
                                             cell.getContext()
@@ -215,29 +250,7 @@ export default function ClientPatientTable() {
                     setPageIndex={table.setPageIndex}
                 />
             </div>
-            <Modal
-                show={showCreateUserModal}
-                onHide={() => setShowCreateUserModal(false)}
-            >
-                <Modal.Header closeButton>
-                    <Modal.Title>
-                        Založení nového účtu pro pacienta/klienta
-                    </Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                    <CreateUser
-                        userRoleTitle={UserRoleTitles.KLIENT_PACIENT}
-                        onChangeDone={() => {
-                            setShowCreateUserModal(false);
-                            queryClient.invalidateQueries({
-                                queryKey: usersQuery.list(
-                                    session.data!.user.formioToken
-                                ).queryKey,
-                            });
-                        }}
-                    />
-                </Modal.Body>
-            </Modal>
+
             <Modal show={!!userToEdit} onHide={() => setUserToEdit(undefined)}>
                 <Modal.Header closeButton>
                     <Modal.Title>Úprava účtu pacienta/klienta</Modal.Title>

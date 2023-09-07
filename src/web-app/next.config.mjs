@@ -85,7 +85,12 @@ const nextConfig = {
     redirects: async () => [
         {
             source: "/zamestnanec",
-            destination: "/zamestnanec/prehled",
+            destination: "/zamestnanec/sprava-formularu",
+            permanent: true,
+        },
+        {
+            source: "/uzivatel",
+            destination: "/uzivatel/prehled",
             permanent: true,
         },
     ],
@@ -101,6 +106,9 @@ const nextConfig = {
     },
 };
 
+/**
+ * @param phase
+ */
 export default async function getNextConfig(phase) {
     if (process.env.SKIP_ENV_VALIDATION === undefined) {
         const env = await import("./src/env.mjs");

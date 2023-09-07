@@ -47,32 +47,63 @@ export default function TaskTable() {
         >();
     const columns = useMemo(
         () => [
+            columnHelper.display({
+                id: "select",
+                header: ({ table }) => (
+                    <Form.Check
+                        checked={table.getIsAllPageRowsSelected()}
+                        onChange={(e) =>
+                            table.toggleAllPageRowsSelected(!!e.target.checked)
+                        }
+                        aria-label="Select all"
+                    />
+                ),
+                cell: ({ row }) => (
+                    <Form.Check
+                        checked={row.getIsSelected()}
+                        onChange={(e) => row.toggleSelected(!!e.target.checked)}
+                        aria-label="Select row"
+                    />
+                ),
+                enableSorting: false,
+                enableHiding: false,
+                meta: {
+                    isNarrow: true,
+                },
+            }),
             columnHelper.accessor("name", {
+                id: "Název",
                 header: "Název",
             }),
             columnHelper.accessor("description", {
+                id: "Popis",
                 header: "Popis",
             }),
             columnHelper.accessor("forUserId", {
+                id: "Pro uživatele",
                 header: "Pro uživatele",
             }),
             columnHelper.accessor("createdAt", {
+                id: "Vytvořeno dne",
                 header: "Vytvořeno dne",
                 cell: (props) => props.row.original.createdAt.toLocaleString(),
             }),
             columnHelper.accessor("state", {
+                id: "Stav",
                 header: "Stav",
                 cell: (props) => (
                     <TaskStateBadge taskState={props.row.original.state} />
                 ),
             }),
             columnHelper.accessor("deadline.dueDateTime", {
+                id: "Deadline",
                 header: "Deadline",
                 cell: (props) =>
                     props.row.original.deadline?.dueDateTime.toLocaleString() ??
                     "-",
             }),
             columnHelper.accessor("deadline.canBeCompletedAfterDeadline", {
+                id: "Lze splnit po deadline?",
                 header: "Lze splnit po deadline?",
                 cell: (props) => {
                     if (props.row.original.deadline === null) return "-";
@@ -83,19 +114,23 @@ export default function TaskTable() {
                 },
             }),
             columnHelper.accessor("updatedAt", {
+                id: "Aktualizováno dne",
                 header: "Aktualizováno dne",
                 cell: (props) => props.row.original.updatedAt.toLocaleString(),
             }),
             columnHelper.display({
-                id: "actions",
+                id: "Akce",
                 header: "Akce",
                 cell: (props) => (
                     <div className="d-flex gap-2">
                         <Button
                             variant="danger"
-                            onClick={() =>
-                                deleteTodo.mutate({ id: props.row.original.id })
-                            }
+                            onClick={() => {
+                                props.row.toggleSelected(false);
+                                deleteTodo.mutate({
+                                    id: props.row.original.id,
+                                });
+                            }}
                         >
                             Smazat
                         </Button>
@@ -162,7 +197,7 @@ export default function TaskTable() {
         <>
             <TaskTableToolbar table={table} />
             <div className="mt-2 d-block text-nowrap overflow-auto">
-                <Table striped bordered hover>
+                <Table bordered hover>
                     <thead>
                         {table.getHeaderGroups().map((headerGroup) => (
                             <tr key={headerGroup.id}>
@@ -182,9 +217,29 @@ export default function TaskTable() {
                     </thead>
                     <tbody>
                         {table.getRowModel().rows.map((row) => (
-                            <tr key={row.id}>
+                            <tr
+                                key={row.id}
+                                className={`${
+                                    row.getIsSelected() ? "table-active" : ""
+                                }`}
+                            >
                                 {row.getVisibleCells().map((cell) => (
-                                    <td key={cell.id}>
+                                    <td
+                                        key={cell.id}
+                                        className="align-middle"
+                                        style={{
+                                            width:
+                                                typeof cell.column.columnDef
+                                                    .meta === "object" &&
+                                                "isNarrow" in
+                                                    cell.column.columnDef
+                                                        .meta &&
+                                                cell.column.columnDef.meta
+                                                    ?.isNarrow
+                                                    ? "0"
+                                                    : undefined,
+                                        }}
+                                    >
                                         {flexRender(
                                             cell.column.columnDef.cell,
                                             cell.getContext()
