@@ -103,6 +103,7 @@ const taskRouter = createTRPCRouter({
                         canBeCompletedAfterDeadline: z.boolean(),
                     })
                     .optional(),
+                start: z.date().optional(),
             })
         )
         .mutation(async (opts): Promise<TaskWithDeadline> => {
@@ -156,6 +157,7 @@ const taskRouter = createTRPCRouter({
                     description: opts.input.description,
                     formId: opts.input.formId,
                     deadline: { create: opts.input.deadline },
+                    start: opts.input.start,
                 },
                 include: { deadline: true },
             });
