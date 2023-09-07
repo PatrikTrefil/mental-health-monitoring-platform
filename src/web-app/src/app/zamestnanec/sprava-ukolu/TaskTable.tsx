@@ -95,6 +95,11 @@ export default function TaskTable() {
                     <TaskStateBadge taskState={props.row.original.state} />
                 ),
             }),
+            columnHelper.accessor("start", {
+                header: "Začátek",
+                cell: (props) =>
+                    props.row.original.start?.toLocaleString() ?? "-",
+            }),
             columnHelper.accessor("deadline.dueDateTime", {
                 id: "Deadline",
                 header: "Deadline",
