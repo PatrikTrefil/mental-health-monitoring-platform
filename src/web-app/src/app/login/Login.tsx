@@ -26,8 +26,8 @@ export default function Login() {
     const searchParams = useSearchParams();
 
     const searchParamsCallbackUrl = searchParams?.get("callbackUrl");
-    const clientPatientDefaultCallback = "/uzivatel/prehled";
-    const employeeDefaultCallback = "/zamestnanec/prehled";
+    const clientPatientDefaultCallback = "/uzivatel/";
+    const employeeDefaultCallback = "/zamestnanec/";
 
     useEffect(
         function redirectIfLoggedIn() {

@@ -64,7 +64,7 @@ export default function NavigationBarClientPatient() {
             <Navbar bg="primary" variant="dark" collapseOnSelect expand="xxl">
                 <Container>
                     <Navbar.Brand
-                        href="/uzivatel/prehled"
+                        href="/uzivatel/"
                         style={{
                             fontSize: "2rem",
                             fontWeight: 600,
@@ -83,9 +83,7 @@ export default function NavigationBarClientPatient() {
                                 activeKey={pathname ?? ""}
                                 className="align-items-center gap-3"
                             >
-                                <Nav.Link href="/uzivatel/prehled">
-                                    Přehled
-                                </Nav.Link>
+                                <Nav.Link href="/uzivatel/">Přehled</Nav.Link>
                             </Nav>
                             <Nav
                                 variant="underline"

@@ -59,11 +59,11 @@ describe.each<TestInput>([
     },
     {
         roleTitleToTest: UserRoleTitles.SPRAVCE_DOTAZNIKU,
-        pathToTest: "http://localhost/zamestnanec/prehled",
+        pathToTest: "http://localhost/zamestnanec/sprava-formularu",
     },
     {
         roleTitleToTest: UserRoleTitles.ZADAVATEL_DOTAZNIKU,
-        pathToTest: "http://localhost/zamestnanec/prehled",
+        pathToTest: "http://localhost/zamestnanec/sprava-formularu",
     },
 ])(
     "accessing $roleTitleToTest page",

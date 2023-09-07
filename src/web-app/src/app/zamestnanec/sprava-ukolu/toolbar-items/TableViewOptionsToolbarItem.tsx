@@ -1,6 +1,6 @@
 "use client";
 
-import { Table, flexRender } from "@tanstack/react-table";
+import { Table } from "@tanstack/react-table";
 import { Dropdown, Form } from "react-bootstrap";
 
 /**
@@ -26,27 +26,25 @@ export default function TableViewOptions<TData>({
                 Zobrazení
             </Dropdown.Toggle>
             <Dropdown.Menu>
-                {table.getHeaderGroups().flatMap((g) =>
-                    g.headers.map((h) => {
+                {table
+                    .getAllColumns()
+                    .filter((h) => h.id !== "select") // the select column is not toggleable
+                    .map((column) => {
                         return (
-                            <Dropdown.ItemText key={h.id}>
+                            <Dropdown.ItemText key={column.id}>
                                 <Form.Check
                                     // render header as label
-                                    label={flexRender(
-                                        h.column.columnDef.header,
-                                        h.getContext()
-                                    )}
-                                    checked={h.column.getIsVisible()}
+                                    label={column.id}
+                                    checked={column.getIsVisible()}
                                     onChange={(e) =>
-                                        h.column.toggleVisibility(
+                                        column.toggleVisibility(
                                             !!e.target.checked
                                         )
                                     }
                                 />
                             </Dropdown.ItemText>
                         );
-                    })
-                )}
+                    })}
             </Dropdown.Menu>
         </Dropdown>
     );

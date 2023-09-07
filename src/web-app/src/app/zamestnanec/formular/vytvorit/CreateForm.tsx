@@ -219,7 +219,7 @@ export default function CreateForm() {
                         );
 
                         toast.success("Formulář byl úspěšně vytvořen.");
-                        router.push("/zamestnanec/prehled");
+                        router.push("/zamestnanec/");
                     }}
                     // Make clients/patients able to fill out the form
                     // and make the employees able to see their submissions

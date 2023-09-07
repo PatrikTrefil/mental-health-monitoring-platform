@@ -69,7 +69,7 @@ export default function NavigationBarEmployee() {
             <Navbar bg="primary" variant="dark" collapseOnSelect expand="xxl">
                 <Container>
                     <Navbar.Brand
-                        href="/zamestnanec/prehled"
+                        href="/zamestnanec/"
                         style={{
                             fontSize: "2rem",
                             fontWeight: 600,
@@ -88,8 +88,8 @@ export default function NavigationBarEmployee() {
                                 activeKey={pathname ?? ""}
                                 className="align-items-center w-100"
                             >
-                                <Nav.Link href="/zamestnanec/prehled">
-                                    Přehled
+                                <Nav.Link href="/zamestnanec/sprava-formularu">
+                                    Správa&nbsp;formulářů
                                 </Nav.Link>
                                 <Nav.Link href="/zamestnanec/sprava-ukolu">
                                     Správa&nbsp;úkolů
