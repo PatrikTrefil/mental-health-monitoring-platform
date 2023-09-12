@@ -1,6 +1,7 @@
 "use client";
 
 import { trpc } from "@/client/trpcClient";
+import TableHeader from "@/components/TableHeader";
 import SimplePagination from "@/components/shared/SimplePagination";
 import TaskStateBadge from "@/components/shared/TaskStateBadge";
 import { AppRouter } from "@/server/routers/root";
@@ -9,11 +10,10 @@ import {
     createColumnHelper,
     flexRender,
     getCoreRowModel,
-    getPaginationRowModel,
     useReactTable,
 } from "@tanstack/react-table";
 import { inferProcedureOutput } from "@trpc/server";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
     Alert,
     Button,
@@ -25,6 +25,8 @@ import {
 } from "react-bootstrap";
 import { toast } from "react-toastify";
 import TaskTableToolbar from "./TaskTableToolbar";
+
+const defaultPageSize = 10;
 
 /**
  * Table of tasks for employees (includes tasks of all users).
@@ -73,43 +75,62 @@ export default function TaskTable() {
             }),
             columnHelper.accessor("name", {
                 id: "Název",
-                header: "Název",
+                header: ({ column }) => (
+                    <TableHeader title="Název" column={column} />
+                ),
             }),
             columnHelper.accessor("description", {
                 id: "Popis",
-                header: "Popis",
+                header: ({ column }) => (
+                    <TableHeader title="Popis" column={column} />
+                ),
             }),
             columnHelper.accessor("forUserId", {
                 id: "Pro uživatele",
-                header: "Pro uživatele",
+                header: ({ column }) => (
+                    <TableHeader title="Pro uživatele" column={column} />
+                ),
             }),
             columnHelper.accessor("createdAt", {
                 id: "Vytvořeno dne",
-                header: "Vytvořeno dne",
+                header: ({ column }) => (
+                    <TableHeader title="Vytvořeno dne" column={column} />
+                ),
                 cell: (props) => props.row.original.createdAt.toLocaleString(),
             }),
             columnHelper.accessor("state", {
                 id: "Stav",
-                header: "Stav",
+                header: ({ column }) => (
+                    <TableHeader title="Stav" column={column} />
+                ),
                 cell: (props) => (
                     <TaskStateBadge taskState={props.row.original.state} />
                 ),
             }),
             columnHelper.accessor("start", {
-                header: "Začátek",
+                header: ({ column }) => (
+                    <TableHeader title="Začátek" column={column} />
+                ),
                 cell: (props) =>
                     props.row.original.start?.toLocaleString() ?? "-",
             }),
             columnHelper.accessor("deadline.dueDateTime", {
                 id: "Deadline",
-                header: "Deadline",
+                header: ({ column }) => (
+                    <TableHeader title="Deadline" column={column} />
+                ),
                 cell: (props) =>
                     props.row.original.deadline?.dueDateTime.toLocaleString() ??
                     "-",
             }),
             columnHelper.accessor("deadline.canBeCompletedAfterDeadline", {
                 id: "Lze splnit po deadline?",
-                header: "Lze splnit po deadline?",
+                header: ({ column }) => (
+                    <TableHeader
+                        title="Lze splnit po deadline?"
+                        column={column}
+                    />
+                ),
                 cell: (props) => {
                     if (props.row.original.deadline === null) return "-";
                     return props.row.original.deadline
@@ -120,12 +141,16 @@ export default function TaskTable() {
             }),
             columnHelper.accessor("updatedAt", {
                 id: "Aktualizováno dne",
-                header: "Aktualizováno dne",
+                header: ({ column }) => (
+                    <TableHeader title="Aktualizováno dne" column={column} />
+                ),
                 cell: (props) => props.row.original.updatedAt.toLocaleString(),
             }),
             columnHelper.display({
                 id: "Akce",
-                header: "Akce",
+                header: ({ column }) => (
+                    <TableHeader title="Akce" column={column} />
+                ),
                 cell: (props) => (
                     <div className="d-flex gap-2">
                         <Button
@@ -167,19 +192,49 @@ export default function TaskTable() {
         ],
         [columnHelper, deleteTodo]
     );
+    const [pageSize, setPageSize] = useState(defaultPageSize);
+    const [pageIndex, setPageIndex] = useState(0);
 
-    const { isLoading, isError, error, data } = trpc.task.listTasks.useQuery();
+    useEffect(() => {
+        // Prefetch next page
+        const nextPageIndex = pageIndex + 1;
+        utils.task.listTasks.prefetch({
+            limit: pageSize,
+            offset: nextPageIndex * pageSize,
+        });
+        // Prefetch previous page
+        const prevPageIndex = pageIndex - 1;
+        if (prevPageIndex >= 0)
+            utils.task.listTasks.prefetch({
+                limit: pageSize,
+                offset: prevPageIndex * pageSize,
+            });
+    }, [pageSize, pageIndex, utils]);
+
+    const {
+        isLoading,
+        isError,
+        error,
+        data: taskQueryData,
+    } = trpc.task.listTasks.useQuery({
+        limit: pageSize,
+        offset: pageIndex * pageSize,
+    });
+
+    const tasks = taskQueryData?.data;
+    const totalTaskCount = taskQueryData?.count;
 
     const table = useReactTable({
         columns,
-        data: data ?? [],
+        data: tasks ?? [],
         getCoreRowModel: getCoreRowModel(),
-        getPaginationRowModel: getPaginationRowModel(),
         initialState: {
             columnVisibility: {
                 updatedAt: false,
             },
         },
+        manualPagination: true,
+        autoResetPageIndex: false,
     });
 
     if (isLoading)
@@ -259,21 +314,21 @@ export default function TaskTable() {
             <div className="d-flex justify-content-between align-items-center">
                 <Form.Select
                     className="my-2 w-auto"
-                    value={table.getState().pagination.pageSize}
+                    value={pageSize}
                     onChange={(e) => {
-                        table.setPageSize(Number(e.target.value));
+                        setPageSize(Number(e.target.value));
                     }}
                 >
-                    {[10, 20, 30].map((pageSize: number) => (
-                        <option key={pageSize} value={pageSize}>
-                            Zobrazit {pageSize}
+                    {[10, 20, 30].map((currPageSize: number) => (
+                        <option key={currPageSize} value={currPageSize}>
+                            Zobrazit {currPageSize}
                         </option>
                     ))}
                 </Form.Select>
                 <SimplePagination
-                    pageIndex={table.getState().pagination.pageIndex}
-                    totalPages={table.getPageCount()}
-                    setPageIndex={table.setPageIndex}
+                    pageIndex={pageIndex}
+                    totalPages={Math.ceil((totalTaskCount ?? 0) / pageSize)}
+                    setPageIndex={setPageIndex}
                 />
             </div>
         </>

@@ -14,23 +14,54 @@ const taskRouter = createTRPCRouter({
      * Get list of all tasks. If user is {@link UserRoleTitles.ZADAVATEL_DOTAZNIKU}, return all tasks.
      * If user is {@link UserRoleTitles.KLIENT_PACIENT}, return only tasks for them.
      */
-    listTasks: protectedProcedure.query((opts): Promise<TaskWithDeadline[]> => {
-        const userRoleTitles = opts.ctx.session.user.roleTitles;
-        if (userRoleTitles.includes(UserRoleTitles.ZADAVATEL_DOTAZNIKU)) {
-            return opts.ctx.prisma.task.findMany({
-                include: { deadline: true },
-            });
-        } else if (userRoleTitles.includes(UserRoleTitles.KLIENT_PACIENT)) {
-            return opts.ctx.prisma.task.findMany({
-                where: {
-                    forUserId: opts.ctx.session.user.data.id,
-                },
-                include: {
-                    deadline: true,
-                },
-            });
-        } else throw new TRPCError({ code: "FORBIDDEN" });
-    }),
+    listTasks: protectedProcedure
+        .input(
+            z.object({
+                limit: z.number().nonnegative(),
+                offset: z.number().nonnegative(),
+            })
+        )
+        .query(
+            async (
+                opts
+            ): Promise<{ data: TaskWithDeadline[]; count: number }> => {
+                const userRoleTitles = opts.ctx.session.user.roleTitles;
+                if (
+                    userRoleTitles.includes(UserRoleTitles.ZADAVATEL_DOTAZNIKU)
+                ) {
+                    const [data, count] = await opts.ctx.prisma.$transaction([
+                        opts.ctx.prisma.task.findMany({
+                            include: { deadline: true },
+                            skip: opts.input.offset,
+                            take: opts.input.limit,
+                        }),
+                        opts.ctx.prisma.task.count(),
+                    ]);
+                    return { data, count };
+                } else if (
+                    userRoleTitles.includes(UserRoleTitles.KLIENT_PACIENT)
+                ) {
+                    const [data, count] = await opts.ctx.prisma.$transaction([
+                        opts.ctx.prisma.task.findMany({
+                            where: {
+                                forUserId: opts.ctx.session.user.data.id,
+                            },
+                            include: {
+                                deadline: true,
+                            },
+                            skip: opts.input.offset,
+                            take: opts.input.limit,
+                        }),
+                        opts.ctx.prisma.task.count({
+                            where: {
+                                forUserId: opts.ctx.session.user.data.id,
+                            },
+                        }),
+                    ]);
+                    return { data, count };
+                } else throw new TRPCError({ code: "FORBIDDEN" });
+            }
+        ),
     /**
      * Get task by id.
      * @returns The task with given id.
