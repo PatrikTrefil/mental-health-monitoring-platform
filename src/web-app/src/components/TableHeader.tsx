@@ -2,19 +2,18 @@ import { Column } from "@tanstack/react-table";
 import React from "react";
 
 // TODO: use this component for all sortable tables
-// TODO: make the sorting work
 
 /**
  * A component that renders a header for a table column that can be sorted.
  * @param root0 - The props of the component.
- * @param root0.title - The title of the column.
  * @param root0.column - The column object to which the header belongs.
+ * @param root0.text - The text of the header.
  */
 export default function TableHeader<TData, TValue>({
-    title,
+    text: title,
     column,
 }: {
-    title: string;
+    text: string;
     column: Column<TData, TValue>;
 }) {
     if (!column.getCanSort()) return <>{title}</>;

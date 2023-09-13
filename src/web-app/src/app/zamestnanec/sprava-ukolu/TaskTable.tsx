@@ -7,6 +7,7 @@ import TaskStateBadge from "@/components/shared/TaskStateBadge";
 import { AppRouter } from "@/server/routers/root";
 import { TaskState } from "@prisma/client";
 import {
+    SortingState,
     createColumnHelper,
     flexRender,
     getCoreRowModel,
@@ -74,60 +75,85 @@ export default function TaskTable() {
                 },
             }),
             columnHelper.accessor("name", {
-                id: "Název",
+                id: "name",
+                meta: {
+                    viewOptionsLabel: "Název",
+                },
                 header: ({ column }) => (
-                    <TableHeader title="Název" column={column} />
+                    <TableHeader text="Název" column={column} />
                 ),
             }),
             columnHelper.accessor("description", {
-                id: "Popis",
+                id: "description",
+                meta: {
+                    viewOptionsLabel: "Popis",
+                },
                 header: ({ column }) => (
-                    <TableHeader title="Popis" column={column} />
+                    <TableHeader text="Popis" column={column} />
                 ),
             }),
             columnHelper.accessor("forUserId", {
-                id: "Pro uživatele",
+                id: "forUserId",
+                meta: {
+                    viewOptionsLabel: "Pro uživatele",
+                },
                 header: ({ column }) => (
-                    <TableHeader title="Pro uživatele" column={column} />
+                    <TableHeader text="Pro uživatele" column={column} />
                 ),
             }),
             columnHelper.accessor("createdAt", {
-                id: "Vytvořeno dne",
+                id: "createdAt",
+                meta: {
+                    viewOptionsLabel: "Vytvořeno dne",
+                },
                 header: ({ column }) => (
-                    <TableHeader title="Vytvořeno dne" column={column} />
+                    <TableHeader text="Vytvořeno dne" column={column} />
                 ),
                 cell: (props) => props.row.original.createdAt.toLocaleString(),
             }),
             columnHelper.accessor("state", {
-                id: "Stav",
+                id: "state",
+                meta: {
+                    viewOptionsLabel: "Stav",
+                },
                 header: ({ column }) => (
-                    <TableHeader title="Stav" column={column} />
+                    <TableHeader text="Stav" column={column} />
                 ),
                 cell: (props) => (
                     <TaskStateBadge taskState={props.row.original.state} />
                 ),
             }),
             columnHelper.accessor("start", {
+                id: "start",
+                meta: {
+                    viewOptionsLabel: "Začátek",
+                },
                 header: ({ column }) => (
-                    <TableHeader title="Začátek" column={column} />
+                    <TableHeader text="Začátek" column={column} />
                 ),
                 cell: (props) =>
                     props.row.original.start?.toLocaleString() ?? "-",
             }),
             columnHelper.accessor("deadline.dueDateTime", {
-                id: "Deadline",
+                id: "deadline.dueDateTime",
+                meta: {
+                    viewOptionsLabel: "Deadline",
+                },
                 header: ({ column }) => (
-                    <TableHeader title="Deadline" column={column} />
+                    <TableHeader text="Deadline" column={column} />
                 ),
                 cell: (props) =>
                     props.row.original.deadline?.dueDateTime.toLocaleString() ??
                     "-",
             }),
             columnHelper.accessor("deadline.canBeCompletedAfterDeadline", {
-                id: "Lze splnit po deadline?",
+                id: "deadline.canBeCompletedAfterDeadline",
+                meta: {
+                    viewOptionsLabel: "Lze splnit po deadline?",
+                },
                 header: ({ column }) => (
                     <TableHeader
-                        title="Lze splnit po deadline?"
+                        text="Lze splnit po deadline?"
                         column={column}
                     />
                 ),
@@ -140,16 +166,21 @@ export default function TaskTable() {
                 },
             }),
             columnHelper.accessor("updatedAt", {
-                id: "Aktualizováno dne",
+                id: "updatedAt",
+                meta: {
+                    viewOptionsLabel: "Aktualizováno dne",
+                },
                 header: ({ column }) => (
-                    <TableHeader title="Aktualizováno dne" column={column} />
+                    <TableHeader text="Aktualizováno dne" column={column} />
                 ),
                 cell: (props) => props.row.original.updatedAt.toLocaleString(),
             }),
             columnHelper.display({
-                id: "Akce",
+                id: "actions",
+                meta: { viewOptionsLabel: "Akce" },
+                enableSorting: false,
                 header: ({ column }) => (
-                    <TableHeader title="Akce" column={column} />
+                    <TableHeader text="Akce" column={column} />
                 ),
                 cell: (props) => (
                     <div className="d-flex gap-2">
@@ -211,6 +242,8 @@ export default function TaskTable() {
             });
     }, [pageSize, pageIndex, utils]);
 
+    const [sorting, setSorting] = useState<SortingState>([]);
+
     const {
         isLoading,
         isError,
@@ -219,6 +252,16 @@ export default function TaskTable() {
     } = trpc.task.listTasks.useQuery({
         limit: pageSize,
         offset: pageIndex * pageSize,
+        // TODO: add ability to sort by multiple columns to api
+        sort:
+            sorting[0] !== undefined
+                ? {
+                      field: sorting[0].id as keyof inferProcedureOutput<
+                          AppRouter["task"]["createTask"]
+                      >,
+                      order: sorting[0].desc ? "desc" : "asc",
+                  }
+                : undefined,
     });
 
     const tasks = taskQueryData?.data;
@@ -227,6 +270,11 @@ export default function TaskTable() {
     const table = useReactTable({
         columns,
         data: tasks ?? [],
+        state: {
+            sorting,
+        },
+        manualSorting: true,
+        onSortingChange: setSorting,
         getCoreRowModel: getCoreRowModel(),
         initialState: {
             columnVisibility: {
