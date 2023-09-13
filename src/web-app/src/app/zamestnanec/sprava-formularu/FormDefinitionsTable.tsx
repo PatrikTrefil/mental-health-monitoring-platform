@@ -10,14 +10,15 @@ import {
     createColumnHelper,
     flexRender,
     getCoreRowModel,
-    getPaginationRowModel,
     useReactTable,
 } from "@tanstack/react-table";
 import { useSession } from "next-auth/react";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Alert, Button, Form, Spinner, Table } from "react-bootstrap";
 import { toast } from "react-toastify";
 import FormTableToolbar from "./FormTableToolbar";
+
+const defaultPageSize = 10;
 
 /**
  * Table of form definitions available to clients/patients.
@@ -49,8 +50,7 @@ export default function FormDefinitionsTable() {
         onSuccess: (_, { formId }) => {
             console.debug("Form deleted.", { formId });
             queryClient.invalidateQueries({
-                queryKey: formsQuery.list(session.data?.user.formioToken!)
-                    .queryKey,
+                queryKey: formsQuery._def,
             });
             queryClient.invalidateQueries({
                 queryKey: formsQuery.detail(
@@ -141,16 +141,27 @@ export default function FormDefinitionsTable() {
         [columnHelper, deleteFormMutate, session.data]
     );
 
+    const [pageSize, setPageSize] = useState(defaultPageSize);
+    const [pageIndex, setPageIndex] = useState(0);
+
     const { isLoading, isError, error, data } = useQuery({
-        ...formsQuery.list(session.data?.user.formioToken!, ["klientPacient"]),
+        ...formsQuery.list(
+            session.data?.user.formioToken!,
+            {
+                limit: pageSize,
+                offset: pageSize * pageIndex,
+            },
+            ["klientPacient"]
+        ),
         enabled: !!session.data?.user.formioToken,
     });
 
     const table = useReactTable({
         columns,
-        data: data ?? [],
+        data: data?.data ?? [],
         getCoreRowModel: getCoreRowModel(),
-        getPaginationRowModel: getPaginationRowModel(),
+        manualPagination: true,
+        autoResetPageIndex: false,
     });
 
     if (isLoading)
@@ -225,21 +236,21 @@ export default function FormDefinitionsTable() {
             <div className="d-flex justify-content-between align-items-center">
                 <Form.Select
                     className="my-2 w-auto"
-                    value={table.getState().pagination.pageSize}
+                    value={pageSize}
                     onChange={(e) => {
-                        table.setPageSize(Number(e.target.value));
+                        setPageSize(Number(e.target.value));
                     }}
                 >
-                    {[10, 20, 30].map((pageSize: number) => (
-                        <option key={pageSize} value={pageSize}>
-                            Zobrazit {pageSize}
+                    {[10, 20, 30].map((currPageSize: number) => (
+                        <option key={currPageSize} value={currPageSize}>
+                            Zobrazit {currPageSize}
                         </option>
                     ))}
                 </Form.Select>
                 <SimplePagination
-                    pageIndex={table.getState().pagination.pageIndex}
-                    totalPages={table.getPageCount()}
-                    setPageIndex={table.setPageIndex}
+                    pageIndex={pageIndex}
+                    totalPages={Math.ceil(data.totalCount / pageSize)}
+                    setPageIndex={setPageIndex}
                 />
             </div>
         </>

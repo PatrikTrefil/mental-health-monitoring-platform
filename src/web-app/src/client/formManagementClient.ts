@@ -192,17 +192,28 @@ export async function deleteFormById(
 /**
  * Load forms from the form management system.
  * @param formioToken - JWT token for formio.
+ * @param pagination.limit
  * @param tags - List of tags which must be present on the form.
+ * @param pagination - Pagination settings.
+ * @param pagination.offset - Offset of the first form to load.
+ * @param pagination.limit - Maximum number of forms to load.
  * @returns List of forms.
  * @throws {TypeError} If the response is not valid json or when a network error is encountered or CORS is misconfigured on the server-side.
+ * @throws {Error} If the Content-Range header in the response is invalid or the total count is unknown.
  */
 export async function loadForms(
     formioToken: string,
+    pagination: {
+        limit: number;
+        offset: number;
+    },
     tags?: string[]
-): Promise<Form[]> {
+): Promise<{ data: Form[]; totalCount: number }> {
     const url = new URL(`${getFormioUrl()}/form/`);
 
     url.searchParams.set("type", "form");
+    url.searchParams.set("limit", pagination.limit.toString());
+    url.searchParams.set("skip", pagination.offset.toString());
     // https://apidocs.form.io/#cd97fc97-7a86-aa65-8e5a-3e9e6eb4a22d
     if (tags) url.searchParams.set("tags__in", tags.join(","));
 
@@ -211,7 +222,15 @@ export async function loadForms(
             "x-jwt-token": formioToken,
         },
     });
-    return (await response.json()) as Form[];
+    const totalCount = Number(
+        response.headers.get("Content-Range")?.match(/\d+$/)
+    );
+    if (isNaN(totalCount)) throw new Error("Invalid Content-Range header.");
+
+    return {
+        data: (await response.json()) as Form[],
+        totalCount,
+    };
 }
 
 /**
