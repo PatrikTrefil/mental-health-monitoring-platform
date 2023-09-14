@@ -3,10 +3,12 @@
 import ExportButton from "@/app/zamestnanec/sprava-formularu/ExportButton";
 import { deleteFormById } from "@/client/formManagementClient";
 import { formsQuery } from "@/client/queries/formManagement";
+import TableHeader from "@/components/TableHeader";
 import SimplePagination from "@/components/shared/SimplePagination";
 import { Form as FormDefinition } from "@/types/formManagement/forms";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
+    SortingState,
     createColumnHelper,
     flexRender,
     getCoreRowModel,
@@ -90,16 +92,24 @@ export default function FormDefinitionsTable() {
                 },
             }),
             columnHelper.accessor("name", {
-                header: "Název",
+                id: "name",
+                header: ({ column }) => (
+                    <TableHeader text="Název" column={column} />
+                ),
             }),
             columnHelper.accessor("created", {
-                header: "Vytvořeno dne",
+                id: "created",
+                header: ({ column }) => (
+                    <TableHeader text="Vytvořeno dne" column={column} />
+                ),
                 cell: (props) =>
                     new Date(props.row.original.created).toLocaleString(),
             }),
             columnHelper.display({
                 id: "actions",
-                header: "Akce",
+                header: ({ column }) => (
+                    <TableHeader text="Akce" column={column} />
+                ),
                 cell: (props) => (
                     <div className="d-flex align-items-center gap-2">
                         <Button
@@ -144,21 +154,36 @@ export default function FormDefinitionsTable() {
     const [pageSize, setPageSize] = useState(defaultPageSize);
     const [pageIndex, setPageIndex] = useState(0);
 
+    const [sorting, setSorting] = useState<SortingState>([]);
+    console.log({ sorting });
+
     const { isLoading, isError, error, data } = useQuery({
-        ...formsQuery.list(
-            session.data?.user.formioToken!,
-            {
+        ...formsQuery.list({
+            formioToken: session.data?.user.formioToken!,
+            pagination: {
                 limit: pageSize,
                 offset: pageSize * pageIndex,
             },
-            ["klientPacient"]
-        ),
+            sort:
+                sorting[0] !== undefined
+                    ? {
+                          field: sorting[0].id as keyof FormDefinition,
+                          order: sorting[0].desc ? "desc" : "asc",
+                      }
+                    : undefined,
+            tags: ["klientPacient"],
+        }),
         enabled: !!session.data?.user.formioToken,
     });
 
     const table = useReactTable({
         columns,
         data: data?.data ?? [],
+        state: {
+            sorting,
+        },
+        manualSorting: true,
+        onSortingChange: setSorting,
         getCoreRowModel: getCoreRowModel(),
         manualPagination: true,
         autoResetPageIndex: false,
