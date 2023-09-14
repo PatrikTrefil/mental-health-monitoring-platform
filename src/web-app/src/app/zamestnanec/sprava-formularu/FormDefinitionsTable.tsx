@@ -155,7 +155,6 @@ export default function FormDefinitionsTable() {
     const [pageIndex, setPageIndex] = useState(0);
 
     const [sorting, setSorting] = useState<SortingState>([]);
-    console.log({ sorting });
 
     const { isLoading, isError, error, data } = useQuery({
         ...formsQuery.list({
