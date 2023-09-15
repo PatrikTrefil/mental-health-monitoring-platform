@@ -46,17 +46,19 @@ const taskRouter = createTRPCRouter({
     listTasks: protectedProcedure
         .input(
             z.object({
-                /**
-                 * Maximum number of tasks to return.
-                 */
-                limit: z.number().nonnegative(),
-                /**
-                 * Offset of the first task to return. (also known as skip).
-                 */
-                offset: z.number().nonnegative(),
-                /**
-                 * Sort order of the results.
-                 */
+                pagination: z.object({
+                    /**
+                     * Maximum number of tasks to return.
+                     */
+                    limit: z.number().nonnegative(),
+                    /**
+                     * Offset of the first task to return. (also known as skip).
+                     */
+                    offset: z.number().nonnegative(),
+                    /**
+                     * Sort order of the results.
+                     */
+                }),
                 sort: z
                     .object({
                         /**
@@ -101,8 +103,8 @@ const taskRouter = createTRPCRouter({
                     const [data, count] = await opts.ctx.prisma.$transaction([
                         opts.ctx.prisma.task.findMany({
                             include: { deadline: true },
-                            skip: opts.input.offset,
-                            take: opts.input.limit,
+                            skip: opts.input.pagination.offset,
+                            take: opts.input.pagination.limit,
                             orderBy,
                         }),
                         opts.ctx.prisma.task.count(),
@@ -119,8 +121,8 @@ const taskRouter = createTRPCRouter({
                             include: {
                                 deadline: true,
                             },
-                            skip: opts.input.offset,
-                            take: opts.input.limit,
+                            skip: opts.input.pagination.offset,
+                            take: opts.input.pagination.limit,
                             orderBy,
                         }),
                         opts.ctx.prisma.task.count({
@@ -238,14 +240,22 @@ const taskRouter = createTRPCRouter({
                     message: "Form with given formId does not exist",
                 });
 
-            const users = await loadClientsAndPatients(
-                opts.ctx.session.user.formioToken
-            );
+            const user = await loadClientsAndPatients({
+                formioToken: opts.ctx.session.user.formioToken,
+                pagination: {
+                    limit: 1,
+                    offset: 0,
+                },
+                filters: [
+                    {
+                        fieldPath: "data.id",
+                        operation: "equal",
+                        comparedValue: opts.input.forUserId,
+                    },
+                ],
+            });
 
-            if (
-                users.find((u) => u.data.id === opts.input.forUserId) ===
-                undefined
-            )
+            if (user === undefined || user.data.length === 0)
                 throw new TRPCError({
                     code: "CONFLICT",
                     message: "User with given forUserId does not exist",

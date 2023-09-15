@@ -26,6 +26,12 @@ vi.mock("@/client/userManagementClient", () => ({
             },
         },
     ]),
+    loadClientPatient: vi.fn(() => ({
+        _id: userSubmissionId,
+        data: {
+            id: userId,
+        },
+    })),
 }));
 
 it("deletes a concept", async () => {

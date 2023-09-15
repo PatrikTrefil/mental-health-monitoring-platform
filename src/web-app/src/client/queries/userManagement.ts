@@ -7,11 +7,20 @@ import {
 } from "../userManagementClient";
 
 export const usersQuery = createQueryKeys("users", {
-    list: (formioToken: string) => ({
+    list: ({
+        formioToken,
+        pagination,
+        sort,
+    }: {
+        formioToken: string;
+        pagination: { limit: number; offset: number };
+        sort?: { field: string; order: "asc" | "desc" };
+    }) => ({
         // We don't include the token in the query key, because the result does not depend on it
         // eslint-disable-next-line @tanstack/query/exhaustive-deps
-        queryKey: ["usersList"],
-        queryFn: () => loadClientsAndPatients(formioToken),
+        queryKey: ["usersList", pagination, sort],
+        queryFn: () =>
+            loadClientsAndPatients({ formioToken, pagination, sort }),
     }),
     detail: (formioToken: string, userSubmissionId: string) => ({
         // We don't include the token in the query key, because the result does not depend on it

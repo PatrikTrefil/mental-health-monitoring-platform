@@ -45,8 +45,7 @@ export default function DeleteFormToolbarItem({
         onSuccess: (_, { formId }) => {
             console.debug("Form deleted.", { formId });
             queryClient.invalidateQueries({
-                queryKey: formsQuery.list(session.data?.user.formioToken!)
-                    .queryKey,
+                queryKey: formsQuery.list._def
             });
             queryClient.invalidateQueries({
                 queryKey: formsQuery.detail(

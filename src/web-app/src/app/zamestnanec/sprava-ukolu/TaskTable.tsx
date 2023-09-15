@@ -226,23 +226,46 @@ export default function TaskTable() {
     const [pageSize, setPageSize] = useState(defaultPageSize);
     const [pageIndex, setPageIndex] = useState(0);
 
+    const [sorting, setSorting] = useState<SortingState>([]);
+
     useEffect(() => {
         // Prefetch next page
         const nextPageIndex = pageIndex + 1;
         utils.task.listTasks.prefetch({
-            limit: pageSize,
-            offset: nextPageIndex * pageSize,
+            pagination: {
+                limit: pageSize,
+                offset: nextPageIndex * pageSize,
+            },
+            sort:
+                sorting[0] !== undefined
+                    ? {
+                          field: sorting[0].id as keyof inferProcedureOutput<
+                              AppRouter["task"]["createTask"]
+                          >,
+                          order: sorting[0].desc ? "desc" : "asc",
+                      }
+                    : undefined,
         });
         // Prefetch previous page
         const prevPageIndex = pageIndex - 1;
         if (prevPageIndex >= 0)
             utils.task.listTasks.prefetch({
-                limit: pageSize,
-                offset: prevPageIndex * pageSize,
+                pagination: {
+                    limit: pageSize,
+                    offset: prevPageIndex * pageSize,
+                },
+                sort:
+                    sorting[0] !== undefined
+                        ? {
+                              field: sorting[0]
+                                  .id as keyof inferProcedureOutput<
+                                  AppRouter["task"]["createTask"]
+                              >,
+                              order: sorting[0].desc ? "desc" : "asc",
+                          }
+                        : undefined,
             });
-    }, [pageSize, pageIndex, utils]);
-
-    const [sorting, setSorting] = useState<SortingState>([]);
+    }, [pageSize, pageIndex, utils, sorting]);
 
     const {
         isLoading,
@@ -250,9 +273,10 @@ export default function TaskTable() {
         error,
         data: taskQueryData,
     } = trpc.task.listTasks.useQuery({
-        limit: pageSize,
-        offset: pageIndex * pageSize,
-        // TODO: add ability to sort by multiple columns to api
+        pagination: {
+            limit: pageSize,
+            offset: pageIndex * pageSize,
+        },
         sort:
             sorting[0] !== undefined
                 ? {

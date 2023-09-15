@@ -10,25 +10,84 @@ import safeFetch from "./safeFetch";
 
 /**
  * Load all users from the user management system.
- * @param formioToken - JWT token for formio.
+ * @param root0 - Options.
+ * @param root0.formioToken - JWT token for formio.
+ * @param root0.pagination - Pagination settings.
+ * @param root0.pagination.limit - Maximum number of clients/patients to load.
+ * @param root0.pagination.offset - Number of clients/patients that should be skipped.
+ * @param root0.sort - Sorting configuration.
+ * @param root0.sort.field - Field to sort by.
+ * @param root0.sort.order - Ordering of the results (ascending or descending).
+ * @param root0.filters
  * @returns List of all users.
  * @throws {RequestError}
  * If the returned http status is not OK.
  * @throws {TypeError}
  * If the response is not valid json or when a network error is encountered or CORS is misconfigured on the server-side.
+ * @throws {Error}
+ * If the Content-Range header is invalid or unknown.
  */
-export async function loadClientsAndPatients(
-    formioToken: string
-): Promise<User[]> {
-    const response = await safeFetch(
-        `${getFormioUrl()}/klientpacient/submission`,
-        {
-            headers: {
-                "x-jwt-token": formioToken,
-            },
+export async function loadClientsAndPatients({
+    formioToken,
+    pagination,
+    sort,
+    filters,
+}: {
+    formioToken: string;
+    pagination: {
+        limit: number;
+        offset: number;
+    };
+    sort?: {
+        field: string;
+        order: "asc" | "desc";
+    };
+    filters?: {
+        fieldPath: string;
+        operation: "equal" | "not equal";
+        comparedValue: string;
+    }[];
+}): Promise<{ data: User[]; totalCount: number }> {
+    const url = new URL(`${getFormioUrl()}/klientpacient/submission`);
+
+    // pagination
+    url.searchParams.set("limit", pagination.limit.toString());
+    url.searchParams.set("skip", pagination.offset.toString());
+
+    if (sort)
+        url.searchParams.set(
+            `${sort.order === "desc" ? "-" : ""}sort`,
+            sort.field
+        );
+    if (filters !== undefined) {
+        for (const filter of filters) {
+            let operation: string;
+            switch (filter.operation) {
+                case "equal":
+                    operation = "";
+                    break;
+                case "not equal":
+                    operation = "__ne";
+                    break;
+            }
+            url.searchParams.set(
+                `${filter.fieldPath}${operation}`,
+                filter.comparedValue
+            );
         }
+    }
+
+    const response = await safeFetch(url, {
+        headers: {
+            "x-jwt-token": formioToken,
+        },
+    });
+    const totalCount = Number(
+        response.headers.get("Content-Range")?.match(/\d+$/)
     );
-    return (await response.json()) as User[];
+    if (isNaN(totalCount)) throw new Error("Invalid Content-Range header.");
+
+    return { data: (await response.json()) as User[], totalCount };
 }
 
 /**

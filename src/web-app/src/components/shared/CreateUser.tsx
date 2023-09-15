@@ -95,9 +95,7 @@ export default function CreateUser({
                         );
                         break;
                     case UserRoleTitles.KLIENT_PACIENT:
-                        queryClient.invalidateQueries(
-                            usersQuery.list(data?.user.formioToken!).queryKey
-                        );
+                        queryClient.invalidateQueries(usersQuery.list._def);
                         break;
                 }
                 onChangeDone?.();

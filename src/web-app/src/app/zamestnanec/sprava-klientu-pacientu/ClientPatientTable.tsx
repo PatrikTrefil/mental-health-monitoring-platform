@@ -2,16 +2,17 @@
 
 import { usersQuery } from "@/client/queries/userManagement";
 import { deleteClientPacient } from "@/client/userManagementClient";
+import TableHeader from "@/components/TableHeader";
 import ChangePasswordUser from "@/components/shared/ChangePasswordUser";
 import SimplePagination from "@/components/shared/SimplePagination";
 import UserRoleTitles from "@/constants/userRoleTitles";
 import { User } from "@/types/userManagement/user";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
+    SortingState,
     createColumnHelper,
     flexRender,
     getCoreRowModel,
-    getPaginationRowModel,
     useReactTable,
 } from "@tanstack/react-table";
 import { useSession } from "next-auth/react";
@@ -19,6 +20,8 @@ import { useMemo, useState } from "react";
 import { Alert, Button, Form, Modal, Spinner, Table } from "react-bootstrap";
 import { toast } from "react-toastify";
 import ClientPatientTableToolbar from "./ClientPatientTableToolbar";
+
+const defaultPageSize = 10;
 
 /**
  * Page for managing users.
@@ -55,8 +58,7 @@ export default function ClientPatientTable() {
                 userSubmissionId,
             });
             queryClient.invalidateQueries({
-                queryKey: usersQuery.list(session.data!.user.formioToken)
-                    .queryKey,
+                queryKey: usersQuery.list._def,
             });
             queryClient.invalidateQueries({
                 queryKey: usersQuery.detail(
@@ -100,16 +102,24 @@ export default function ClientPatientTable() {
                 },
             }),
             columnHelper.accessor("data.id", {
-                header: "ID",
+                id: "data.id",
+                header: ({ column }) => (
+                    <TableHeader text="ID" column={column} />
+                ),
             }),
             columnHelper.accessor("created", {
-                header: "Vytvořeno dne",
+                id: "created",
+                header: ({ column }) => (
+                    <TableHeader text="Vytvořeno dne" column={column} />
+                ),
                 cell: (props) =>
                     new Date(props.row.original.created).toLocaleString(),
             }),
             columnHelper.display({
                 id: "actions",
-                header: "Akce",
+                header: ({ column }) => (
+                    <TableHeader text="Akce" column={column} />
+                ),
                 cell: (props) => (
                     <div className="d-flex gap-2">
                         <Button
@@ -144,16 +154,40 @@ export default function ClientPatientTable() {
         [columnHelper, session.data, deleteUserMutate]
     );
 
+    const [pageSize, setPageSize] = useState(defaultPageSize);
+    const [pageIndex, setPageIndex] = useState(0);
+
+    const [sorting, setSorting] = useState<SortingState>([]);
+
     const { isLoading, isError, error, data } = useQuery({
-        ...usersQuery.list(session.data?.user.formioToken!),
+        ...usersQuery.list({
+            formioToken: session.data?.user.formioToken!,
+            pagination: {
+                limit: pageSize,
+                offset: pageIndex * pageSize,
+            },
+            sort:
+                sorting[0] !== undefined
+                    ? {
+                          field: sorting[0].id,
+                          order: sorting[0].desc ? "desc" : "asc",
+                      }
+                    : undefined,
+        }),
         enabled: !!session.data?.user.formioToken,
     });
 
     const table = useReactTable({
         columns,
-        data: data ?? [],
+        data: data?.data ?? [],
         getCoreRowModel: getCoreRowModel(),
-        getPaginationRowModel: getPaginationRowModel(),
+        state: {
+            sorting,
+        },
+        manualSorting: true,
+        onSortingChange: setSorting,
+        manualPagination: true,
+        autoResetPageIndex: false,
     });
 
     if (isLoading)
@@ -233,9 +267,9 @@ export default function ClientPatientTable() {
             <div className="d-flex justify-content-between align-items-center">
                 <Form.Select
                     className="my-2 w-auto"
-                    value={table.getState().pagination.pageSize}
+                    value={pageSize}
                     onChange={(e) => {
-                        table.setPageSize(Number(e.target.value));
+                        setPageSize(Number(e.target.value));
                     }}
                 >
                     {[10, 20, 30].map((pageSize: number) => (
@@ -245,9 +279,9 @@ export default function ClientPatientTable() {
                     ))}
                 </Form.Select>
                 <SimplePagination
-                    pageIndex={table.getState().pagination.pageIndex}
-                    totalPages={table.getPageCount()}
-                    setPageIndex={table.setPageIndex}
+                    pageIndex={pageIndex}
+                    totalPages={Math.ceil(data.totalCount / pageSize)}
+                    setPageIndex={setPageIndex}
                 />
             </div>
 

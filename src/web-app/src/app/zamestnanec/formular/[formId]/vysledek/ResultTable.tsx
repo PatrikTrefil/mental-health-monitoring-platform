@@ -37,7 +37,15 @@ export default function ResultTable({ formId }: { formId: string }) {
         isError: isErrorUsers,
         error: errorUsers,
     } = useSmartFetch({
-        queryFn: () => loadClientsAndPatients(data?.user.formioToken!),
+        queryFn: () =>
+            loadClientsAndPatients({
+                formioToken: data?.user.formioToken!,
+                // HACK: find a beter solution
+                pagination: {
+                    limit: 1000,
+                    offset: 0,
+                },
+            }),
         enabled: !!data,
     });
 
@@ -80,8 +88,9 @@ export default function ResultTable({ formId }: { formId: string }) {
             columnHelper.accessor("owner", {
                 header: "Autor",
                 cell: (props) =>
-                    users?.find((user) => user._id === props.row.original.owner)
-                        ?.data?.id ?? "Načítání...",
+                    users?.data.find(
+                        (user) => user._id === props.row.original.owner
+                    )?.data?.id ?? "Načítání...",
             }),
             columnHelper.accessor("created", {
                 header: "Vytvořeno dne",

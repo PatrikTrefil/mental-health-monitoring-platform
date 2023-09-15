@@ -194,12 +194,16 @@ export default function TaskCreationForm() {
         data: users,
         refetch: refetchUsers,
     } = useQuery({
-        ...usersQuery.list(session.data?.user.formioToken!),
+        ...usersQuery.list({
+            formioToken: session.data?.user.formioToken!,
+            // HACK: find a better solution
+            pagination: { limit: 1000, offset: 0 },
+        }),
         enabled: !!session.data?.user.formioToken,
     });
 
     const userOptionsList = useMemo(() => {
-        return users?.map((user) => ({
+        return users?.data.map((user) => ({
             value: user.data.id,
             label: user.data.id,
         }));
@@ -212,13 +216,18 @@ export default function TaskCreationForm() {
         data: forms,
         refetch: refetchForms,
     } = useQuery({
-        ...formsQuery.list(session.data?.user.formioToken!, ["klientPacient"]),
+        ...formsQuery.list({
+            formioToken: session.data?.user.formioToken!,
+            tags: ["klientPacient"],
+            // HACK: find a better solution
+            pagination: { limit: 1000, offset: 0 },
+        }),
         keepPreviousData: true,
         enabled: !!session.data?.user.formioToken,
     });
 
     const formSelectOptions = useMemo(
-        () => forms?.map((f) => ({ value: f._id, label: f.name })),
+        () => forms?.data.map((f) => ({ value: f._id, label: f.name })),
         [forms]
     );
 
