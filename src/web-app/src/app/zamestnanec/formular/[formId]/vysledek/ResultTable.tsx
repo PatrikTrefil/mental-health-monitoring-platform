@@ -87,10 +87,15 @@ export default function ResultTable({ formId }: { formId: string }) {
         const cols = [
             columnHelper.accessor("owner", {
                 header: "Autor",
-                cell: (props) =>
-                    users?.data.find(
-                        (user) => user._id === props.row.original.owner
-                    )?.data?.id ?? "Načítání...",
+                cell: (props) => {
+                    if (users === null) return "Načítání...";
+
+                    return (
+                        users.data.find(
+                            (user) => user._id === props.row.original.owner
+                        )?.data?.id ?? "Neznámý"
+                    );
+                },
             }),
             columnHelper.accessor("created", {
                 header: "Vytvořeno dne",
