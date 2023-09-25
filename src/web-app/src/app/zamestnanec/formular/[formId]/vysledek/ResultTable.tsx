@@ -1,15 +1,15 @@
 "use client";
 
-import { loadFormById, loadSubmissions } from "@/client/formManagementClient";
-import { loadClientsAndPatients } from "@/client/userManagementClient";
+import { formsQuery } from "@/client/queries/formManagement";
+import { usersQuery } from "@/client/queries/userManagement";
 import SimplePagination from "@/components/shared/SimplePagination";
-import { useSmartFetch } from "@/hooks/useSmartFetch";
 import { Form as FormFormio } from "@/types/formManagement/forms";
 import {
     DataValue,
     SelectBoxDataValue,
     Submission,
 } from "@/types/formManagement/submission";
+import { useQueries, useQuery } from "@tanstack/react-query";
 import {
     createColumnHelper,
     flexRender,
@@ -31,71 +31,74 @@ import stringifyResult from "./stringifyResult";
 export default function ResultTable({ formId }: { formId: string }) {
     const { data } = useSession();
 
-    // We need to load users to display their names in table
-    const {
-        data: users,
-        isError: isErrorUsers,
-        error: errorUsers,
-    } = useSmartFetch({
-        queryFn: () =>
-            loadClientsAndPatients({
-                formioToken: data?.user.formioToken!,
-                // HACK: find a beter solution
-                pagination: {
-                    limit: 1000,
-                    offset: 0,
-                },
-            }),
-        enabled: !!data,
-    });
-
     // We need the form object to get path of the form to load submissions
     const {
         data: form,
         isError: isErrorForm,
         error: errorForm,
         isLoading: isLoadingForm,
-    } = useSmartFetch<FormFormio, string>({
-        queryFn: async () => {
-            const form = await loadFormById(formId, data!.user.formioToken);
-            if (!form) throw "Formulář s předaným ID nebyl nalezen";
-
-            return form;
-        },
-        enabled: !!data,
+    } = useQuery({
+        ...formsQuery.detail(data?.user.formioToken!, formId),
+        enabled: !!data?.user.formioToken,
     });
 
     const {
-        data: submissions,
+        data: rawSubmissions,
         isError: isErrorSubmissions,
         error: errorSubmissions,
         isLoading: isLoadingSubmissions,
-    } = useSmartFetch({
-        queryFn: async () => {
-            const submissions = await loadSubmissions(
-                form!.path,
-                data!.user.formioToken
-            );
-            return addHumanReadableLabelsToSubmissionData(submissions, form!);
-        },
+    } = useQuery({
+        ...formsQuery.submissions(data?.user.formioToken!, formId),
         enabled: !!data && !!form,
     });
 
+    const labeledSubmissions = useMemo(
+        () =>
+            rawSubmissions !== undefined && form !== undefined && form !== null
+                ? addHumanReadableLabelsToSubmissionData(rawSubmissions, form)
+                : [],
+        [rawSubmissions, form]
+    );
+
+    const userIdsToLoad = useMemo(() => {
+        if (rawSubmissions === undefined) return [];
+        return Array.from(
+            new Set<string>(
+                rawSubmissions.map((submission) => submission.owner)
+            )
+        );
+    }, [rawSubmissions]);
+
+    // We need to load users to display their names in table
+    const users = useQueries({
+        queries: userIdsToLoad.map((userId) => ({
+            ...usersQuery.detail(data?.user.formioToken!, userId),
+            enabled: !!data?.user.formioToken,
+        })),
+    });
+
+    const userIdUserDisplayNameMap = useMemo(() => {
+        if (users === undefined) return new Map<string, string>();
+        return new Map(
+            users.map((user) => [user.data?._id, user.data?.data.id])
+        );
+    }, [users]);
+
+    const tableData = useMemo(() => {
+        return labeledSubmissions?.map((submission) => ({
+            ...submission,
+            ownerDisplayId:
+                userIdUserDisplayNameMap.get(submission.owner) ?? "Neznámý",
+        }));
+    }, [labeledSubmissions, userIdUserDisplayNameMap]);
+
     const columnHelper =
-        createColumnHelper<Exclude<typeof submissions, null>[number]>();
+        createColumnHelper<Exclude<typeof tableData, undefined>[number]>();
     const columns = useMemo(() => {
         const cols = [
             columnHelper.accessor("owner", {
                 header: "Autor",
-                cell: (props) => {
-                    if (users === null) return "Načítání...";
-
-                    return (
-                        users.data.find(
-                            (user) => user._id === props.row.original.owner
-                        )?.data?.id ?? "Neznámý"
-                    );
-                },
+                cell: (props) => props.row.original.ownerDisplayId,
             }),
             columnHelper.accessor("created", {
                 header: "Vytvořeno dne",
@@ -125,11 +128,11 @@ export default function ResultTable({ formId }: { formId: string }) {
                 );
             }
         return cols;
-    }, [columnHelper, form, users]);
+    }, [columnHelper, form?.components]);
 
     const table = useReactTable({
         columns,
-        data: submissions ?? [],
+        data: tableData ?? [],
         getCoreRowModel: getCoreRowModel(),
         getPaginationRowModel: getPaginationRowModel(),
     });
@@ -143,11 +146,17 @@ export default function ResultTable({ formId }: { formId: string }) {
             </div>
         );
 
-    if (isErrorForm) return <Alert variant="danger">{errorForm}</Alert>;
+    if (isErrorForm) {
+        console.error(errorForm);
+        return <Alert variant="danger">Nepodařilo se načíst data.</Alert>;
+    }
 
-    if (isErrorSubmissions || isErrorUsers) {
-        if (isErrorUsers) console.error(errorUsers);
-        else if (isErrorSubmissions) console.error(errorSubmissions);
+    if (form === null) {
+        return <Alert variant="danger">Formulář neexistuje.</Alert>;
+    }
+
+    if (isErrorSubmissions) {
+        if (isErrorSubmissions) console.error(errorSubmissions);
 
         return (
             <Alert variant="danger">
@@ -160,7 +169,7 @@ export default function ResultTable({ formId }: { formId: string }) {
         <>
             <h1>Výsledky formuláře - {form.title}</h1>
             <FrequencyVisualization
-                data={submissions.map((s) => s.data)}
+                data={labeledSubmissions.map((s) => s.data)}
                 labelKeyMap={Object.fromEntries(
                     form.components
                         .filter(
