@@ -48,6 +48,9 @@ it("deletes a concept", async () => {
                     form: formId,
                 },
             }),
+            headers: {
+                "x-jwt-token": mockValidAdminToken,
+            },
         })
     );
     // assert - the draft is deleted
@@ -81,6 +84,9 @@ it("returns 404 if the draft does not exist", async () => {
                     form: formId,
                 },
             }),
+            headers: {
+                "x-jwt-token": mockValidAdminToken,
+            },
         })
     );
     expect(response.status).toBe(404);

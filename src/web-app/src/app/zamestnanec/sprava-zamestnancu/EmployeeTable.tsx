@@ -1,19 +1,25 @@
 "use client";
 
-import { employeesQuery, rolesQuery } from "@/client/queries/userManagement";
+import {
+    employeesInfiniteQuery,
+    spravceDotaznikuQuery,
+    zadavatelDotaznikuQuery,
+} from "@/client/queries/userManagement";
 import { deleteUser } from "@/client/userManagementClient";
+import TableHeader from "@/components/TableHeader";
 import ChangePasswordUser from "@/components/shared/ChangePasswordUser";
-import SimplePagination from "@/components/shared/SimplePagination";
 import UserRoleTitles from "@/constants/userRoleTitles";
 import { UserRoleTitle } from "@/types/userManagement/UserRoleTitle";
-import { Role } from "@/types/userManagement/role";
-import { User } from "@/types/userManagement/user";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
+    useInfiniteQuery,
+    useMutation,
+    useQueryClient,
+} from "@tanstack/react-query";
+import {
+    SortingState,
     createColumnHelper,
     flexRender,
     getCoreRowModel,
-    getPaginationRowModel,
     useReactTable,
 } from "@tanstack/react-table";
 import { signOut, useSession } from "next-auth/react";
@@ -22,18 +28,7 @@ import { Alert, Button, Form, Modal, Spinner, Table } from "react-bootstrap";
 import { toast } from "react-toastify";
 import EmployeeTableToolbar from "./EmployeeTableToolbar";
 
-/**
- * Convert ID of a role to its title.
- * @param roleId - Role id to convert.
- * @param roles - List of role objects.
- * @returns Role title of the role with the given ID.
- * @throws Error if the role ID is unknown.
- */
-function roleIdToRoleTitle(roleId: string, roles: Role[]): UserRoleTitle {
-    const role = roles.find((role) => role._id === roleId);
-    if (!role) throw new Error("Unknown role ID.");
-    return role.title;
-}
+const pageSize = 10;
 
 /**
  * Page for managing employee accounts.
@@ -47,13 +42,6 @@ export default function EmployeeTable() {
         userId: string;
         roleTitle: UserRoleTitle;
     }>();
-
-    const { data: roles } = useQuery({
-        ...rolesQuery.list(session.data?.user.formioToken!),
-        enabled: !!session.data,
-    });
-
-    const roleTitlesCurrentUser = session.data?.user.roleTitles;
 
     const { mutate: deleteEmployeeMutate } = useMutation({
         mutationFn: async ({
@@ -80,18 +68,57 @@ export default function EmployeeTable() {
 
             toast.error("Smazání účtu selhalo.");
         },
-        onSuccess: (_, { userSubmissionId }) => {
+        onSuccess: (_, { userSubmissionId, userRoleTitle }) => {
             console.debug("Employee deleted.", {
                 userSubmissionId,
             });
             queryClient.invalidateQueries({
-                queryKey: employeesQuery.list(session.data!.user.formioToken)
-                    .queryKey,
+                queryKey: employeesInfiniteQuery.list._def,
             });
+            if (userRoleTitle === UserRoleTitles.SPRAVCE_DOTAZNIKU)
+                queryClient.invalidateQueries({
+                    queryKey: spravceDotaznikuQuery.list._def,
+                });
+            else if (userRoleTitle === UserRoleTitles.ZADAVATEL_DOTAZNIKU)
+                queryClient.invalidateQueries({
+                    queryKey: zadavatelDotaznikuQuery.list._def,
+                });
+            else
+                throw new Error(`Unexpected user role title: ${userRoleTitle}`);
         },
     });
 
-    const columnHelper = createColumnHelper<User>();
+    const [sorting, setSorting] = useState<SortingState>([]);
+
+    const {
+        isLoading,
+        isError,
+        error,
+        data: employees,
+        hasNextPage,
+        fetchNextPage,
+    } = useInfiniteQuery({
+        ...employeesInfiniteQuery.list({
+            formioToken: session.data?.user.formioToken!,
+            sorting,
+            pageSize,
+        }),
+        enabled: !!session.data?.user.formioToken,
+        getNextPageParam: (lastPage) =>
+            lastPage.nextPageParam.nextPageSpravceOffset !== undefined ||
+            lastPage.nextPageParam.nextPageZadavatelOffset !== undefined
+                ? lastPage.nextPageParam
+                : undefined,
+    });
+
+    const tableData = useMemo(
+        function flattenEmployeesPages() {
+            return employees?.pages.flatMap((item) => item.data) ?? [];
+        },
+        [employees]
+    );
+
+    const columnHelper = createColumnHelper<(typeof tableData)[number]>();
     const columns = useMemo(
         () => [
             columnHelper.display({
@@ -119,77 +146,51 @@ export default function EmployeeTable() {
                 },
             }),
             columnHelper.accessor("data.id", {
-                header: "ID",
+                id: "data.id",
+                header: ({ column }) => (
+                    <TableHeader text="ID" column={column} />
+                ),
                 cell: (props) => {
-                    if (roles === undefined) return null;
-
-                    const userRoles = props.row.original.roles;
-                    const roleTitles = userRoles.map((role) =>
-                        roleIdToRoleTitle(role, roles)
-                    );
-                    let mainRoleTitle: UserRoleTitle | undefined = undefined;
-                    if (roleTitles.includes(UserRoleTitles.SPRAVCE_DOTAZNIKU))
-                        mainRoleTitle = UserRoleTitles.SPRAVCE_DOTAZNIKU;
-                    else if (
-                        roleTitles.includes(UserRoleTitles.ZADAVATEL_DOTAZNIKU)
-                    )
-                        mainRoleTitle = UserRoleTitles.ZADAVATEL_DOTAZNIKU;
-
                     return (
                         <>
                             {props.row.original.data.id}{" "}
-                            <i>({mainRoleTitle ?? "-"})</i>
+                            <i>
+                                ({props.row.original.mainUserRoleTitle ?? "-"})
+                            </i>
                         </>
                     );
                 },
             }),
             columnHelper.accessor("created", {
-                header: "Vytvořeno dne",
+                id: "created",
+                header: ({ column }) => (
+                    <TableHeader text="Vytvořeno dne" column={column} />
+                ),
                 cell: (props) =>
                     new Date(props.row.original.created).toLocaleString(),
             }),
             columnHelper.display({
                 id: "actions",
-                header: "Akce",
+                header: ({ column }) => (
+                    <TableHeader text="Akce" column={column} />
+                ),
                 cell: (props) => {
-                    if (
-                        roles === undefined ||
-                        roleTitlesCurrentUser === undefined
-                    )
-                        return null;
                     const isOwnAccount =
                         props.row.original._id === session?.data?.user._id;
-                    let deleteButton: React.ReactNode | null;
+                    const actionNodes: React.ReactNode[] = [];
 
-                    const userRoles = props.row.original.roles;
-                    const roleTitlesRow = userRoles.map((role) =>
-                        roleIdToRoleTitle(role, roles)
-                    );
-                    let mainUserRoleTitle: UserRoleTitle;
+                    const roleTitlesCurrentUser = session.data?.user.roleTitles;
                     if (
-                        roleTitlesRow.includes(UserRoleTitles.SPRAVCE_DOTAZNIKU)
-                    )
-                        mainUserRoleTitle = UserRoleTitles.SPRAVCE_DOTAZNIKU;
-                    else if (
-                        roleTitlesRow.includes(
-                            UserRoleTitles.ZADAVATEL_DOTAZNIKU
-                        )
-                    )
-                        mainUserRoleTitle = UserRoleTitles.ZADAVATEL_DOTAZNIKU;
-                    else throw new Error("Unknown user role.");
-
-                    if (
-                        roleTitlesCurrentUser.includes(
+                        roleTitlesCurrentUser?.includes(
                             UserRoleTitles.SPRAVCE_DOTAZNIKU
                         ) ||
-                        (roleTitlesCurrentUser.includes(
+                        (roleTitlesCurrentUser?.includes(
                             UserRoleTitles.ZADAVATEL_DOTAZNIKU
                         ) &&
-                            roleTitlesRow.includes(
-                                UserRoleTitles.ZADAVATEL_DOTAZNIKU
-                            ))
-                    )
-                        deleteButton = (
+                            props.row.original.mainUserRoleTitle ===
+                                UserRoleTitles.ZADAVATEL_DOTAZNIKU)
+                    ) {
+                        actionNodes.push(
                             <Button
                                 variant="danger"
                                 disabled={!session.data}
@@ -197,7 +198,9 @@ export default function EmployeeTable() {
                                     deleteEmployeeMutate({
                                         userSubmissionId:
                                             props.row.original._id,
-                                        userRoleTitle: mainUserRoleTitle,
+                                        userRoleTitle:
+                                            props.row.original
+                                                .mainUserRoleTitle,
                                         formioToken:
                                             session.data!.user.formioToken,
                                     });
@@ -208,44 +211,38 @@ export default function EmployeeTable() {
                                 Smazat {isOwnAccount && "vlastní účet"}
                             </Button>
                         );
-                    return (
-                        <div className="d-flex gap-2">
-                            {deleteButton}
+                        actionNodes.push(
                             <Button
                                 onClick={() => {
                                     setUserToEdit({
                                         submissionId: props.row.original._id,
                                         userId: props.row.original.data.id,
-                                        roleTitle: mainUserRoleTitle,
+                                        roleTitle:
+                                            props.row.original
+                                                .mainUserRoleTitle,
                                     });
                                 }}
                             >
                                 Upravit {isOwnAccount && "vlastní účet"}
                             </Button>
-                        </div>
-                    );
+                        );
+                    }
+                    return <div className="d-flex gap-2">{...actionNodes}</div>;
                 },
             }),
         ],
-        [
-            columnHelper,
-            roles,
-            session.data,
-            roleTitlesCurrentUser,
-            deleteEmployeeMutate,
-        ]
+        [columnHelper, session.data, deleteEmployeeMutate]
     );
-
-    const { isLoading, isError, error, data } = useQuery({
-        ...employeesQuery.list(session.data?.user.formioToken!),
-        enabled: !!session.data?.user.formioToken,
-    });
 
     const table = useReactTable({
         columns,
-        data: data ?? [],
+        data: tableData,
         getCoreRowModel: getCoreRowModel(),
-        getPaginationRowModel: getPaginationRowModel(),
+        state: {
+            sorting,
+        },
+        manualSorting: true,
+        onSortingChange: setSorting,
     });
 
     if (isLoading)
@@ -259,6 +256,7 @@ export default function EmployeeTable() {
 
     if (isError) {
         console.error(error);
+
         return (
             <Alert variant="danger">
                 Načítání seznamu zaměstnanců selhalo.
@@ -324,25 +322,15 @@ export default function EmployeeTable() {
                     </tbody>
                 </Table>
             </div>
-            <div className="d-flex justify-content-between align-items-center">
-                <Form.Select
-                    className="my-2 w-auto"
-                    value={table.getState().pagination.pageSize}
-                    onChange={(e) => {
-                        table.setPageSize(Number(e.target.value));
-                    }}
+            <div className="d-flex justify-content-center align-items-center mb-4 mt-1">
+                <Button
+                    size="lg"
+                    disabled={!hasNextPage}
+                    variant={hasNextPage ? "primary" : "secondary"}
+                    onClick={() => fetchNextPage()}
                 >
-                    {[10, 20, 30].map((pageSize: number) => (
-                        <option key={pageSize} value={pageSize}>
-                            Zobrazit {pageSize}
-                        </option>
-                    ))}
-                </Form.Select>
-                <SimplePagination
-                    pageIndex={table.getState().pagination.pageIndex}
-                    totalPages={table.getPageCount()}
-                    setPageIndex={table.setPageIndex}
-                />
+                    Načíst další
+                </Button>
             </div>
             <Modal show={!!userToEdit} onHide={() => setUserToEdit(undefined)}>
                 <Modal.Header closeButton>

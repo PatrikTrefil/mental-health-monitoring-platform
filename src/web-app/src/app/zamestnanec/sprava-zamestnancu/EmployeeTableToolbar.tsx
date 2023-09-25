@@ -1,4 +1,5 @@
 import UserRoleTitles from "@/constants/userRoleTitles";
+import { UserRoleTitle } from "@/types/userManagement/UserRoleTitle";
 import { User } from "@/types/userManagement/user";
 import { Table } from "@tanstack/react-table";
 import { useSession } from "next-auth/react";
@@ -14,7 +15,7 @@ import DeleteEmployeeToolbarItem from "./toolbar-items/DeleteEmployeeToolbarItem
 export default function EmployeeTableToolbar({
     table,
 }: {
-    table: Table<User>;
+    table: Table<User & { mainUserRoleTitle: UserRoleTitle }>;
 }) {
     const session = useSession();
 

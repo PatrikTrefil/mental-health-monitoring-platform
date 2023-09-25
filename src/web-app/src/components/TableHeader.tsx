@@ -1,8 +1,6 @@
 import { Column } from "@tanstack/react-table";
 import React from "react";
 
-// TODO: use this component for all sortable tables
-
 /**
  * A component that renders a header for a table column that can be sorted.
  * @param root0 - The props of the component.
@@ -44,7 +42,10 @@ export default function TableHeader<TData, TValue>({
         <div
             className="d-flex"
             style={{ cursor: "pointer" }}
-            onClick={headerOnClick}
+            onClick={() => {
+                console.log("click");
+                headerOnClick();
+            }}
         >
             {title}
             {icon}

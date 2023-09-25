@@ -18,7 +18,10 @@ import safeFetch from "./safeFetch";
  * @param root0.sort - Sorting configuration.
  * @param root0.sort.field - Field to sort by.
  * @param root0.sort.order - Ordering of the results (ascending or descending).
- * @param root0.filters
+ * @param root0.filters - Filters to apply.
+ * @param root0.filters.fieldPath - Field to filter by.
+ * @param root0.filters.operation - Operation to apply.
+ * @param root0.filters.comparedValue - Value to compare to.
  * @returns List of all users.
  * @throws {RequestError}
  * If the returned http status is not OK.
@@ -163,37 +166,127 @@ export async function loadRoles(formioToken: string): Promise<Role[]> {
 }
 
 /**
- * Load employees from the user management system.
- * @param formioToken - JWT token for formio.
- * @throws {RequestError}
- * If the returned http status is not OK.
- * @throws {TypeError}
- * If the response is not valid json or when a network error is encountered or CORS is misconfigured on the server-side.
+ * Load employees with role {@link UserRoleTitles.SPRAVCE_DOTAZNIKU}.
+ * @param root0 - Options.
+ * @param root0.formioToken - JWT token for formio.
+ * @param root0.pagination - Pagination settings.
+ * @param root0.pagination.limit - Maximum number of clients/patients to load.
+ * @param root0.pagination.offset - Number of clients/patients that should be skipped.
+ * @param root0.sort - Sorting configuration.
+ * @param root0.sort.field - Field to sort by.
+ * @param root0.sort.order - Ordering of the results (ascending or descending).
+ * @throws {Error} If the Content-Range header is invalid or unknown.
  */
-export async function loadEmployees(formioToken: string): Promise<User[]> {
-    const spravceDotaznikuResponse = await safeFetch(
-        `${getFormioUrl()}/zamestnanec/spravce-dotazniku/submission`,
-        {
-            headers: {
-                "x-jwt-token": formioToken,
-            },
-        }
+export async function loadSpravceDotazniku({
+    formioToken,
+    pagination,
+    sort,
+}: {
+    formioToken: string;
+    pagination: {
+        limit: number;
+        offset: number;
+    };
+    sort?: {
+        field: string;
+        order: "asc" | "desc";
+    };
+}): Promise<{
+    data: (User & { mainUserRoleTitle: UserRoleTitle })[];
+    totalCount: number;
+}> {
+    const url = new URL(
+        `${getFormioUrl()}/zamestnanec/spravce-dotazniku/submission`
     );
+    // pagination
+    url.searchParams.set("limit", pagination.limit.toString());
+    url.searchParams.set("skip", pagination.offset.toString());
 
-    const zadavatelDotaznikuResponse = await safeFetch(
-        `${getFormioUrl()}/zamestnanec/zadavatel-dotazniku/submission`,
-        {
-            headers: {
-                "x-jwt-token": formioToken,
-            },
-        }
+    if (sort)
+        url.searchParams.set(
+            `sort`,
+            `${sort.order === "desc" ? "-" : ""}${sort.field}`
+        );
+    const response = await safeFetch(url, {
+        headers: {
+            "x-jwt-token": formioToken,
+        },
+    });
+    const totalCount = Number(
+        response.headers.get("Content-Range")?.match(/\d+$/)
     );
+    if (isNaN(totalCount)) throw new Error("Invalid Content-Range header.");
 
-    const spravciDotazniku = (await spravceDotaznikuResponse.json()) as User[];
-    const zadavateleDotazniku =
-        (await zadavatelDotaznikuResponse.json()) as User[];
+    const data = (await response.json()) as User[];
 
-    return spravciDotazniku.concat(zadavateleDotazniku);
+    return {
+        data: data.map((u) => ({
+            ...u,
+            mainUserRoleTitle: UserRoleTitles.SPRAVCE_DOTAZNIKU,
+        })),
+        totalCount,
+    };
+}
+
+/**
+ * Load employees with role {@link UserRoleTitles.ZADAVATEL_DOTAZNIKU}.
+ * @param root0 - Options.
+ * @param root0.formioToken - JWT token for formio.
+ * @param root0.pagination - Pagination settings.
+ * @param root0.pagination.limit - Maximum number of clients/patients to load.
+ * @param root0.pagination.offset - Number of clients/patients that should be skipped.
+ * @param root0.sort - Sorting configuration.
+ * @param root0.sort.field - Field to sort by.
+ * @param root0.sort.order - Ordering of the results (ascending or descending).
+ */
+export async function loadZadavatelDotazniku({
+    formioToken,
+    pagination,
+    sort,
+}: {
+    formioToken: string;
+    pagination: {
+        limit: number;
+        offset: number;
+    };
+    sort?: {
+        field: string;
+        order: "asc" | "desc";
+    };
+}): Promise<{
+    data: (User & { mainUserRoleTitle: UserRoleTitle })[];
+    totalCount: number;
+}> {
+    const url = new URL(
+        `${getFormioUrl()}/zamestnanec/zadavatel-dotazniku/submission`
+    );
+    // pagination
+    url.searchParams.set("limit", pagination.limit.toString());
+    url.searchParams.set("skip", pagination.offset.toString());
+
+    if (sort)
+        url.searchParams.set(
+            `sort`,
+            `${sort.order === "desc" ? "-" : ""}${sort.field}`
+        );
+    const response = await safeFetch(url, {
+        headers: {
+            "x-jwt-token": formioToken,
+        },
+    });
+    const totalCount = Number(
+        response.headers.get("Content-Range")?.match(/\d+$/)
+    );
+    if (isNaN(totalCount)) throw new Error("Invalid Content-Range header.");
+
+    const data = (await response.json()) as User[];
+    return {
+        data: data.map((u) => ({
+            ...u,
+            mainUserRoleTitle: UserRoleTitles.ZADAVATEL_DOTAZNIKU,
+        })),
+        totalCount,
+    };
 }
 
 /**

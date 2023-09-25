@@ -1,12 +1,10 @@
 "use client";
 
-import { employeesQuery, rolesQuery } from "@/client/queries/userManagement";
+import { employeesInfiniteQuery } from "@/client/queries/userManagement";
 import { deleteUser } from "@/client/userManagementClient";
-import UserRoleTitles from "@/constants/userRoleTitles";
 import { UserRoleTitle } from "@/types/userManagement/UserRoleTitle";
-import { Role } from "@/types/userManagement/role";
 import { User } from "@/types/userManagement/user";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Table } from "@tanstack/react-table";
 import { useSession } from "next-auth/react";
 import { Button } from "react-bootstrap";
@@ -20,14 +18,10 @@ import { toast } from "react-toastify";
 export default function DeleteEmployeeToolbarItem({
     table,
 }: {
-    table: Table<User>;
+    table: Table<User & { mainUserRoleTitle: UserRoleTitle }>;
 }) {
     const queryClient = useQueryClient();
     const session = useSession();
-    const { data: roles } = useQuery({
-        ...rolesQuery.list(session.data?.user.formioToken!),
-        enabled: !!session.data,
-    });
 
     const { mutate: deleteEmployeeMutate } = useMutation({
         mutationFn: async ({
@@ -70,20 +64,8 @@ export default function DeleteEmployeeToolbarItem({
                     : "visually-hidden"
             }`}
             onClick={() => {
-                if (roles === undefined) return;
                 for (const row of table.getSelectedRowModel().rows) {
-                    const userRoles = row.original.roles;
-                    const roleTitles = userRoles.map((role) =>
-                        roleIdToRoleTitle(role, roles)
-                    );
-                    let mainRoleTitle: UserRoleTitle | undefined = undefined;
-                    if (roleTitles.includes(UserRoleTitles.SPRAVCE_DOTAZNIKU))
-                        mainRoleTitle = UserRoleTitles.SPRAVCE_DOTAZNIKU;
-                    else if (
-                        roleTitles.includes(UserRoleTitles.ZADAVATEL_DOTAZNIKU)
-                    )
-                        mainRoleTitle = UserRoleTitles.ZADAVATEL_DOTAZNIKU;
-                    else throw new Error("No main role found.");
+                    const mainRoleTitle = row.original.mainUserRoleTitle;
 
                     deleteEmployeeMutate({
                         formioToken: session.data?.user.formioToken!,
@@ -97,9 +79,7 @@ export default function DeleteEmployeeToolbarItem({
                 setTimeout(
                     () =>
                         queryClient.invalidateQueries({
-                            queryKey: employeesQuery.list(
-                                session.data!.user.formioToken
-                            ).queryKey,
+                            queryKey: employeesInfiniteQuery.list._def,
                         }),
                     500
                 );
@@ -108,17 +88,4 @@ export default function DeleteEmployeeToolbarItem({
             <i className="bi bi-trash"></i>
         </Button>
     );
-}
-
-/**
- * Convert ID of a role to its title.
- * @param roleId - Role id to convert.
- * @param roles - List of role objects.
- * @returns Role title of the role with the given ID.
- * @throws Error if the role ID is unknown.
- */
-function roleIdToRoleTitle(roleId: string, roles: Role[]): UserRoleTitle {
-    const role = roles.find((role) => role._id === roleId);
-    if (!role) throw new Error("Unknown role ID.");
-    return role.title;
 }
