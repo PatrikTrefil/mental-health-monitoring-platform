@@ -11,6 +11,7 @@ import safeFetch from "./safeFetch";
 /**
  * Load all users from the user management system.
  * @param root0 - Options.
+ * @param root0.filters - Filters to apply.
  * @param root0.formioToken - JWT token for formio.
  * @param root0.pagination - Pagination settings.
  * @param root0.pagination.limit - Maximum number of clients/patients to load.
@@ -18,10 +19,6 @@ import safeFetch from "./safeFetch";
  * @param root0.sort - Sorting configuration.
  * @param root0.sort.field - Field to sort by.
  * @param root0.sort.order - Ordering of the results (ascending or descending).
- * @param root0.filters - Filters to apply.
- * @param root0.filters.fieldPath - Field to filter by.
- * @param root0.filters.operation - Operation to apply.
- * @param root0.filters.comparedValue - Value to compare to.
  * @returns List of all users.
  * @throws {RequestError}
  * If the returned http status is not OK.
