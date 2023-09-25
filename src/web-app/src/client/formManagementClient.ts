@@ -359,7 +359,7 @@ export async function loadSubmissions(
     console.log("Fetching submissions of form...", {
         formId,
     });
-    const response = await safeFetch(`${getFormioUrl()}/${formId}/submission`, {
+    const response = await safeFetch(`${getFormioUrl()}/form/${formId}/submission`, {
         headers: {
             "x-jwt-token": formioToken,
         },
