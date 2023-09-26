@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Alert, Button, Col, Form, Modal, Row } from "react-bootstrap";
+import { Button, Col, Form, Modal, Row } from "react-bootstrap";
 import DataVisualization, { ChartType, ChartTypes } from "./DataVisualization";
 import { LabeledDataValue } from "./ResultTable";
 import stringifyResult from "./stringifyResult";
@@ -37,19 +37,19 @@ export default function FrequencyVisualization({
 
         const values = data.map((dataEntry) => {
             const value = dataEntry[fieldToVisualize]?.value;
-            if (value === undefined) throw new Error("Unexpected undefined");
+            if (value === undefined) return "Chybějící hodnota";
 
             return stringifyResult(value);
         });
         return calculateFrequencies(values);
     }, [data, fieldToVisualize]);
 
-    if (Object.keys(labelKeyMap).length === 0)
-        return <Alert variant="danger">Žádná data k vizualizaci</Alert>;
+    const isDataEmpty = Object.keys(labelKeyMap).length === 0;
 
     return (
         <>
             <Button
+                disabled={isDataEmpty}
                 variant="primary"
                 onClick={() => setIsVisualizationModalShowing(true)}
             >
