@@ -347,27 +347,51 @@ export async function loadSubmission(
 /**
  * Get submissions of a form.
  * @param formId - Id of the form to load submissions from.
+ * @param formioToken.formioToken
  * @param formioToken - JWT token for formio.
+ * @param formioToken.pagination - Pagination settings.
+ * @param formioToken.pagination.limit - Maximum number of submissions to load.
+ * @param formioToken.pagination.offset - Offset of the first submission to load.
  * @returns List of submissions.
  * @throws {RequestError} If the http request fails.
  * @throws {TypeError} If the response is not valid json or when a network error is encountered or CORS is misconfigured on the server-side.
+ * @throws {Error} If the Content-Range header is invalid or unknown.
  */
 export async function loadSubmissions(
     formId: string,
-    formioToken: string
-): Promise<Submission[]> {
+    {
+        formioToken,
+        pagination,
+    }: {
+        formioToken: string;
+        pagination: {
+            limit: number;
+            offset: number;
+        };
+    }
+): Promise<{data: Submission[], totalCount: number}> {
     console.log("Fetching submissions of form...", {
         formId,
     });
-    const response = await safeFetch(`${getFormioUrl()}/form/${formId}/submission`, {
-        headers: {
-            "x-jwt-token": formioToken,
-        },
-    });
-    console.log("Submissions of form fetched.", {
+    const response = await safeFetch(
+        `${getFormioUrl()}/form/${formId}/submission?limit=${
+            pagination.limit
+        }&skip=${pagination.offset}`,
+        {
+            headers: {
+                "x-jwt-token": formioToken,
+            },
+        }
+    );
+    console.debug("Submissions of form fetched.", {
         formId,
     });
-    return (await response.json()) as Submission[];
+    const totalCount = Number(
+        response.headers.get("Content-Range")?.match(/\d+$/)
+    );
+    if (isNaN(totalCount)) throw new Error("Invalid Content-Range header.");
+
+    return { data: (await response.json()) as Submission[], totalCount };
 }
 
 /**

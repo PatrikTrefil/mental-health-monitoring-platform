@@ -14,14 +14,15 @@ import {
     createColumnHelper,
     flexRender,
     getCoreRowModel,
-    getPaginationRowModel,
     useReactTable,
 } from "@tanstack/react-table";
 import { useSession } from "next-auth/react";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Alert, Form, Spinner, Table } from "react-bootstrap";
 import FrequencyVisualization from "./FrequencyVisualization";
 import stringifyResult from "./stringifyResult";
+
+const defaultPageSize = 10;
 
 /**
  * Display table with results from form with given formId.
@@ -30,6 +31,8 @@ import stringifyResult from "./stringifyResult";
  */
 export default function ResultTable({ formId }: { formId: string }) {
     const { data } = useSession();
+
+    // TODO: sorting
 
     // We need the form object to get path of the form to load submissions
     const {
@@ -42,15 +45,22 @@ export default function ResultTable({ formId }: { formId: string }) {
         enabled: !!data?.user.formioToken,
     });
 
+    const [pageSize, setPageSize] = useState(defaultPageSize);
+    const [pageIndex, setPageIndex] = useState(0);
+
     const {
-        data: rawSubmissions,
+        data: submissionsQueryData,
         isError: isErrorSubmissions,
         error: errorSubmissions,
         isLoading: isLoadingSubmissions,
     } = useQuery({
-        ...formsQuery.submissions(data?.user.formioToken!, formId),
+        ...formsQuery.submissions(formId, {
+            formioToken: data?.user.formioToken!,
+            pagination: { limit: pageSize, offset: pageSize * pageIndex },
+        }),
         enabled: !!data && !!form,
     });
+    const rawSubmissions = submissionsQueryData?.data;
 
     const labeledSubmissions = useMemo(
         () =>
@@ -118,9 +128,8 @@ export default function ResultTable({ formId }: { formId: string }) {
                             header: comp.label,
                             cell: (props) => {
                                 const value =
-                                    props.row.original.data[comp.key]?.value;
-                                if (value === undefined)
-                                    throw new Error("Unexpected undefined");
+                                    props.row.original.data[comp.key]?.value ??
+                                    "Chybějící hodnota";
                                 return stringifyResult(value);
                             },
                         }
@@ -134,7 +143,7 @@ export default function ResultTable({ formId }: { formId: string }) {
         columns,
         data: tableData ?? [],
         getCoreRowModel: getCoreRowModel(),
-        getPaginationRowModel: getPaginationRowModel(),
+        manualPagination: true,
     });
 
     if (isLoadingSubmissions || isLoadingForm)
@@ -217,9 +226,9 @@ export default function ResultTable({ formId }: { formId: string }) {
             <div className="d-flex justify-content-between align-items-center">
                 <Form.Select
                     className="my-2 w-auto"
-                    value={table.getState().pagination.pageSize}
+                    value={pageSize}
                     onChange={(e) => {
-                        table.setPageSize(Number(e.target.value));
+                        setPageSize(Number(e.target.value));
                     }}
                 >
                     {[10, 20, 30].map((pageSize: number) => (
@@ -229,9 +238,11 @@ export default function ResultTable({ formId }: { formId: string }) {
                     ))}
                 </Form.Select>
                 <SimplePagination
-                    pageIndex={table.getState().pagination.pageIndex}
-                    totalPages={table.getPageCount()}
-                    setPageIndex={table.setPageIndex}
+                    pageIndex={pageIndex}
+                    totalPages={Math.ceil(
+                        submissionsQueryData.totalCount / pageSize
+                    )}
+                    setPageIndex={setPageIndex}
                 />
             </div>
         </>
