@@ -2,6 +2,7 @@
 
 import { formsQuery } from "@/client/queries/formManagement";
 import { usersQuery } from "@/client/queries/userManagement";
+import TableHeader from "@/components/TableHeader";
 import SimplePagination from "@/components/shared/SimplePagination";
 import { Form as FormFormio } from "@/types/formManagement/forms";
 import {
@@ -11,6 +12,7 @@ import {
 } from "@/types/formManagement/submission";
 import { useQueries, useQuery } from "@tanstack/react-query";
 import {
+    SortingState,
     createColumnHelper,
     flexRender,
     getCoreRowModel,
@@ -32,8 +34,6 @@ const defaultPageSize = 10;
 export default function ResultTable({ formId }: { formId: string }) {
     const { data } = useSession();
 
-    // TODO: sorting
-
     // We need the form object to get path of the form to load submissions
     const {
         data: form,
@@ -48,6 +48,8 @@ export default function ResultTable({ formId }: { formId: string }) {
     const [pageSize, setPageSize] = useState(defaultPageSize);
     const [pageIndex, setPageIndex] = useState(0);
 
+    const [sorting, setSorting] = useState<SortingState>([]);
+
     const {
         data: submissionsQueryData,
         isError: isErrorSubmissions,
@@ -57,6 +59,13 @@ export default function ResultTable({ formId }: { formId: string }) {
         ...formsQuery.submissions(formId, {
             formioToken: data?.user.formioToken!,
             pagination: { limit: pageSize, offset: pageSize * pageIndex },
+            sort:
+                sorting[0] !== undefined
+                    ? {
+                          field: sorting[0].id,
+                          order: sorting[0].desc ? "desc" : "asc",
+                      }
+                    : undefined,
         }),
         enabled: !!data && !!form,
     });
@@ -107,11 +116,17 @@ export default function ResultTable({ formId }: { formId: string }) {
     const columns = useMemo(() => {
         const cols = [
             columnHelper.accessor("owner", {
-                header: "Autor",
+                id: "owner",
+                header: ({ column }) => (
+                    <TableHeader text="Autor" column={column} />
+                ),
                 cell: (props) => props.row.original.ownerDisplayId,
             }),
             columnHelper.accessor("created", {
-                header: "Vytvořeno dne",
+                id: "created",
+                header: ({ column }) => (
+                    <TableHeader text="Vytvořeno dne" column={column} />
+                ),
                 cell: (props) =>
                     new Date(props.row.original.created).toLocaleString(),
             }),
@@ -125,7 +140,13 @@ export default function ResultTable({ formId }: { formId: string }) {
                     columnHelper.accessor(
                         `data.${comp.key}` as keyof Submission,
                         {
-                            header: comp.label,
+                            id: `data.${comp.key}`,
+                            header: ({ column }) => (
+                                <TableHeader
+                                    text={comp.label}
+                                    column={column}
+                                />
+                            ),
                             cell: (props) => {
                                 const value =
                                     props.row.original.data[comp.key]?.value ??
@@ -144,6 +165,12 @@ export default function ResultTable({ formId }: { formId: string }) {
         data: tableData ?? [],
         getCoreRowModel: getCoreRowModel(),
         manualPagination: true,
+        state: {
+            sorting,
+        },
+        manualSorting: true,
+        onSortingChange: setSorting,
+        autoResetPageIndex: false,
     });
 
     if (isLoadingSubmissions || isLoadingForm)

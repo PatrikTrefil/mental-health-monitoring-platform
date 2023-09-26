@@ -347,11 +347,14 @@ export async function loadSubmission(
 /**
  * Get submissions of a form.
  * @param formId - Id of the form to load submissions from.
- * @param formioToken.formioToken
- * @param formioToken - JWT token for formio.
- * @param formioToken.pagination - Pagination settings.
- * @param formioToken.pagination.limit - Maximum number of submissions to load.
- * @param formioToken.pagination.offset - Offset of the first submission to load.
+ * @param root0 - Options for loading submissions.
+ * @param root0.formioToken - JWT token for formio.
+ * @param root0.pagination - Pagination settings.
+ * @param root0.pagination.limit - Maximum number of submissions to load.
+ * @param root0.pagination.offset - Offset of the first submission to load.
+ * @param root0.sort - Sorting settings.
+ * @param root0.sort.field - Field to sort by.
+ * @param root0.sort.order - Order to sort by. (ascending or descending).
  * @returns List of submissions.
  * @throws {RequestError} If the http request fails.
  * @throws {TypeError} If the response is not valid json or when a network error is encountered or CORS is misconfigured on the server-side.
@@ -362,27 +365,35 @@ export async function loadSubmissions(
     {
         formioToken,
         pagination,
+        sort,
     }: {
         formioToken: string;
         pagination: {
             limit: number;
             offset: number;
         };
+        sort?: { field: string; order: "asc" | "desc" };
     }
-): Promise<{data: Submission[], totalCount: number}> {
+): Promise<{ data: Submission[]; totalCount: number }> {
+    const url = new URL(`${getFormioUrl()}/form/${formId}/submission`);
+    // pagination
+    url.searchParams.set("limit", pagination.limit.toString());
+    url.searchParams.set("skip", pagination.offset.toString());
+
+    if (sort)
+        url.searchParams.set(
+            `sort`,
+            `${sort.order === "desc" ? "-" : ""}${sort.field}`
+        );
+
     console.log("Fetching submissions of form...", {
         formId,
     });
-    const response = await safeFetch(
-        `${getFormioUrl()}/form/${formId}/submission?limit=${
-            pagination.limit
-        }&skip=${pagination.offset}`,
-        {
-            headers: {
-                "x-jwt-token": formioToken,
-            },
-        }
-    );
+    const response = await safeFetch(url, {
+        headers: {
+            "x-jwt-token": formioToken,
+        },
+    });
     console.debug("Submissions of form fetched.", {
         formId,
     });
