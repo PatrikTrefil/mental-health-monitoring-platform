@@ -4,6 +4,12 @@ import { trpc } from "@/client/trpcClient";
 import TableHeader from "@/components/TableHeader";
 import SimplePagination from "@/components/shared/SimplePagination";
 import TaskStateBadge from "@/components/shared/TaskStateBadge";
+import {
+    orderUrlParamAscValue,
+    orderUrlParamDescValue,
+    orderUrlParamName,
+    sortUrlParamName,
+} from "@/constants/urlSort";
 import { AppRouter } from "@/server/routers/root";
 import { TaskState } from "@prisma/client";
 import {
@@ -14,6 +20,7 @@ import {
     useReactTable,
 } from "@tanstack/react-table";
 import { inferProcedureOutput } from "@trpc/server";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import {
     Alert,
@@ -226,7 +233,25 @@ export default function TaskTable() {
     const [pageSize, setPageSize] = useState(defaultPageSize);
     const [pageIndex, setPageIndex] = useState(0);
 
-    const [sorting, setSorting] = useState<SortingState>([]);
+    const router = useRouter();
+    const pathname = usePathname();
+    const searchParams = useSearchParams()!;
+
+    const sorting: SortingState = useMemo(() => {
+        const sortParam = searchParams.get(sortUrlParamName);
+        return sortParam !== null
+            ? [
+                  {
+                      id: sortParam,
+                      desc:
+                          searchParams.get(orderUrlParamName) ===
+                          orderUrlParamDescValue
+                              ? true
+                              : false,
+                  },
+              ]
+            : [];
+    }, [searchParams]);
 
     useEffect(() => {
         // Prefetch next page
@@ -298,7 +323,29 @@ export default function TaskTable() {
             sorting,
         },
         manualSorting: true,
-        onSortingChange: setSorting,
+        onSortingChange: (updaterOrValue) => {
+            let newValue: SortingState;
+            if (typeof updaterOrValue === "function")
+                newValue = updaterOrValue(sorting);
+            else newValue = updaterOrValue;
+
+            // HACK: using toString first because of type issue https://github.com/vercel/next.js/issues/49245
+            const newParams = new URLSearchParams(searchParams.toString());
+            if (newValue[0] !== undefined) {
+                newParams.set(sortUrlParamName, newValue[0].id);
+                newParams.set(
+                    orderUrlParamName,
+                    newValue[0].desc
+                        ? orderUrlParamDescValue
+                        : orderUrlParamAscValue
+                );
+            } else {
+                newParams.delete(sortUrlParamName);
+                newParams.delete(orderUrlParamName);
+            }
+
+            router.replace(pathname + "?" + newParams.toString());
+        },
         getCoreRowModel: getCoreRowModel(),
         initialState: {
             columnVisibility: {

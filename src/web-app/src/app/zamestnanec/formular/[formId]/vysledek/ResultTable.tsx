@@ -4,6 +4,12 @@ import { formsQuery } from "@/client/queries/formManagement";
 import { usersQuery } from "@/client/queries/userManagement";
 import TableHeader from "@/components/TableHeader";
 import SimplePagination from "@/components/shared/SimplePagination";
+import {
+    orderUrlParamAscValue,
+    orderUrlParamDescValue,
+    orderUrlParamName,
+    sortUrlParamName,
+} from "@/constants/urlSort";
 import { Form as FormFormio } from "@/types/formManagement/forms";
 import {
     DataValue,
@@ -19,6 +25,7 @@ import {
     useReactTable,
 } from "@tanstack/react-table";
 import { useSession } from "next-auth/react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useMemo, useState } from "react";
 import { Alert, Form, Spinner, Table } from "react-bootstrap";
 import FrequencyVisualization from "./FrequencyVisualization";
@@ -48,7 +55,25 @@ export default function ResultTable({ formId }: { formId: string }) {
     const [pageSize, setPageSize] = useState(defaultPageSize);
     const [pageIndex, setPageIndex] = useState(0);
 
-    const [sorting, setSorting] = useState<SortingState>([]);
+    const router = useRouter();
+    const pathname = usePathname();
+    const searchParams = useSearchParams()!;
+
+    const sorting: SortingState = useMemo(() => {
+        const sortParam = searchParams.get(sortUrlParamName);
+        return sortParam !== null
+            ? [
+                  {
+                      id: sortParam,
+                      desc:
+                          searchParams.get(orderUrlParamName) ===
+                          orderUrlParamDescValue
+                              ? true
+                              : false,
+                  },
+              ]
+            : [];
+    }, [searchParams]);
 
     const {
         data: submissionsQueryData,
@@ -169,7 +194,29 @@ export default function ResultTable({ formId }: { formId: string }) {
             sorting,
         },
         manualSorting: true,
-        onSortingChange: setSorting,
+        onSortingChange: (updaterOrValue) => {
+            let newValue: SortingState;
+            if (typeof updaterOrValue === "function")
+                newValue = updaterOrValue(sorting);
+            else newValue = updaterOrValue;
+
+            // HACK: using toString first because of type issue https://github.com/vercel/next.js/issues/49245
+            const newParams = new URLSearchParams(searchParams.toString());
+            if (newValue[0] !== undefined) {
+                newParams.set(sortUrlParamName, newValue[0].id);
+                newParams.set(
+                    orderUrlParamName,
+                    newValue[0].desc
+                        ? orderUrlParamDescValue
+                        : orderUrlParamAscValue
+                );
+            } else {
+                newParams.delete(sortUrlParamName);
+                newParams.delete(orderUrlParamName);
+            }
+
+            router.replace(pathname + "?" + newParams.toString());
+        },
         autoResetPageIndex: false,
     });
 

@@ -8,6 +8,12 @@ import {
 import { deleteUser } from "@/client/userManagementClient";
 import TableHeader from "@/components/TableHeader";
 import ChangePasswordUser from "@/components/shared/ChangePasswordUser";
+import {
+    orderUrlParamAscValue,
+    orderUrlParamDescValue,
+    orderUrlParamName,
+    sortUrlParamName,
+} from "@/constants/urlSort";
 import UserRoleTitles from "@/constants/userRoleTitles";
 import { UserRoleTitle } from "@/types/userManagement/UserRoleTitle";
 import {
@@ -23,6 +29,7 @@ import {
     useReactTable,
 } from "@tanstack/react-table";
 import { signOut, useSession } from "next-auth/react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useMemo, useState } from "react";
 import { Alert, Button, Form, Modal, Spinner, Table } from "react-bootstrap";
 import { toast } from "react-toastify";
@@ -88,7 +95,25 @@ export default function EmployeeTable() {
         },
     });
 
-    const [sorting, setSorting] = useState<SortingState>([]);
+    const router = useRouter();
+    const pathname = usePathname();
+    const searchParams = useSearchParams()!;
+
+    const sorting: SortingState = useMemo(() => {
+        const sortParam = searchParams.get(sortUrlParamName);
+        return sortParam !== null
+            ? [
+                  {
+                      id: sortParam,
+                      desc:
+                          searchParams.get(orderUrlParamName) ===
+                          orderUrlParamDescValue
+                              ? true
+                              : false,
+                  },
+              ]
+            : [];
+    }, [searchParams]);
 
     const {
         isLoading,
@@ -242,7 +267,29 @@ export default function EmployeeTable() {
             sorting,
         },
         manualSorting: true,
-        onSortingChange: setSorting,
+        onSortingChange: (updaterOrValue) => {
+            let newValue: SortingState;
+            if (typeof updaterOrValue === "function")
+                newValue = updaterOrValue(sorting);
+            else newValue = updaterOrValue;
+
+            // HACK: using toString first because of type issue https://github.com/vercel/next.js/issues/49245
+            const newParams = new URLSearchParams(searchParams.toString());
+            if (newValue[0] !== undefined) {
+                newParams.set(sortUrlParamName, newValue[0].id);
+                newParams.set(
+                    orderUrlParamName,
+                    newValue[0].desc
+                        ? orderUrlParamDescValue
+                        : orderUrlParamAscValue
+                );
+            } else {
+                newParams.delete(sortUrlParamName);
+                newParams.delete(orderUrlParamName);
+            }
+
+            router.replace(pathname + "?" + newParams.toString());
+        },
     });
 
     if (isLoading)
