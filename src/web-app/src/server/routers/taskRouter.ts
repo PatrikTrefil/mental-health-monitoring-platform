@@ -73,6 +73,16 @@ const taskRouter = createTRPCRouter({
                         order: z.enum(["asc", "desc"]).default("asc"),
                     })
                     .optional(),
+                filters: z
+                    .array(
+                        z.object({
+                            fieldPath: z.string(),
+                            // Possibly add more operators in the future.
+                            operation: z.enum(["contains"]),
+                            comparedValue: z.string(),
+                        })
+                    )
+                    .optional(),
             })
         )
         .query(
@@ -80,6 +90,29 @@ const taskRouter = createTRPCRouter({
                 opts
             ): Promise<{ data: TaskWithDeadline[]; count: number }> => {
                 const userRoleTitles = opts.ctx.session.user.roleTitles;
+
+                const filters: Prisma.TaskWhereInput["AND"] = [];
+                if (opts.input.filters) {
+                    for (const filter of opts.input.filters) {
+                        if (filter.fieldPath.startsWith(deadlinePrefix)) {
+                            filters.push({
+                                deadline: {
+                                    [filter.fieldPath.slice(
+                                        deadlinePrefix.length
+                                    )]: {
+                                        contains: filter.comparedValue,
+                                    },
+                                },
+                            });
+                        } else {
+                            filters.push({
+                                [filter.fieldPath]: {
+                                    contains: filter.comparedValue,
+                                },
+                            });
+                        }
+                    }
+                }
 
                 const orderBy: Prisma.TaskOrderByWithRelationInput = {};
                 if (opts.input.sort) {
@@ -102,7 +135,12 @@ const taskRouter = createTRPCRouter({
                 ) {
                     const [data, count] = await opts.ctx.prisma.$transaction([
                         opts.ctx.prisma.task.findMany({
-                            include: { deadline: true },
+                            where: {
+                                AND: filters,
+                            },
+                            include: {
+                                deadline: true,
+                            },
                             skip: opts.input.pagination.offset,
                             take: opts.input.pagination.limit,
                             orderBy,
@@ -117,6 +155,7 @@ const taskRouter = createTRPCRouter({
                         opts.ctx.prisma.task.findMany({
                             where: {
                                 forUserId: opts.ctx.session.user.data.id,
+                                AND: filters,
                             },
                             include: {
                                 deadline: true,

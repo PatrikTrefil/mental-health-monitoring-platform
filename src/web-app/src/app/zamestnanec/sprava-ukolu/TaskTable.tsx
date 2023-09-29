@@ -5,6 +5,7 @@ import TableHeader from "@/components/TableHeader";
 import SimplePagination from "@/components/shared/SimplePagination";
 import TaskStateBadge from "@/components/shared/TaskStateBadge";
 import {
+    filterUrlParamName,
     orderUrlParamAscValue,
     orderUrlParamDescValue,
     orderUrlParamName,
@@ -13,6 +14,7 @@ import {
 import { AppRouter } from "@/server/routers/root";
 import { TaskState } from "@prisma/client";
 import {
+    ColumnFiltersState,
     SortingState,
     createColumnHelper,
     flexRender,
@@ -35,6 +37,7 @@ import { toast } from "react-toastify";
 import TaskTableToolbar from "./TaskTableToolbar";
 
 const defaultPageSize = 10;
+const filterColumnId = "name";
 
 /**
  * Table of tasks for employees (includes tasks of all users).
@@ -237,6 +240,13 @@ export default function TaskTable() {
     const pathname = usePathname();
     const searchParams = useSearchParams()!;
 
+    const columnFilters = useMemo(() => {
+        const filterParam = searchParams.get(filterUrlParamName);
+        return filterParam !== null
+            ? [{ id: filterColumnId, value: filterParam }]
+            : [];
+    }, [searchParams]);
+
     const sorting: SortingState = useMemo(() => {
         const sortParam = searchParams.get(sortUrlParamName);
         return sortParam !== null
@@ -311,6 +321,16 @@ export default function TaskTable() {
                       order: sorting[0].desc ? "desc" : "asc",
                   }
                 : undefined,
+        filters:
+            columnFilters[0] !== undefined
+                ? [
+                      {
+                          fieldPath: columnFilters[0].id,
+                          operation: "contains",
+                          comparedValue: columnFilters[0].value as string,
+                      } as const,
+                  ]
+                : undefined,
     });
 
     const tasks = taskQueryData?.data;
@@ -346,6 +366,20 @@ export default function TaskTable() {
 
             router.replace(pathname + "?" + newParams.toString());
         },
+        onColumnFiltersChange: (updaterOrValue) => {
+            let newValue: ColumnFiltersState;
+            if (typeof updaterOrValue === "function")
+                newValue = updaterOrValue(columnFilters);
+            else newValue = updaterOrValue;
+
+            // HACK: using toString first because of type issue https://github.com/vercel/next.js/issues/49245
+            const newParams = new URLSearchParams(searchParams.toString());
+            if (newValue[0] !== undefined)
+                newParams.set(filterUrlParamName, newValue[0].value as string);
+            else newParams.delete(filterUrlParamName);
+
+            router.replace(pathname + "?" + newParams.toString());
+        },
         getCoreRowModel: getCoreRowModel(),
         initialState: {
             columnVisibility: {
@@ -356,15 +390,6 @@ export default function TaskTable() {
         autoResetPageIndex: false,
     });
 
-    if (isLoading)
-        return (
-            <div className="position-absolute top-50 start-50 translate-middle">
-                <Spinner animation="border" role="status">
-                    <span className="visually-hidden">Načítání...</span>
-                </Spinner>
-            </div>
-        );
-
     if (isError) {
         console.error(error);
         return (
@@ -374,61 +399,71 @@ export default function TaskTable() {
 
     return (
         <>
-            <TaskTableToolbar table={table} />
+            <TaskTableToolbar table={table} filterColumnId={filterColumnId} />
             <div className="mt-2 d-block text-nowrap overflow-auto">
-                <Table bordered hover>
-                    <thead>
-                        {table.getHeaderGroups().map((headerGroup) => (
-                            <tr key={headerGroup.id}>
-                                {headerGroup.headers.map((header) => (
-                                    <th key={header.id}>
-                                        {header.isPlaceholder
-                                            ? null
-                                            : flexRender(
-                                                  header.column.columnDef
-                                                      .header,
-                                                  header.getContext()
-                                              )}
-                                    </th>
-                                ))}
-                            </tr>
-                        ))}
-                    </thead>
-                    <tbody>
-                        {table.getRowModel().rows.map((row) => (
-                            <tr
-                                key={row.id}
-                                className={`${
-                                    row.getIsSelected() ? "table-active" : ""
-                                }`}
-                            >
-                                {row.getVisibleCells().map((cell) => (
-                                    <td
-                                        key={cell.id}
-                                        className="align-middle"
-                                        style={{
-                                            width:
-                                                typeof cell.column.columnDef
-                                                    .meta === "object" &&
-                                                "isNarrow" in
-                                                    cell.column.columnDef
-                                                        .meta &&
-                                                cell.column.columnDef.meta
-                                                    ?.isNarrow
-                                                    ? "0"
-                                                    : undefined,
-                                        }}
-                                    >
-                                        {flexRender(
-                                            cell.column.columnDef.cell,
-                                            cell.getContext()
-                                        )}
-                                    </td>
-                                ))}
-                            </tr>
-                        ))}
-                    </tbody>
-                </Table>
+                {isLoading ? (
+                    <div className="position-absolute top-50 start-50 translate-middle">
+                        <Spinner animation="border" role="status">
+                            <span className="visually-hidden">Načítání...</span>
+                        </Spinner>
+                    </div>
+                ) : (
+                    <Table bordered hover>
+                        <thead>
+                            {table.getHeaderGroups().map((headerGroup) => (
+                                <tr key={headerGroup.id}>
+                                    {headerGroup.headers.map((header) => (
+                                        <th key={header.id}>
+                                            {header.isPlaceholder
+                                                ? null
+                                                : flexRender(
+                                                      header.column.columnDef
+                                                          .header,
+                                                      header.getContext()
+                                                  )}
+                                        </th>
+                                    ))}
+                                </tr>
+                            ))}
+                        </thead>
+                        <tbody>
+                            {table.getRowModel().rows.map((row) => (
+                                <tr
+                                    key={row.id}
+                                    className={`${
+                                        row.getIsSelected()
+                                            ? "table-active"
+                                            : ""
+                                    }`}
+                                >
+                                    {row.getVisibleCells().map((cell) => (
+                                        <td
+                                            key={cell.id}
+                                            className="align-middle"
+                                            style={{
+                                                width:
+                                                    typeof cell.column.columnDef
+                                                        .meta === "object" &&
+                                                    "isNarrow" in
+                                                        cell.column.columnDef
+                                                            .meta &&
+                                                    cell.column.columnDef.meta
+                                                        ?.isNarrow
+                                                        ? "0"
+                                                        : undefined,
+                                            }}
+                                        >
+                                            {flexRender(
+                                                cell.column.columnDef.cell,
+                                                cell.getContext()
+                                            )}
+                                        </td>
+                                    ))}
+                                </tr>
+                            ))}
+                        </tbody>
+                    </Table>
+                )}
             </div>
             <div className="d-flex justify-content-between align-items-center">
                 <Form.Select
