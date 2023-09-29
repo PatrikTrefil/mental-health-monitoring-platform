@@ -1,23 +1,25 @@
 "use client";
 
 import useDebounce from "@/hooks/useDebounce";
-import { User } from "@/types/userManagement/user";
 import { Table } from "@tanstack/react-table";
 import { useEffect, useState } from "react";
 import { Form } from "react-bootstrap";
 
 /**
- * Toolbar item for filtering the table of clients and patients.
+ * Toolbar item for filtering a table.
  * @param root0 - Props for the component.
  * @param root0.table - Table for which to render the toolbar item.
  * @param root0.filterColumnId - ID of the column to filter by.
+ * @param root0.placeholder - Placeholder text for the filter input.
  */
-export default function FilterClientPatientToolbarItem({
+export default function FilterToolbarItem<T>({
     table,
     filterColumnId,
+    placeholder,
 }: {
-    table: Table<User>;
+    table: Table<T>;
     filterColumnId: string;
+    placeholder: string;
 }) {
     const [filterValue, setFilterValue] = useState(
         () =>
@@ -32,7 +34,7 @@ export default function FilterClientPatientToolbarItem({
     return (
         <Form.Control
             type="text"
-            placeholder="Filtrovat klienty/pacienty"
+            placeholder={placeholder}
             value={filterValue}
             onChange={(e) => setFilterValue(e.target.value)}
         />

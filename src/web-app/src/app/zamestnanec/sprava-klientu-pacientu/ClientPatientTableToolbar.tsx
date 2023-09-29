@@ -1,8 +1,8 @@
 import { User } from "@/types/userManagement/user";
 import { Table } from "@tanstack/react-table";
+import FilterToolbarItem from "../../../components/FilterToolbarItem";
 import CreateClientPatientToolbarItem from "./toolbar-items/CreateClientPatientToolbarItem";
 import DeleteClientPatientToolbarItem from "./toolbar-items/DeleteClientPatientToolbarItem";
-import FilterClientPatientToolbarItem from "./toolbar-items/FilterClientPatientToolbarItem";
 
 /**
  * Toolbar for the table of clients and patients.
@@ -20,9 +20,10 @@ export default function ClientPatientTableToolbar({
     return (
         <div className="d-flex gap-2 flex-wrap">
             <div style={{ maxWidth: "200px" }}>
-                <FilterClientPatientToolbarItem
+                <FilterToolbarItem
                     table={table}
                     filterColumnId={filterColumnId}
+                    placeholder="Filtrovat klienty/pacienty"
                 />
             </div>
             <CreateClientPatientToolbarItem />
