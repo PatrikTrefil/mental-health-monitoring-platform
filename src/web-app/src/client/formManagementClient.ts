@@ -200,6 +200,7 @@ export async function deleteFormById(
  * @param root0.sort.field - Field to sort by.
  * @param root0.sort.order - Order to sort by. (ascending or descending).
  * @param root0.tags - List of tags which must be present on the form.
+ * @param root0.filters - List of filters to apply.
  * @returns List of forms.
  * @throws {TypeError} If the response is not valid json or when a network error is encountered or CORS is misconfigured on the server-side.
  * @throws {Error} If the Content-Range header in the response is invalid or the total count is unknown.
@@ -209,6 +210,7 @@ export async function loadForms({
     pagination,
     sort,
     tags,
+    filters,
 }: {
     formioToken: string;
     pagination: {
@@ -219,6 +221,11 @@ export async function loadForms({
         field: keyof Form;
         order: "asc" | "desc";
     };
+    filters?: {
+        fieldPath: string;
+        operation: "contains";
+        comparedValue: string;
+    }[];
     tags?: string[];
 }): Promise<{ data: Form[]; totalCount: number }> {
     const url = new URL(`${getFormioUrl()}/form/`);
@@ -234,6 +241,15 @@ export async function loadForms({
             `${sort.order === "desc" ? "-" : ""}sort`,
             sort.field
         );
+
+    if (filters !== undefined) {
+        for (const filter of filters) {
+            url.searchParams.set(
+                `${filter.fieldPath}__regex`,
+                `/${filter.comparedValue}/i`
+            );
+        }
+    }
 
     // https://apidocs.form.io/#cd97fc97-7a86-aa65-8e5a-3e9e6eb4a22d
     if (tags) url.searchParams.set("tags__in", tags.join(","));
