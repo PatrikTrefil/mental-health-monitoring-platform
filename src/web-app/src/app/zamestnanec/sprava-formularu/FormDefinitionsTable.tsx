@@ -10,7 +10,7 @@ import {
     orderUrlParamDescValue,
     orderUrlParamName,
     sortUrlParamName,
-} from "@/constants/urlSort";
+} from "@/constants/urlParamNames";
 import { Form as FormDefinition } from "@/types/formManagement/forms";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {

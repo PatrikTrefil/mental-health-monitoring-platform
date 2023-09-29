@@ -13,16 +13,18 @@ export const usersQuery = createQueryKeys("users", {
         formioToken,
         pagination,
         sort,
+        filters,
     }: {
         formioToken: string;
         pagination: { limit: number; offset: number };
         sort?: { field: string; order: "asc" | "desc" };
+        filters?: Parameters<typeof loadClientsAndPatients>[0]["filters"];
     }) => ({
         // We don't include the token in the query key, because the result does not depend on it
         // eslint-disable-next-line @tanstack/query/exhaustive-deps
-        queryKey: ["usersList", pagination, sort],
+        queryKey: ["usersList", pagination, sort, filters],
         queryFn: () =>
-            loadClientsAndPatients({ formioToken, pagination, sort }),
+            loadClientsAndPatients({ formioToken, pagination, sort, filters }),
     }),
     detail: (formioToken: string, userSubmissionId: string) => ({
         // We don't include the token in the query key, because the result does not depend on it

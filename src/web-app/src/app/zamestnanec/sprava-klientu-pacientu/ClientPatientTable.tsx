@@ -6,15 +6,17 @@ import TableHeader from "@/components/TableHeader";
 import ChangePasswordUser from "@/components/shared/ChangePasswordUser";
 import SimplePagination from "@/components/shared/SimplePagination";
 import {
+    filterUrlParamName,
     orderUrlParamAscValue,
     orderUrlParamDescValue,
     orderUrlParamName,
     sortUrlParamName,
-} from "@/constants/urlSort";
+} from "@/constants/urlParamNames";
 import UserRoleTitles from "@/constants/userRoleTitles";
 import { User } from "@/types/userManagement/user";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
+    ColumnFiltersState,
     SortingState,
     createColumnHelper,
     flexRender,
@@ -29,6 +31,7 @@ import { toast } from "react-toastify";
 import ClientPatientTableToolbar from "./ClientPatientTableToolbar";
 
 const defaultPageSize = 10;
+const filterColumnId = "data.id";
 
 /**
  * Page for managing users.
@@ -168,6 +171,13 @@ export default function ClientPatientTable() {
     const pathname = usePathname();
     const searchParams = useSearchParams()!;
 
+    const columnFilters = useMemo(() => {
+        const filterParam = searchParams.get(filterUrlParamName);
+        return filterParam !== null
+            ? [{ id: filterColumnId, value: filterParam }]
+            : [];
+    }, [searchParams]);
+
     const sorting: SortingState = useMemo(() => {
         const sortParam = searchParams.get(sortUrlParamName);
         return sortParam !== null
@@ -198,6 +208,16 @@ export default function ClientPatientTable() {
                           order: sorting[0].desc ? "desc" : "asc",
                       }
                     : undefined,
+            filters:
+                columnFilters[0] !== undefined
+                    ? [
+                          {
+                              fieldPath: columnFilters[0].id,
+                              operation: "contains",
+                              comparedValue: columnFilters[0].value as string,
+                          },
+                      ]
+                    : undefined,
         }),
         enabled: !!session.data?.user.formioToken,
     });
@@ -208,6 +228,7 @@ export default function ClientPatientTable() {
         getCoreRowModel: getCoreRowModel(),
         state: {
             sorting,
+            columnFilters,
         },
         manualSorting: true,
         onSortingChange: (updaterOrValue) => {
@@ -233,18 +254,23 @@ export default function ClientPatientTable() {
 
             router.replace(pathname + "?" + newParams.toString());
         },
+        onColumnFiltersChange: (updaterOrValue) => {
+            let newValue: ColumnFiltersState;
+            if (typeof updaterOrValue === "function")
+                newValue = updaterOrValue(columnFilters);
+            else newValue = updaterOrValue;
+
+            // HACK: using toString first because of type issue https://github.com/vercel/next.js/issues/49245
+            const newParams = new URLSearchParams(searchParams.toString());
+            if (newValue[0] !== undefined)
+                newParams.set(filterUrlParamName, newValue[0].value as string);
+            else newParams.delete(filterUrlParamName);
+
+            router.replace(pathname + "?" + newParams.toString());
+        },
         manualPagination: true,
         autoResetPageIndex: false,
     });
-
-    if (isLoading)
-        return (
-            <div className="position-absolute top-50 start-50 translate-middle">
-                <Spinner animation="border" role="status">
-                    <span className="visually-hidden">Načítání...</span>
-                </Spinner>
-            </div>
-        );
 
     if (isError) {
         console.error(error);
@@ -255,61 +281,74 @@ export default function ClientPatientTable() {
 
     return (
         <>
-            <ClientPatientTableToolbar table={table} />
+            <ClientPatientTableToolbar
+                table={table}
+                filterColumnId={filterColumnId}
+            />
             <div className="my-2 d-block text-nowrap overflow-auto">
-                <Table bordered hover>
-                    <thead>
-                        {table.getHeaderGroups().map((headerGroup) => (
-                            <tr key={headerGroup.id}>
-                                {headerGroup.headers.map((header) => (
-                                    <th key={header.id}>
-                                        {header.isPlaceholder
-                                            ? null
-                                            : flexRender(
-                                                  header.column.columnDef
-                                                      .header,
-                                                  header.getContext()
-                                              )}
-                                    </th>
-                                ))}
-                            </tr>
-                        ))}
-                    </thead>
-                    <tbody>
-                        {table.getRowModel().rows.map((row) => (
-                            <tr
-                                key={row.id}
-                                className={`${
-                                    row.getIsSelected() ? "table-active" : ""
-                                }`}
-                            >
-                                {row.getVisibleCells().map((cell) => (
-                                    <td
-                                        key={cell.id}
-                                        className="align-middle"
-                                        style={{
-                                            width:
-                                                typeof cell.column.columnDef
-                                                    .meta === "object" &&
-                                                "isNarrow" in
-                                                    cell.column.columnDef
-                                                        .meta &&
-                                                cell.column.columnDef.meta
-                                                    ?.isNarrow
-                                                    ? "0"
-                                                    : undefined,
-                                        }}
-                                    >
-                                        {flexRender(
-                                            cell.column.columnDef.cell,
-                                            cell.getContext()
-                                        )}
-                                    </td>
-                                ))}
-                            </tr>
-                        ))}
-                    </tbody>
-                </Table>
+                {isLoading ? (
+                    <div className="position-absolute top-50 start-50 translate-middle">
+                        <Spinner animation="border" role="status">
+                            <span className="visually-hidden">Načítání...</span>
+                        </Spinner>
+                    </div>
+                ) : (
+                    <Table bordered hover>
+                        <thead>
+                            {table.getHeaderGroups().map((headerGroup) => (
+                                <tr key={headerGroup.id}>
+                                    {headerGroup.headers.map((header) => (
+                                        <th key={header.id}>
+                                            {header.isPlaceholder
+                                                ? null
+                                                : flexRender(
+                                                      header.column.columnDef
+                                                          .header,
+                                                      header.getContext()
+                                                  )}
+                                        </th>
+                                    ))}
+                                </tr>
+                            ))}
+                        </thead>
+                        <tbody>
+                            {table.getRowModel().rows.map((row) => (
+                                <tr
+                                    key={row.id}
+                                    className={`${
+                                        row.getIsSelected()
+                                            ? "table-active"
+                                            : ""
+                                    }`}
+                                >
+                                    {row.getVisibleCells().map((cell) => (
+                                        <td
+                                            key={cell.id}
+                                            className="align-middle"
+                                            style={{
+                                                width:
+                                                    typeof cell.column.columnDef
+                                                        .meta === "object" &&
+                                                    "isNarrow" in
+                                                        cell.column.columnDef
+                                                            .meta &&
+                                                    cell.column.columnDef.meta
+                                                        ?.isNarrow
+                                                        ? "0"
+                                                        : undefined,
+                                            }}
+                                        >
+                                            {flexRender(
+                                                cell.column.columnDef.cell,
+                                                cell.getContext()
+                                            )}
+                                        </td>
+                                    ))}
+                                </tr>
+                            ))}
+                        </tbody>
+                    </Table>
+                )}
             </div>
             <div className="d-flex justify-content-between align-items-center">
                 <Form.Select
@@ -327,11 +366,10 @@ export default function ClientPatientTable() {
                 </Form.Select>
                 <SimplePagination
                     pageIndex={pageIndex}
-                    totalPages={Math.ceil(data.totalCount / pageSize)}
+                    totalPages={Math.ceil(data?.totalCount ?? 0 / pageSize)}
                     setPageIndex={setPageIndex}
                 />
             </div>
-
             <Modal show={!!userToEdit} onHide={() => setUserToEdit(undefined)}>
                 <Modal.Header closeButton>
                     <Modal.Title>Úprava účtu pacienta/klienta</Modal.Title>

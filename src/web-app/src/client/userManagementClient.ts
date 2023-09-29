@@ -44,7 +44,7 @@ export async function loadClientsAndPatients({
     };
     filters?: {
         fieldPath: string;
-        operation: "equal" | "not equal";
+        operation: "contains";
         comparedValue: string;
     }[];
 }): Promise<{ data: User[]; totalCount: number }> {
@@ -61,18 +61,9 @@ export async function loadClientsAndPatients({
         );
     if (filters !== undefined) {
         for (const filter of filters) {
-            let operation: string;
-            switch (filter.operation) {
-                case "equal":
-                    operation = "";
-                    break;
-                case "not equal":
-                    operation = "__ne";
-                    break;
-            }
             url.searchParams.set(
-                `${filter.fieldPath}${operation}`,
-                filter.comparedValue
+                `${filter.fieldPath}__regex`,
+                `/${filter.comparedValue}/i`
             );
         }
     }

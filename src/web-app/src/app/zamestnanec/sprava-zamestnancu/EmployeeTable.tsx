@@ -13,7 +13,7 @@ import {
     orderUrlParamDescValue,
     orderUrlParamName,
     sortUrlParamName,
-} from "@/constants/urlSort";
+} from "@/constants/urlParamNames";
 import UserRoleTitles from "@/constants/userRoleTitles";
 import { UserRoleTitle } from "@/types/userManagement/UserRoleTitle";
 import {

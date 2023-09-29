@@ -249,7 +249,7 @@ const taskRouter = createTRPCRouter({
                 filters: [
                     {
                         fieldPath: "data.id",
-                        operation: "equal",
+                        operation: "contains",
                         comparedValue: opts.input.forUserId,
                     },
                 ],

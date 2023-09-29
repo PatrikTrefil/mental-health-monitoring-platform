@@ -9,7 +9,7 @@ import {
     orderUrlParamDescValue,
     orderUrlParamName,
     sortUrlParamName,
-} from "@/constants/urlSort";
+} from "@/constants/urlParamNames";
 import { AppRouter } from "@/server/routers/root";
 import { TaskState } from "@prisma/client";
 import {

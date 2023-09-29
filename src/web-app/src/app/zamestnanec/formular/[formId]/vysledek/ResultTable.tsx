@@ -9,7 +9,7 @@ import {
     orderUrlParamDescValue,
     orderUrlParamName,
     sortUrlParamName,
-} from "@/constants/urlSort";
+} from "@/constants/urlParamNames";
 import { Form as FormFormio } from "@/types/formManagement/forms";
 import {
     DataValue,
