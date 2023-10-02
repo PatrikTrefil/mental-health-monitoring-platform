@@ -25,7 +25,7 @@ export default function FormTableToolbar({
                 <FilterToolbarItem
                     table={table}
                     filterColumnId={filterColumnId}
-                    placeholder="Filtrovat klienty/pacienty"
+                    placeholder="Filtrovat formuláře"
                 />
             </div>
             <CreateFormToolbarItem />
