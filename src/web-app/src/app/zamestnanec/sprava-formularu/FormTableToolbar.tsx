@@ -10,7 +10,7 @@ import DeleteFormToolbarItem from "./toolbar-items/DeleteFormToolbarItem";
  * Toolbar for the form table.
  * @param root0 - Props for this component.
  * @param root0.table - Table for which this toolbar is rendered.
- * @param root0.filterColumnId
+ * @param root0.filterColumnId - Id of the column by which the table is filtered.
  */
 export default function FormTableToolbar({
     table,
