@@ -163,12 +163,14 @@ export async function loadRoles(formioToken: string): Promise<Role[]> {
  * @param root0.sort - Sorting configuration.
  * @param root0.sort.field - Field to sort by.
  * @param root0.sort.order - Ordering of the results (ascending or descending).
+ * @param root0.filters - Filters to apply.
  * @throws {Error} If the Content-Range header is invalid or unknown.
  */
 export async function loadSpravceDotazniku({
     formioToken,
     pagination,
     sort,
+    filters,
 }: {
     formioToken: string;
     pagination: {
@@ -179,6 +181,11 @@ export async function loadSpravceDotazniku({
         field: string;
         order: "asc" | "desc";
     };
+    filters?: {
+        fieldPath: string;
+        operation: "contains";
+        comparedValue: string;
+    }[];
 }): Promise<{
     data: (User & { mainUserRoleTitle: UserRoleTitle })[];
     totalCount: number;
@@ -195,6 +202,16 @@ export async function loadSpravceDotazniku({
             `sort`,
             `${sort.order === "desc" ? "-" : ""}${sort.field}`
         );
+
+    if (filters !== undefined) {
+        for (const filter of filters) {
+            url.searchParams.set(
+                `${filter.fieldPath}__regex`,
+                `/${filter.comparedValue}/i`
+            );
+        }
+    }
+
     const response = await safeFetch(url, {
         headers: {
             "x-jwt-token": formioToken,
@@ -226,11 +243,13 @@ export async function loadSpravceDotazniku({
  * @param root0.sort - Sorting configuration.
  * @param root0.sort.field - Field to sort by.
  * @param root0.sort.order - Ordering of the results (ascending or descending).
+ * @param root0.filters - Filters to apply.
  */
 export async function loadZadavatelDotazniku({
     formioToken,
     pagination,
     sort,
+    filters,
 }: {
     formioToken: string;
     pagination: {
@@ -241,6 +260,11 @@ export async function loadZadavatelDotazniku({
         field: string;
         order: "asc" | "desc";
     };
+    filters?: {
+        fieldPath: string;
+        operation: "contains";
+        comparedValue: string;
+    }[];
 }): Promise<{
     data: (User & { mainUserRoleTitle: UserRoleTitle })[];
     totalCount: number;
@@ -257,6 +281,16 @@ export async function loadZadavatelDotazniku({
             `sort`,
             `${sort.order === "desc" ? "-" : ""}${sort.field}`
         );
+
+    if (filters !== undefined) {
+        for (const filter of filters) {
+            url.searchParams.set(
+                `${filter.fieldPath}__regex`,
+                `/${filter.comparedValue}/i`
+            );
+        }
+    }
+
     const response = await safeFetch(url, {
         headers: {
             "x-jwt-token": formioToken,

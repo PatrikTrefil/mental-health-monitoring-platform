@@ -87,10 +87,16 @@ export const employeesInfiniteQuery = createQueryKeys("employees", {
         formioToken,
         pageSize,
         sorting,
+        filters,
     }: {
         formioToken: string;
         pageSize: number;
         sorting: SortingState;
+        filters?: {
+            fieldPath: string;
+            operation: "contains";
+            comparedValue: string;
+        }[];
     }) => ({
         queryFn: async ({ pageParam }) => {
             /**
@@ -126,6 +132,7 @@ export const employeesInfiniteQuery = createQueryKeys("employees", {
                                         order: sorting[0].desc ? "desc" : "asc",
                                     }
                                   : undefined,
+                          filters,
                       })
                     : new Promise<undefined>((resolve) => resolve(undefined));
             const zadavatelePromise =
@@ -143,6 +150,7 @@ export const employeesInfiniteQuery = createQueryKeys("employees", {
                                         order: sorting[0].desc ? "desc" : "asc",
                                     }
                                   : undefined,
+                          filters,
                       })
                     : new Promise<undefined>((resolve) => resolve(undefined));
 
@@ -173,7 +181,7 @@ export const employeesInfiniteQuery = createQueryKeys("employees", {
             };
         },
         // eslint-disable-next-line @tanstack/query/exhaustive-deps
-        queryKey: ["employees", sorting],
+        queryKey: ["employees", sorting, filters, pageSize],
     }),
 });
 
