@@ -19,7 +19,7 @@ export default function ClientPatientTableToolbar({
 }) {
     return (
         <div className="d-flex gap-2 flex-wrap">
-            <div style={{ maxWidth: "200px" }}>
+            <div style={{ maxWidth: "300px" }}>
                 <FilterToolbarItem
                     table={table}
                     filterColumnId={filterColumnId}

@@ -371,6 +371,7 @@ export async function loadSubmission(
  * @param root0.sort - Sorting settings.
  * @param root0.sort.field - Field to sort by.
  * @param root0.sort.order - Order to sort by. (ascending or descending).
+ * @param root0.filters - List of filters to apply.
  * @returns List of submissions.
  * @throws {RequestError} If the http request fails.
  * @throws {TypeError} If the response is not valid json or when a network error is encountered or CORS is misconfigured on the server-side.
@@ -382,6 +383,7 @@ export async function loadSubmissions(
         formioToken,
         pagination,
         sort,
+        filters,
     }: {
         formioToken: string;
         pagination: {
@@ -389,6 +391,11 @@ export async function loadSubmissions(
             offset: number;
         };
         sort?: { field: string; order: "asc" | "desc" };
+        filters?: {
+            fieldPath: string;
+            operation: "contains";
+            comparedValue: string;
+        }[];
     }
 ): Promise<{ data: Submission[]; totalCount: number }> {
     const url = new URL(`${getFormioUrl()}/form/${formId}/submission`);
@@ -401,6 +408,15 @@ export async function loadSubmissions(
             `sort`,
             `${sort.order === "desc" ? "-" : ""}${sort.field}`
         );
+
+    if (filters !== undefined) {
+        for (const filter of filters) {
+            url.searchParams.set(
+                `${filter.fieldPath}__regex`,
+                `/${filter.comparedValue}/i`
+            );
+        }
+    }
 
     console.log("Fetching submissions of form...", {
         formId,

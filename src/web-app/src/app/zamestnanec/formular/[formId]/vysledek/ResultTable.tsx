@@ -5,6 +5,8 @@ import { usersQuery } from "@/client/queries/userManagement";
 import TableHeader from "@/components/TableHeader";
 import SimplePagination from "@/components/shared/SimplePagination";
 import {
+    filterColumnIdUrlParamName,
+    filterUrlParamName,
     orderUrlParamAscValue,
     orderUrlParamDescValue,
     orderUrlParamName,
@@ -18,6 +20,7 @@ import {
 } from "@/types/formManagement/submission";
 import { useQueries, useQuery } from "@tanstack/react-query";
 import {
+    ColumnFiltersState,
     SortingState,
     createColumnHelper,
     flexRender,
@@ -28,7 +31,7 @@ import { useSession } from "next-auth/react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useMemo, useState } from "react";
 import { Alert, Form, Spinner, Table } from "react-bootstrap";
-import FrequencyVisualization from "./FrequencyVisualization";
+import ResultTableToolbar from "./ResultTableToolbar";
 import stringifyResult from "./stringifyResult";
 
 const defaultPageSize = 10;
@@ -58,6 +61,15 @@ export default function ResultTable({ formId }: { formId: string }) {
     const router = useRouter();
     const pathname = usePathname();
     const searchParams = useSearchParams()!;
+
+    const filterColumnId = searchParams.get(filterColumnIdUrlParamName) ?? "";
+
+    const columnFilters = useMemo(() => {
+        const filterParam = searchParams.get(filterUrlParamName) ?? "";
+        return filterParam !== "" && filterColumnId !== ""
+            ? [{ id: filterColumnId, value: filterParam }]
+            : [];
+    }, [searchParams, filterColumnId]);
 
     const sorting: SortingState = useMemo(() => {
         const sortParam = searchParams.get(sortUrlParamName);
@@ -90,6 +102,16 @@ export default function ResultTable({ formId }: { formId: string }) {
                           field: sorting[0].id,
                           order: sorting[0].desc ? "desc" : "asc",
                       }
+                    : undefined,
+            filters:
+                columnFilters[0] !== undefined
+                    ? [
+                          {
+                              fieldPath: columnFilters[0].id,
+                              operation: "contains",
+                              comparedValue: columnFilters[0].value as string,
+                          },
+                      ]
                     : undefined,
         }),
         enabled: !!data && !!form,
@@ -135,6 +157,26 @@ export default function ResultTable({ formId }: { formId: string }) {
                 userIdUserDisplayNameMap.get(submission.owner) ?? "Neznámý",
         }));
     }, [labeledSubmissions, userIdUserDisplayNameMap]);
+
+    const dataVisualizationKeyLabelMap = useMemo(
+        () =>
+            Object.fromEntries(
+                form?.components
+                    ?.filter((c) => c.type !== "button" && c.key !== "taskId")
+                    ?.map(({ key, label }) => [key, label]) ?? []
+            ),
+        [form]
+    );
+
+    const filterPathLabelMap = useMemo(
+        () =>
+            Object.fromEntries(
+                form?.components
+                    ?.filter((c) => c.type !== "button")
+                    .map((c) => [`data.${c.key}`, c.label]) ?? []
+            ),
+        [form]
+    );
 
     const columnHelper =
         createColumnHelper<Exclude<typeof tableData, undefined>[number]>();
@@ -217,17 +259,25 @@ export default function ResultTable({ formId }: { formId: string }) {
 
             router.replace(pathname + "?" + newParams.toString());
         },
+        manualFiltering: true,
+        onColumnFiltersChange: (updaterOrValue) => {
+            let newValue: ColumnFiltersState;
+            if (typeof updaterOrValue === "function")
+                newValue = updaterOrValue(columnFilters);
+            else newValue = updaterOrValue;
+
+            // HACK: using toString first because of type issue https://github.com/vercel/next.js/issues/49245
+            const newParams = new URLSearchParams(searchParams.toString());
+            if (newValue[0] !== undefined) {
+                newParams.set(filterUrlParamName, newValue[0].value as string);
+            } else {
+                newParams.delete(filterUrlParamName);
+            }
+
+            router.replace(pathname + "?" + newParams.toString());
+        },
         autoResetPageIndex: false,
     });
-
-    if (isLoadingSubmissions || isLoadingForm)
-        return (
-            <div className="position-absolute top-50 start-50 translate-middle">
-                <Spinner animation="border" role="status">
-                    <span className="visually-hidden">Načítání...</span>
-                </Spinner>
-            </div>
-        );
 
     if (isErrorForm) {
         console.error(errorForm);
@@ -250,53 +300,64 @@ export default function ResultTable({ formId }: { formId: string }) {
 
     return (
         <>
-            <h1>Výsledky formuláře - {form.title}</h1>
-            <FrequencyVisualization
-                data={labeledSubmissions.map((s) => s.data)}
-                labelKeyMap={Object.fromEntries(
-                    form.components
-                        .filter(
-                            (c) => c.type !== "button" && c.key !== "taskId"
-                        )
-                        .map((c) => [c.key, c.label])
-                )}
+            <h1>Výsledky formuláře - {form?.title ?? "Načítání..."}</h1>
+            <ResultTableToolbar
+                frequencyVisualizationProps={{
+                    data: labeledSubmissions.map((s) => s.data),
+                    keyLabelMap: dataVisualizationKeyLabelMap,
+                }}
+                table={table}
+                filterProps={{
+                    filterColumnId: filterColumnId,
+                    pathLabelMap: filterPathLabelMap,
+                }}
             />
-
-            <div className="my-2 d-block text-nowrap overflow-auto w-100">
-                <Table striped bordered hover>
-                    <thead>
-                        {table.getHeaderGroups().map((headerGroup) => (
-                            <tr key={headerGroup.id}>
-                                {headerGroup.headers.map((header) => (
-                                    <th key={header.id}>
-                                        {header.isPlaceholder
-                                            ? null
-                                            : flexRender(
-                                                  header.column.columnDef
-                                                      .header,
-                                                  header.getContext()
-                                              )}
-                                    </th>
-                                ))}
-                            </tr>
-                        ))}
-                    </thead>
-                    <tbody>
-                        {table.getRowModel().rows.map((row) => (
-                            <tr key={row.id}>
-                                {row.getVisibleCells().map((cell) => (
-                                    <td key={cell.id} className="align-middle">
-                                        {flexRender(
-                                            cell.column.columnDef.cell,
-                                            cell.getContext()
-                                        )}
-                                    </td>
-                                ))}
-                            </tr>
-                        ))}
-                    </tbody>
-                </Table>
-            </div>
+            {isLoadingSubmissions || isLoadingForm ? (
+                <div className="position-absolute top-50 start-50 translate-middle">
+                    <Spinner animation="border" role="status">
+                        <span className="visually-hidden">Načítání...</span>
+                    </Spinner>
+                </div>
+            ) : (
+                <div className="my-2 d-block text-nowrap overflow-auto w-100">
+                    <Table striped bordered hover>
+                        <thead>
+                            {table.getHeaderGroups().map((headerGroup) => (
+                                <tr key={headerGroup.id}>
+                                    {headerGroup.headers.map((header) => (
+                                        <th key={header.id}>
+                                            {header.isPlaceholder
+                                                ? null
+                                                : flexRender(
+                                                      header.column.columnDef
+                                                          .header,
+                                                      header.getContext()
+                                                  )}
+                                        </th>
+                                    ))}
+                                </tr>
+                            ))}
+                        </thead>
+                        <tbody>
+                            {table.getRowModel().rows.map((row) => (
+                                <tr key={row.id}>
+                                    {row.getVisibleCells().map((cell) => (
+                                        <td
+                                            key={cell.id}
+                                            className="align-middle"
+                                        >
+                                            {flexRender(
+                                                cell.column.columnDef.cell,
+                                                cell.getContext()
+                                            )}
+                                        </td>
+                                    ))}
+                                </tr>
+                            ))}
+                        </tbody>
+                    </Table>
+                </div>
+            )}
             <div className="d-flex justify-content-between align-items-center">
                 <Form.Select
                     className="my-2 w-auto"
@@ -314,7 +375,7 @@ export default function ResultTable({ formId }: { formId: string }) {
                 <SimplePagination
                     pageIndex={pageIndex}
                     totalPages={Math.ceil(
-                        submissionsQueryData.totalCount / pageSize
+                        submissionsQueryData?.totalCount ?? 0 / pageSize
                     )}
                     setPageIndex={setPageIndex}
                 />

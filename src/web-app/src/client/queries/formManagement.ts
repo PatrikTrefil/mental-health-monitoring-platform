@@ -42,16 +42,22 @@ export const formsQuery = createQueryKeys("forms", {
             formioToken,
             pagination,
             sort,
+            filters,
         }: {
             formioToken: string;
             pagination: { limit: number; offset: number };
             sort?: { field: string; order: "asc" | "desc" };
+            filters?: {
+                fieldPath: string;
+                operation: "contains";
+                comparedValue: string;
+            }[];
         }
     ) => ({
         // We don't include the token in the query key, because the result does not depend on it
         // eslint-disable-next-line @tanstack/query/exhaustive-deps
-        queryKey: ["submissions", formId, pagination, sort],
+        queryKey: ["submissions", formId, pagination, sort, filters],
         queryFn: () =>
-            loadSubmissions(formId, { formioToken, pagination, sort }),
+            loadSubmissions(formId, { formioToken, pagination, sort, filters }),
     }),
 });

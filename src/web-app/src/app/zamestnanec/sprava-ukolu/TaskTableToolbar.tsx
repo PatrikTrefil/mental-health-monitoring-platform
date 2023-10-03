@@ -25,7 +25,7 @@ export default function TaskTableToolbar({
                 <FilterToolbarItem
                     table={table}
                     filterColumnId={filterColumnId}
-                    placeholder="Filtrovat klienty/pacienty"
+                    placeholder="Filtrovat úkoly"
                 />
             </div>
             <TaskCreationToolbarItem />

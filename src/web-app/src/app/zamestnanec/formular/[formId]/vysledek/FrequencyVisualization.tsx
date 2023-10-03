@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Button, Col, Form, Modal, Row } from "react-bootstrap";
 import DataVisualization, { ChartType, ChartTypes } from "./DataVisualization";
 import { LabeledDataValue } from "./ResultTable";
@@ -11,23 +11,19 @@ import stringifyResult from "./stringifyResult";
  * The user may select any field from the data to visualize. The user may select from
  * different chart types.
  * @param root0 - Props for the component.
- * @param root0.data - Data to visualize.
- * @param root0.labelKeyMap - Map of labels to keys in the data.
+ * @param root0.data - Data to visualize. May be empty while the data is loading.
+ * @param root0.keyLabelMap - Map of keys in data property of the submission to labels.
  */
 export default function FrequencyVisualization({
     data,
-    labelKeyMap,
+    keyLabelMap: labelKeyMap,
 }: {
     data: { [key: string]: LabeledDataValue }[];
-    labelKeyMap: { [key: string]: string };
+    keyLabelMap: { [key: string]: string };
 }) {
     const [isVisualizationModalShowing, setIsVisualizationModalShowing] =
         useState(false);
-    const [fieldToVisualize, setFieldToVisualize] = useState(
-        Object.keys(labelKeyMap).length > 0
-            ? Object.keys(labelKeyMap)[0]
-            : undefined
-    );
+    const [fieldToVisualize, setFieldToVisualize] = useState<string>();
 
     const [selectedChartType, setSelectedChartType] = useState<ChartType>(
         ChartTypes.bar
@@ -44,7 +40,14 @@ export default function FrequencyVisualization({
         return calculateFrequencies(values);
     }, [data, fieldToVisualize]);
 
-    const isDataEmpty = Object.keys(labelKeyMap).length === 0;
+    useEffect(
+        function defaultToFirst() {
+            setFieldToVisualize(Object.keys(labelKeyMap)[0]);
+        },
+        [labelKeyMap]
+    );
+
+    const isDataEmpty = Object.keys(data).length === 0;
 
     return (
         <>
@@ -72,42 +75,42 @@ export default function FrequencyVisualization({
                 <Modal.Body>
                     <Row>
                         <Col>
-                            <Form.Label htmlFor="field-to-visualize">
-                                Vizualizované pole
-                            </Form.Label>
-                            <Form.Select
-                                value={fieldToVisualize}
-                                onChange={(e) =>
-                                    setFieldToVisualize(e.target.value)
-                                }
-                                id="field-to-visualize"
-                            >
-                                {Object.entries(labelKeyMap).map(([k, v]) => (
-                                    <option key={k} value={k}>
-                                        {v}
-                                    </option>
-                                ))}
-                            </Form.Select>
+                            <Form.Group controlId="field-to-visualize">
+                                <Form.Label>Vizualizované pole</Form.Label>
+                                <Form.Select
+                                    value={fieldToVisualize}
+                                    onChange={(e) =>
+                                        setFieldToVisualize(e.target.value)
+                                    }
+                                >
+                                    {Object.entries(labelKeyMap).map(
+                                        ([k, v]) => (
+                                            <option key={k} value={k}>
+                                                {v}
+                                            </option>
+                                        )
+                                    )}
+                                </Form.Select>
+                            </Form.Group>
                         </Col>
                         <Col>
-                            <Form.Label htmlFor="chart-type">
-                                Typ grafu
-                            </Form.Label>
-                            <Form.Select
-                                value={selectedChartType}
-                                onChange={(e) =>
-                                    setSelectedChartType(
-                                        e.target.value as ChartType
-                                    )
-                                }
-                                id="chart-type"
-                            >
-                                {Object.values(ChartTypes).map((v) => (
-                                    <option key={v} value={v}>
-                                        {v}
-                                    </option>
-                                ))}
-                            </Form.Select>
+                            <Form.Group controlId="chart-type">
+                                <Form.Label>Typ grafu</Form.Label>
+                                <Form.Select
+                                    value={selectedChartType}
+                                    onChange={(e) =>
+                                        setSelectedChartType(
+                                            e.target.value as ChartType
+                                        )
+                                    }
+                                >
+                                    {Object.values(ChartTypes).map((v) => (
+                                        <option key={v} value={v}>
+                                            {v}
+                                        </option>
+                                    ))}
+                                </Form.Select>
+                            </Form.Group>
                         </Col>
                     </Row>
                     <div className="mt-2">
