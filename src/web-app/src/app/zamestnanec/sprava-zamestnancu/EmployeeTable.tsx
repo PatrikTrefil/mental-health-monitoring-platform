@@ -237,6 +237,7 @@ export default function EmployeeTable() {
                     ) {
                         actionNodes.push(
                             <Button
+                                key="delete-button"
                                 variant="danger"
                                 disabled={!session.data}
                                 onClick={async () => {
@@ -258,6 +259,7 @@ export default function EmployeeTable() {
                         );
                         actionNodes.push(
                             <Button
+                                key="edit-button"
                                 onClick={() => {
                                     setUserToEdit({
                                         submissionId: props.row.original._id,
