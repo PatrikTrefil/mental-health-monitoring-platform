@@ -13,15 +13,25 @@ import {
 } from "./utility";
 
 type CreateTaskInput = inferProcedureInput<AppRouter["task"]["createTask"]>;
+type CreateTaskOutput = inferProcedureOutput<AppRouter["task"]["createTask"]>;
 
-const mockInputTask: CreateTaskInput & { description: string } = {
+const mockInputTask: CreateTaskInput & {
+    description: string;
+    start: Date;
+    deadline: { dueDateTime: Date; canBeCompletedAfterDeadline: boolean };
+} = {
     name: "foo",
     forUserId: faker.string.uuid(),
     description: "bar",
     formId: faker.string.uuid(),
+    start: faker.date.future(),
+    deadline: {
+        dueDateTime: faker.date.future(),
+        canBeCompletedAfterDeadline: false,
+    },
 };
 
-const mockOutputTaskExpectationTemplate = {
+const mockOutputTaskExpectationTemplate: CreateTaskOutput = {
     ...mockInputTask,
     id: expect.any(String),
     createdAt: expect.any(Date),
@@ -29,6 +39,11 @@ const mockOutputTaskExpectationTemplate = {
     createdByEmployeeId: expect.any(String),
     state: TaskState.READY,
     submissionId: null,
+    deadline: {
+        dueDateTime: expect.any(Date),
+        canBeCompletedAfterDeadline: expect.any(Boolean),
+        taskId: expect.any(String),
+    },
 };
 
 vi.mock("@/server/db");
@@ -50,18 +65,21 @@ vi.mock("@/client/formManagementClient", () => ({
 
 vi.mock("@/client/userManagementClient", () => ({
     loadClientsAndPatients: vi.fn(async () => {
-        const mockUsers: Awaited<ReturnType<typeof loadClientsAndPatients>> = [
-            {
-                _id: "12324",
-                data: { id: "123" },
-                created: "",
-                owner: "",
-                access: [],
-                form: "",
-                roles: [],
-                metadata: {},
-            },
-        ];
+        const mockUsers: Awaited<ReturnType<typeof loadClientsAndPatients>> = {
+            data: [
+                {
+                    _id: "12324",
+                    data: { id: "123" },
+                    created: "",
+                    owner: "",
+                    access: [],
+                    form: "",
+                    roles: [],
+                    metadata: {},
+                },
+            ],
+            totalCount: 1,
+        };
         return mockUsers;
     }),
 }));
@@ -82,23 +100,26 @@ describe("todo functionality", () => {
             submissionAccess: [],
             components: [],
         });
-        vi.mocked(loadClientsAndPatients).mockResolvedValueOnce([
-            {
-                _id: faker.string.uuid(),
-                data: { id: mockInputTask.forUserId },
-                access: [],
-                created: faker.date.past().toISOString(),
-                form: faker.string.uuid(),
-                metadata: {},
-                owner: faker.string.uuid(),
-                roles: [],
-            },
-        ]);
+        vi.mocked(loadClientsAndPatients).mockResolvedValueOnce({
+            data: [
+                {
+                    _id: faker.string.uuid(),
+                    data: { id: mockInputTask.forUserId },
+                    access: [],
+                    created: faker.date.past().toISOString(),
+                    form: faker.string.uuid(),
+                    metadata: {},
+                    owner: faker.string.uuid(),
+                    roles: [],
+                },
+            ],
+            totalCount: 1,
+        });
         if (!employeeCtx.session) throw new Error("no session");
 
-        prisma.task.create.mockResolvedValueOnce(
-            mockOutputTaskExpectationTemplate
-        );
+        prisma.task.create.mockResolvedValueOnce({
+            ...mockOutputTaskExpectationTemplate,
+        });
         const createdTask = await caller.task.createTask(mockInputTask);
 
         expect(createdTask).toMatchObject(mockOutputTaskExpectationTemplate);
@@ -124,11 +145,18 @@ describe("todo functionality", () => {
             createdByEmployeeId: faker.string.uuid(),
             state: TaskState.READY,
             submissionId: null,
+            forUserId: clientCtx.session.user.data.id,
+            // @ts-expect-error I have no idea how to use the other findUnique overload which includes the deadline object for mocking
+            deadline: {
+                ...mockInputTask.deadline,
+                taskId: mockTaskId,
+            },
         });
         const receivedTask = await clientCaller.task.getTask({
             id: mockTaskId,
         });
 
+        console.log({ receivedTask });
         // assert
         expect(receivedTask).toMatchObject(mockOutputTaskExpectationTemplate);
     });
@@ -175,10 +203,13 @@ describe("todo functionality", () => {
             });
         }
 
-        prisma.task.findMany.mockResolvedValueOnce(
-            mockTasks.map((t) => ({ ...t, deadline: null }))
-        );
-        const tasks = await caller.task.listTasks();
+        prisma.$transaction.mockResolvedValueOnce([
+            mockTasks.map((t) => ({ ...t, deadline: null })),
+            mockTasks.length,
+        ]);
+        const tasks = await caller.task.listTasks({
+            pagination: { limit: 10, offset: 0 },
+        });
 
         if (!ctx.session?.user.data.id) throw new Error("Session is null");
 
@@ -186,7 +217,7 @@ describe("todo functionality", () => {
         for (let i = 0; i < numberOfTasks; i++) {
             const expectedTask: Awaited<
                 ReturnType<typeof caller.task.listTasks>
-            >[number] = {
+            >["data"][number] = {
                 ...mockInputTask,
                 name: `test ${i}`,
                 id: expect.any(String),
@@ -197,16 +228,16 @@ describe("todo functionality", () => {
                 submissionId: null,
                 deadline: null,
             };
-            expect(tasks).toContainEqual(expectedTask);
+            expect(tasks.data).toContainEqual(expectedTask);
         }
     });
 
     it("lists my todos as client/patient", async () => {
         const numberOfTasks = 10;
         const patientId = faker.string.uuid();
-        const createdTasks: inferProcedureOutput<
-            AppRouter["task"]["listTasks"]
-        > = new Array(numberOfTasks);
+        const createdTasks = new Array<
+            inferProcedureOutput<AppRouter["task"]["listTasks"]>["data"][number]
+        >(numberOfTasks);
         for (let i = 0; i < numberOfTasks; i++) {
             createdTasks[i] = {
                 ...mockInputTask,
@@ -229,13 +260,18 @@ describe("todo functionality", () => {
             patientId
         );
         const patientCaller = appRouter.createCaller(patientCtx);
-        prisma.task.findMany.mockResolvedValueOnce(createdTasks);
-        const patientsTasks = await patientCaller.task.listTasks();
+        prisma.$transaction.mockResolvedValueOnce([
+            createdTasks,
+            createdTasks.length,
+        ]);
+        const patientsTasks = await patientCaller.task.listTasks({
+            pagination: { limit: 10, offset: 0 },
+        });
 
         // assert
         for (const createdTask of createdTasks) {
             if (createdTask.forUserId === patientId)
-                expect(patientsTasks).toContainEqual(createdTask);
+                expect(patientsTasks.data).toContainEqual(createdTask);
         }
     });
 
@@ -297,9 +333,10 @@ describe("todo functionality", () => {
                 UserRoleTitles.ZADAVATEL_DOTAZNIKU,
             ])
         );
-        vi.mocked(loadClientsAndPatients).mockImplementationOnce(
-            async () => []
-        );
+        vi.mocked(loadClientsAndPatients).mockImplementationOnce(async () => ({
+            data: [],
+            totalCount: 0,
+        }));
         expect(
             caller.task.createTask(mockInputTask)
         ).rejects.toMatchInlineSnapshot(
@@ -333,9 +370,9 @@ describe("todo permissions", () => {
         const caller = appRouter.createCaller(
             createInnerTRPCContextNoSession()
         );
-        await expect(caller.task.listTasks()).rejects.toMatchInlineSnapshot(
-            "[TRPCError: UNAUTHORIZED]"
-        );
+        await expect(
+            caller.task.listTasks({ pagination: { limit: 10, offset: 0 } })
+        ).rejects.toMatchInlineSnapshot("[TRPCError: UNAUTHORIZED]");
     });
 
     it("throws when getting a todo as unauthenticated", async () => {
@@ -367,7 +404,10 @@ describe("todo permissions", () => {
             formId: faker.string.uuid(),
         };
 
-        prisma.task.findUnique.mockResolvedValueOnce(mockTaskForDifferentUser);
+        prisma.task.findUnique.mockResolvedValueOnce({
+            start: null,
+            ...mockTaskForDifferentUser,
+        });
         await expect(() =>
             clientCaller.task.getTask({ id: mockTaskForDifferentUser.id })
         ).rejects.toMatchInlineSnapshot("[TRPCError: FORBIDDEN]");

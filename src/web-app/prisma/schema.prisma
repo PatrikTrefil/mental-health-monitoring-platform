@@ -10,8 +10,6 @@ datasource db {
     url      = env("DATABASE_URL")
 }
 
-// TODO: Test deadlines
-
 model Task {
     /// Artificial ID of the task
     id                  String    @id @default(uuid())

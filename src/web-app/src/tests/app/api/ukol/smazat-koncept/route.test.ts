@@ -26,6 +26,12 @@ vi.mock("@/client/userManagementClient", () => ({
             },
         },
     ]),
+    loadClientPatient: vi.fn(() => ({
+        _id: userSubmissionId,
+        data: {
+            id: userId,
+        },
+    })),
 }));
 
 it("deletes a concept", async () => {
@@ -42,6 +48,9 @@ it("deletes a concept", async () => {
                     form: formId,
                 },
             }),
+            headers: {
+                "x-jwt-token": mockValidAdminToken,
+            },
         })
     );
     // assert - the draft is deleted
@@ -75,6 +84,9 @@ it("returns 404 if the draft does not exist", async () => {
                     form: formId,
                 },
             }),
+            headers: {
+                "x-jwt-token": mockValidAdminToken,
+            },
         })
     );
     expect(response.status).toBe(404);

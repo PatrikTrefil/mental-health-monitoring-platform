@@ -8,6 +8,7 @@ import { Dropdown, Form } from "react-bootstrap";
  * @param root0 - Props for the component.
  * @param root0.table - Table for which to render options.
  * @param root0.style - Style for the dropdown container.
+ * @throws {Error} If any column in the table does not have a label.
  */
 export default function TableViewOptions<TData>({
     table,
@@ -30,11 +31,20 @@ export default function TableViewOptions<TData>({
                     .getAllColumns()
                     .filter((h) => h.id !== "select") // the select column is not toggleable
                     .map((column) => {
+                        const meta = column.columnDef.meta;
+                        if (
+                            meta === undefined ||
+                            !("viewOptionsLabel" in meta) ||
+                            typeof meta.viewOptionsLabel !== "string"
+                        )
+                            throw new Error(
+                                `Column ${column.id} does not have a label.`
+                            );
+
                         return (
                             <Dropdown.ItemText key={column.id}>
                                 <Form.Check
-                                    // render header as label
-                                    label={column.id}
+                                    label={meta.viewOptionsLabel}
                                     checked={column.getIsVisible()}
                                     onChange={(e) =>
                                         column.toggleVisibility(

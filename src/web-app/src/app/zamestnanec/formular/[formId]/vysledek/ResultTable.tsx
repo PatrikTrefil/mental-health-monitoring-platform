@@ -1,27 +1,40 @@
 "use client";
 
-import { loadFormById, loadSubmissions } from "@/client/formManagementClient";
-import { loadClientsAndPatients } from "@/client/userManagementClient";
+import { formsQuery } from "@/client/queries/formManagement";
+import { usersQuery } from "@/client/queries/userManagement";
+import TableHeader from "@/components/TableHeader";
 import SimplePagination from "@/components/shared/SimplePagination";
-import { useSmartFetch } from "@/hooks/useSmartFetch";
+import {
+    filterColumnIdUrlParamName,
+    filterUrlParamName,
+    orderUrlParamAscValue,
+    orderUrlParamDescValue,
+    orderUrlParamName,
+    sortUrlParamName,
+} from "@/constants/urlParamNames";
 import { Form as FormFormio } from "@/types/formManagement/forms";
 import {
     DataValue,
     SelectBoxDataValue,
     Submission,
 } from "@/types/formManagement/submission";
+import { useQueries, useQuery } from "@tanstack/react-query";
 import {
+    ColumnFiltersState,
+    SortingState,
     createColumnHelper,
     flexRender,
     getCoreRowModel,
-    getPaginationRowModel,
     useReactTable,
 } from "@tanstack/react-table";
 import { useSession } from "next-auth/react";
-import { useMemo } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useMemo, useState } from "react";
 import { Alert, Form, Spinner, Table } from "react-bootstrap";
-import FrequencyVisualization from "./FrequencyVisualization";
+import ResultTableToolbar from "./ResultTableToolbar";
 import stringifyResult from "./stringifyResult";
+
+const defaultPageSize = 10;
 
 /**
  * Display table with results from form with given formId.
@@ -31,60 +44,156 @@ import stringifyResult from "./stringifyResult";
 export default function ResultTable({ formId }: { formId: string }) {
     const { data } = useSession();
 
-    // We need to load users to display their names in table
-    const {
-        data: users,
-        isError: isErrorUsers,
-        error: errorUsers,
-    } = useSmartFetch({
-        queryFn: () => loadClientsAndPatients(data?.user.formioToken!),
-        enabled: !!data,
-    });
-
     // We need the form object to get path of the form to load submissions
     const {
         data: form,
         isError: isErrorForm,
         error: errorForm,
         isLoading: isLoadingForm,
-    } = useSmartFetch<FormFormio, string>({
-        queryFn: async () => {
-            const form = await loadFormById(formId, data!.user.formioToken);
-            if (!form) throw "Formulář s předaným ID nebyl nalezen";
-
-            return form;
-        },
-        enabled: !!data,
+    } = useQuery({
+        ...formsQuery.detail(data?.user.formioToken!, formId),
+        enabled: !!data?.user.formioToken,
     });
 
+    const [pageSize, setPageSize] = useState(defaultPageSize);
+    const [pageIndex, setPageIndex] = useState(0);
+
+    const router = useRouter();
+    const pathname = usePathname();
+    const searchParams = useSearchParams()!;
+
+    const filterColumnId = searchParams.get(filterColumnIdUrlParamName) ?? "";
+
+    const columnFilters = useMemo(() => {
+        const filterParam = searchParams.get(filterUrlParamName) ?? "";
+        return filterParam !== "" && filterColumnId !== ""
+            ? [{ id: filterColumnId, value: filterParam }]
+            : [];
+    }, [searchParams, filterColumnId]);
+
+    const sorting: SortingState = useMemo(() => {
+        const sortParam = searchParams.get(sortUrlParamName);
+        return sortParam !== null
+            ? [
+                  {
+                      id: sortParam,
+                      desc:
+                          searchParams.get(orderUrlParamName) ===
+                          orderUrlParamDescValue
+                              ? true
+                              : false,
+                  },
+              ]
+            : [];
+    }, [searchParams]);
+
     const {
-        data: submissions,
+        data: submissionsQueryData,
         isError: isErrorSubmissions,
         error: errorSubmissions,
         isLoading: isLoadingSubmissions,
-    } = useSmartFetch({
-        queryFn: async () => {
-            const submissions = await loadSubmissions(
-                form!.path,
-                data!.user.formioToken
-            );
-            return addHumanReadableLabelsToSubmissionData(submissions, form!);
-        },
+    } = useQuery({
+        ...formsQuery.submissions(formId, {
+            formioToken: data?.user.formioToken!,
+            pagination: { limit: pageSize, offset: pageSize * pageIndex },
+            sort:
+                sorting[0] !== undefined
+                    ? {
+                          field: sorting[0].id,
+                          order: sorting[0].desc ? "desc" : "asc",
+                      }
+                    : undefined,
+            filters:
+                columnFilters[0] !== undefined
+                    ? [
+                          {
+                              fieldPath: columnFilters[0].id,
+                              operation: "contains",
+                              comparedValue: columnFilters[0].value as string,
+                          },
+                      ]
+                    : undefined,
+        }),
         enabled: !!data && !!form,
     });
+    const rawSubmissions = submissionsQueryData?.data;
+
+    const labeledSubmissions = useMemo(
+        () =>
+            rawSubmissions !== undefined && form !== undefined && form !== null
+                ? addHumanReadableLabelsToSubmissionData(rawSubmissions, form)
+                : [],
+        [rawSubmissions, form]
+    );
+
+    const userIdsToLoad = useMemo(() => {
+        if (rawSubmissions === undefined) return [];
+        return Array.from(
+            new Set<string>(
+                rawSubmissions.map((submission) => submission.owner)
+            )
+        );
+    }, [rawSubmissions]);
+
+    // We need to load users to display their names in table
+    const users = useQueries({
+        queries: userIdsToLoad.map((userId) => ({
+            ...usersQuery.detail(data?.user.formioToken!, userId),
+            enabled: !!data?.user.formioToken,
+        })),
+    });
+
+    const userIdUserDisplayNameMap = useMemo(() => {
+        if (users === undefined) return new Map<string, string>();
+        return new Map(
+            users.map((user) => [user.data?._id, user.data?.data.id])
+        );
+    }, [users]);
+
+    const tableData = useMemo(() => {
+        return labeledSubmissions?.map((submission) => ({
+            ...submission,
+            ownerDisplayId:
+                userIdUserDisplayNameMap.get(submission.owner) ?? "Neznámý",
+        }));
+    }, [labeledSubmissions, userIdUserDisplayNameMap]);
+
+    const dataVisualizationKeyLabelMap = useMemo(
+        () =>
+            Object.fromEntries(
+                form?.components
+                    ?.filter((c) => c.type !== "button" && c.key !== "taskId")
+                    ?.map(({ key, label }) => [key, label]) ?? []
+            ),
+        [form]
+    );
+
+    const filterPathLabelMap = useMemo(
+        () =>
+            Object.fromEntries(
+                form?.components
+                    ?.filter((c) => c.type !== "button")
+                    .map((c) => [`data.${c.key}`, c.label]) ?? []
+            ),
+        [form]
+    );
 
     const columnHelper =
-        createColumnHelper<Exclude<typeof submissions, null>[number]>();
+        createColumnHelper<Exclude<typeof tableData, undefined>[number]>();
     const columns = useMemo(() => {
         const cols = [
             columnHelper.accessor("owner", {
-                header: "Autor",
-                cell: (props) =>
-                    users?.find((user) => user._id === props.row.original.owner)
-                        ?.data?.id ?? "Načítání...",
+                id: "owner",
+                header: ({ column }) => (
+                    <TableHeader text="Autor" column={column} />
+                ),
+                cell: (props) => props.row.original.ownerDisplayId,
             }),
             columnHelper.accessor("created", {
-                header: "Vytvořeno dne",
+                id: "created",
+                header: ({ column }) => (
+                    <TableHeader text="Vytvořeno dne" column={column} />
+                ),
                 cell: (props) =>
                     new Date(props.row.original.created).toLocaleString(),
             }),
@@ -98,12 +207,17 @@ export default function ResultTable({ formId }: { formId: string }) {
                     columnHelper.accessor(
                         `data.${comp.key}` as keyof Submission,
                         {
-                            header: comp.label,
+                            id: `data.${comp.key}`,
+                            header: ({ column }) => (
+                                <TableHeader
+                                    text={comp.label}
+                                    column={column}
+                                />
+                            ),
                             cell: (props) => {
                                 const value =
-                                    props.row.original.data[comp.key]?.value;
-                                if (value === undefined)
-                                    throw new Error("Unexpected undefined");
+                                    props.row.original.data[comp.key]?.value ??
+                                    "Chybějící hodnota";
                                 return stringifyResult(value);
                             },
                         }
@@ -111,29 +225,71 @@ export default function ResultTable({ formId }: { formId: string }) {
                 );
             }
         return cols;
-    }, [columnHelper, form, users]);
+    }, [columnHelper, form?.components]);
 
     const table = useReactTable({
         columns,
-        data: submissions ?? [],
+        data: tableData ?? [],
         getCoreRowModel: getCoreRowModel(),
-        getPaginationRowModel: getPaginationRowModel(),
+        manualPagination: true,
+        state: {
+            sorting,
+        },
+        manualSorting: true,
+        onSortingChange: (updaterOrValue) => {
+            let newValue: SortingState;
+            if (typeof updaterOrValue === "function")
+                newValue = updaterOrValue(sorting);
+            else newValue = updaterOrValue;
+
+            // HACK: using toString first because of type issue https://github.com/vercel/next.js/issues/49245
+            const newParams = new URLSearchParams(searchParams.toString());
+            if (newValue[0] !== undefined) {
+                newParams.set(sortUrlParamName, newValue[0].id);
+                newParams.set(
+                    orderUrlParamName,
+                    newValue[0].desc
+                        ? orderUrlParamDescValue
+                        : orderUrlParamAscValue
+                );
+            } else {
+                newParams.delete(sortUrlParamName);
+                newParams.delete(orderUrlParamName);
+            }
+
+            router.replace(pathname + "?" + newParams.toString());
+        },
+        manualFiltering: true,
+        onColumnFiltersChange: (updaterOrValue) => {
+            let newValue: ColumnFiltersState;
+            if (typeof updaterOrValue === "function")
+                newValue = updaterOrValue(columnFilters);
+            else newValue = updaterOrValue;
+
+            // HACK: using toString first because of type issue https://github.com/vercel/next.js/issues/49245
+            const newParams = new URLSearchParams(searchParams.toString());
+            if (newValue[0] !== undefined) {
+                newParams.set(filterUrlParamName, newValue[0].value as string);
+            } else {
+                newParams.delete(filterUrlParamName);
+            }
+
+            router.replace(pathname + "?" + newParams.toString());
+        },
+        autoResetPageIndex: false,
     });
 
-    if (isLoadingSubmissions || isLoadingForm)
-        return (
-            <div className="position-absolute top-50 start-50 translate-middle">
-                <Spinner animation="border" role="status">
-                    <span className="visually-hidden">Načítání...</span>
-                </Spinner>
-            </div>
-        );
+    if (isErrorForm) {
+        console.error(errorForm);
+        return <Alert variant="danger">Nepodařilo se načíst data.</Alert>;
+    }
 
-    if (isErrorForm) return <Alert variant="danger">{errorForm}</Alert>;
+    if (form === null) {
+        return <Alert variant="danger">Formulář neexistuje.</Alert>;
+    }
 
-    if (isErrorSubmissions || isErrorUsers) {
-        if (isErrorUsers) console.error(errorUsers);
-        else if (isErrorSubmissions) console.error(errorSubmissions);
+    if (isErrorSubmissions) {
+        if (isErrorSubmissions) console.error(errorSubmissions);
 
         return (
             <Alert variant="danger">
@@ -144,59 +300,70 @@ export default function ResultTable({ formId }: { formId: string }) {
 
     return (
         <>
-            <h1>Výsledky formuláře - {form.title}</h1>
-            <FrequencyVisualization
-                data={submissions.map((s) => s.data)}
-                labelKeyMap={Object.fromEntries(
-                    form.components
-                        .filter(
-                            (c) => c.type !== "button" && c.key !== "taskId"
-                        )
-                        .map((c) => [c.key, c.label])
-                )}
+            <h1>Výsledky formuláře - {form?.title ?? "Načítání..."}</h1>
+            <ResultTableToolbar
+                frequencyVisualizationProps={{
+                    data: labeledSubmissions.map((s) => s.data),
+                    keyLabelMap: dataVisualizationKeyLabelMap,
+                }}
+                table={table}
+                filterProps={{
+                    filterColumnId: filterColumnId,
+                    pathLabelMap: filterPathLabelMap,
+                }}
             />
-
-            <div className="my-2 d-block text-nowrap overflow-auto w-100">
-                <Table striped bordered hover>
-                    <thead>
-                        {table.getHeaderGroups().map((headerGroup) => (
-                            <tr key={headerGroup.id}>
-                                {headerGroup.headers.map((header) => (
-                                    <th key={header.id}>
-                                        {header.isPlaceholder
-                                            ? null
-                                            : flexRender(
-                                                  header.column.columnDef
-                                                      .header,
-                                                  header.getContext()
-                                              )}
-                                    </th>
-                                ))}
-                            </tr>
-                        ))}
-                    </thead>
-                    <tbody>
-                        {table.getRowModel().rows.map((row) => (
-                            <tr key={row.id}>
-                                {row.getVisibleCells().map((cell) => (
-                                    <td key={cell.id} className="align-middle">
-                                        {flexRender(
-                                            cell.column.columnDef.cell,
-                                            cell.getContext()
-                                        )}
-                                    </td>
-                                ))}
-                            </tr>
-                        ))}
-                    </tbody>
-                </Table>
-            </div>
+            {isLoadingSubmissions || isLoadingForm ? (
+                <div className="position-absolute top-50 start-50 translate-middle">
+                    <Spinner animation="border" role="status">
+                        <span className="visually-hidden">Načítání...</span>
+                    </Spinner>
+                </div>
+            ) : (
+                <div className="my-2 d-block text-nowrap overflow-auto w-100">
+                    <Table striped bordered hover>
+                        <thead>
+                            {table.getHeaderGroups().map((headerGroup) => (
+                                <tr key={headerGroup.id}>
+                                    {headerGroup.headers.map((header) => (
+                                        <th key={header.id}>
+                                            {header.isPlaceholder
+                                                ? null
+                                                : flexRender(
+                                                      header.column.columnDef
+                                                          .header,
+                                                      header.getContext()
+                                                  )}
+                                        </th>
+                                    ))}
+                                </tr>
+                            ))}
+                        </thead>
+                        <tbody>
+                            {table.getRowModel().rows.map((row) => (
+                                <tr key={row.id}>
+                                    {row.getVisibleCells().map((cell) => (
+                                        <td
+                                            key={cell.id}
+                                            className="align-middle"
+                                        >
+                                            {flexRender(
+                                                cell.column.columnDef.cell,
+                                                cell.getContext()
+                                            )}
+                                        </td>
+                                    ))}
+                                </tr>
+                            ))}
+                        </tbody>
+                    </Table>
+                </div>
+            )}
             <div className="d-flex justify-content-between align-items-center">
                 <Form.Select
                     className="my-2 w-auto"
-                    value={table.getState().pagination.pageSize}
+                    value={pageSize}
                     onChange={(e) => {
-                        table.setPageSize(Number(e.target.value));
+                        setPageSize(Number(e.target.value));
                     }}
                 >
                     {[10, 20, 30].map((pageSize: number) => (
@@ -206,9 +373,11 @@ export default function ResultTable({ formId }: { formId: string }) {
                     ))}
                 </Form.Select>
                 <SimplePagination
-                    pageIndex={table.getState().pagination.pageIndex}
-                    totalPages={table.getPageCount()}
-                    setPageIndex={table.setPageIndex}
+                    pageIndex={pageIndex}
+                    totalPages={Math.ceil(
+                        submissionsQueryData?.totalCount ?? 0 / pageSize
+                    )}
+                    setPageIndex={setPageIndex}
                 />
             </div>
         </>

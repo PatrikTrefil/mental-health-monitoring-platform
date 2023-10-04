@@ -1,7 +1,4 @@
-import {
-    loadClientsAndPatients,
-    loginAdmin,
-} from "@/client/userManagementClient";
+import { loadClientPatient } from "@/client/userManagementClient";
 import { prisma } from "@/server/db";
 import { Prisma } from "@prisma/client";
 import { z } from "zod";
@@ -37,12 +34,10 @@ export async function POST(req: Request) {
         return new Response(JSON.stringify(body.error), { status: 400 });
     }
 
-    const adminToken = await loginAdmin(
-        process.env.FORMIO_ROOT_EMAIL,
-        process.env.FORMIO_ROOT_PASSWORD
-    );
-    const users = await loadClientsAndPatients(adminToken);
-    const user = users.find((u) => u._id === body.data.request.owner);
+    const formioToken = req.headers.get("x-jwt-token");
+    if (formioToken === null) return new Response(undefined, { status: 401 });
+
+    const user = await loadClientPatient(formioToken, body.data.request.owner);
     if (!user)
         return new Response(JSON.stringify({ error: "User not found" }), {
             status: 404,

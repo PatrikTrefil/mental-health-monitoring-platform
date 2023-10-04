@@ -45,8 +45,7 @@ export default function DeleteClientPatientToolbarItem({
                 userSubmissionId,
             });
             queryClient.invalidateQueries({
-                queryKey: usersQuery.list(session.data!.user.formioToken)
-                    .queryKey,
+                queryKey: usersQuery.list._def,
             });
             queryClient.invalidateQueries({
                 queryKey: usersQuery.detail(
