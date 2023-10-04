@@ -4,3 +4,5 @@ export const orderUrlParamAscValue = "asc";
 export const orderUrlParamDescValue = "desc";
 export const filterUrlParamName = "filter";
 export const filterColumnIdUrlParamName = "filterBy";
+export const limitUrlParamName = "limit";
+export const pageIndexUrlParamName = "pageIndex";

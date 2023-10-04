@@ -13,6 +13,8 @@ import {
     sortUrlParamName,
 } from "@/constants/urlParamNames";
 import UserRoleTitles from "@/constants/userRoleTitles";
+import { useURLLimit } from "@/hooks/useURLLimit";
+import { useURLPageIndex } from "@/hooks/useURLPageIndex";
 import { User } from "@/types/userManagement/user";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -30,7 +32,6 @@ import { Alert, Button, Form, Modal, Spinner, Table } from "react-bootstrap";
 import { toast } from "react-toastify";
 import ClientPatientTableToolbar from "./ClientPatientTableToolbar";
 
-const defaultPageSize = 10;
 const filterColumnId = "data.id";
 
 /**
@@ -164,8 +165,9 @@ export default function ClientPatientTable() {
         [columnHelper, session.data, deleteUserMutate]
     );
 
-    const [pageSize, setPageSize] = useState(defaultPageSize);
-    const [pageIndex, setPageIndex] = useState(0);
+    const validLimitValues = [10, 20, 30];
+    const { limit, setLimit } = useURLLimit({ validValues: validLimitValues });
+    const { pageIndex, setPageIndex } = useURLPageIndex();
 
     const router = useRouter();
     const pathname = usePathname();
@@ -198,8 +200,8 @@ export default function ClientPatientTable() {
         ...usersQuery.list({
             formioToken: session.data?.user.formioToken!,
             pagination: {
-                limit: pageSize,
-                offset: pageIndex * pageSize,
+                limit,
+                offset: pageIndex * limit,
             },
             sort:
                 sorting[0] !== undefined
@@ -272,7 +274,7 @@ export default function ClientPatientTable() {
         autoResetPageIndex: false,
     });
 
-    const totalPages = Math.ceil((data?.totalCount ?? 0) / pageSize);
+    const totalPages = Math.ceil((data?.totalCount ?? 0) / limit);
     useEffect(
         function prefetch() {
             // Prefetch next page
@@ -282,8 +284,8 @@ export default function ClientPatientTable() {
                     usersQuery.list({
                         formioToken: session.data?.user.formioToken!,
                         pagination: {
-                            limit: pageSize,
-                            offset: nextPageIndex * pageSize,
+                            limit,
+                            offset: nextPageIndex * limit,
                         },
                         sort:
                             sorting[0] !== undefined
@@ -312,8 +314,8 @@ export default function ClientPatientTable() {
                     usersQuery.list({
                         formioToken: session.data?.user.formioToken!,
                         pagination: {
-                            limit: pageSize,
-                            offset: prevPageIndex * pageSize,
+                            limit,
+                            offset: prevPageIndex * limit,
                         },
                         sort:
                             sorting[0] !== undefined
@@ -337,7 +339,7 @@ export default function ClientPatientTable() {
                 );
         },
         [
-            pageSize,
+            limit,
             pageIndex,
             sorting,
             columnFilters,
@@ -428,12 +430,10 @@ export default function ClientPatientTable() {
             <div className="d-flex justify-content-between align-items-center">
                 <Form.Select
                     className="my-2 w-auto"
-                    value={pageSize}
-                    onChange={(e) => {
-                        setPageSize(Number(e.target.value));
-                    }}
+                    value={limit}
+                    onChange={(e) => setLimit(e.target.value)}
                 >
-                    {[10, 20, 30].map((pageSize: number) => (
+                    {validLimitValues.map((pageSize: number) => (
                         <option key={pageSize} value={pageSize}>
                             Zobrazit {pageSize}
                         </option>
