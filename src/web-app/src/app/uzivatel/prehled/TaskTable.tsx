@@ -1,19 +1,27 @@
 "use client";
 
 import { trpc } from "@/client/trpcClient";
+import TableHeader from "@/components/TableHeader";
 import SimplePagination from "@/components/shared/SimplePagination";
 import TaskStateBadge from "@/components/shared/TaskStateBadge";
+import {
+    orderUrlParamAscValue,
+    orderUrlParamDescValue,
+    orderUrlParamName,
+    sortUrlParamName,
+} from "@/constants/urlParamNames";
 import { AppRouter } from "@/server/routers/root";
 import { TaskState } from "@prisma/client";
 import {
+    SortingState,
     createColumnHelper,
     flexRender,
     getCoreRowModel,
-    getPaginationRowModel,
     useReactTable,
 } from "@tanstack/react-table";
 import { inferProcedureOutput } from "@trpc/server";
-import { useMemo } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useMemo, useState } from "react";
 import {
     Alert,
     Button,
@@ -24,6 +32,8 @@ import {
     Tooltip,
 } from "react-bootstrap";
 import { OverlayChildren } from "react-bootstrap/esm/Overlay";
+
+const defaultPageSize = 10;
 
 /**
  * Table of tasks of the current user.
@@ -36,36 +46,62 @@ export default function TaskTable() {
     const columns = useMemo(
         () => [
             columnHelper.accessor("name", {
-                header: "Název",
+                id: "name",
+                header: ({ column }) => (
+                    <TableHeader text="Název" column={column} />
+                ),
             }),
             columnHelper.accessor("createdAt", {
-                header: "Vytvořeno dne",
+                id: "createdAt",
+                header: ({ column }) => (
+                    <TableHeader text="Vytvořeno dne" column={column} />
+                ),
                 cell: (props) =>
                     props.row.original.createdAt.toLocaleDateString(),
             }),
             columnHelper.accessor("description", {
-                header: "Popis",
+                id: "description",
+                header: ({ column }) => (
+                    <TableHeader text="Popis" column={column} />
+                ),
                 cell: (props) => props.row.original.description ?? "Bez popisu",
             }),
-            columnHelper.accessor("deadline", {
-                header: "Deadline",
+            columnHelper.accessor("start", {
+                id: "start",
+                header: ({ column }) => (
+                    <TableHeader text="Začátek" column={column} />
+                ),
+                cell: (props) =>
+                    props.row.original.start?.toLocaleString() ?? "-",
+            }),
+            columnHelper.accessor("deadline.dueDateTime", {
+                id: "deadline.dueDateTime",
+                header: ({ column }) => (
+                    <TableHeader text="Deadline" column={column} />
+                ),
                 cell: (props) =>
                     props.row.original.deadline?.dueDateTime.toLocaleString() ??
                     "-",
             }),
             columnHelper.accessor("state", {
-                header: "Stav",
+                id: "state",
+                header: ({ column }) => (
+                    <TableHeader text="Stav" column={column} />
+                ),
                 cell: (props) => (
                     <TaskStateBadge taskState={props.row.original.state} />
                 ),
             }),
             columnHelper.display({
                 id: "actions",
-                header: "Akce",
+                header: ({ column }) => (
+                    <TableHeader text="Akce" column={column} />
+                ),
                 cell: (props) => {
                     const state = props.row.original.state;
 
                     const deadline = props.row.original.deadline;
+                    const start = props.row.original.start;
                     let tooltip: OverlayChildren;
                     switch (state) {
                         case TaskState.READY:
@@ -75,6 +111,10 @@ export default function TaskTable() {
                                 deadline.dueDateTime < new Date()
                             )
                                 tooltip = <Tooltip>Již je po termínu</Tooltip>;
+                            else if (start !== null)
+                                tooltip = (
+                                    <Tooltip>Úkol ještě nelze splnit.</Tooltip>
+                                );
                             else tooltip = <></>;
                             break;
                         case TaskState.COMPLETED:
@@ -92,7 +132,9 @@ export default function TaskTable() {
                         state === TaskState.READY &&
                         (deadline === null ||
                             deadline.canBeCompletedAfterDeadline ||
-                            deadline.dueDateTime >= new Date());
+                            deadline.dueDateTime >= new Date()) &&
+                        (start === null || start <= new Date());
+
                     return (
                         <OverlayTrigger overlay={tooltip}>
                             <span className="d-inline-block">
@@ -116,14 +158,76 @@ export default function TaskTable() {
         ],
         [columnHelper]
     );
+    const [pageSize, setPageSize] = useState(defaultPageSize);
+    const [pageIndex, setPageIndex] = useState(0);
 
-    const { isLoading, isError, error, data } = trpc.task.listTasks.useQuery();
+    const router = useRouter();
+    const pathname = usePathname();
+    const searchParams = useSearchParams()!;
+
+    const sorting: SortingState = useMemo(() => {
+        const sortParam = searchParams.get(sortUrlParamName);
+        return sortParam !== null
+            ? [
+                  {
+                      id: sortParam,
+                      desc:
+                          searchParams.get(orderUrlParamName) ===
+                          orderUrlParamDescValue
+                              ? true
+                              : false,
+                  },
+              ]
+            : [];
+    }, [searchParams]);
+
+    const { isLoading, isError, error, data } = trpc.task.listTasks.useQuery({
+        pagination: {
+            limit: pageSize,
+            offset: pageIndex * pageSize,
+        },
+        sort:
+            sorting[0] !== undefined
+                ? {
+                      field: sorting[0].id,
+                      order: sorting[0].desc ? "desc" : "asc",
+                  }
+                : undefined,
+    });
 
     const table = useReactTable({
         columns,
-        data: data ?? [],
+        data: data?.data ?? [],
         getCoreRowModel: getCoreRowModel(),
-        getPaginationRowModel: getPaginationRowModel(),
+        state: {
+            sorting,
+        },
+        manualSorting: true,
+        onSortingChange: (updaterOrValue) => {
+            let newValue: SortingState;
+            if (typeof updaterOrValue === "function")
+                newValue = updaterOrValue(sorting);
+            else newValue = updaterOrValue;
+
+            // HACK: using toString first because of type issue https://github.com/vercel/next.js/issues/49245
+            const newParams = new URLSearchParams(searchParams.toString());
+            if (newValue[0] !== undefined) {
+                newParams.set(sortUrlParamName, newValue[0].id);
+                newParams.set(
+                    orderUrlParamName,
+                    newValue[0].desc
+                        ? orderUrlParamDescValue
+                        : orderUrlParamAscValue
+                );
+            } else {
+                newParams.delete(sortUrlParamName);
+                newParams.delete(orderUrlParamName);
+            }
+
+            router.replace(pathname + "?" + newParams.toString());
+        },
+        manualPagination: true,
+        autoResetPageIndex: false,
     });
 
     if (isLoading)
@@ -180,9 +284,9 @@ export default function TaskTable() {
             <div className="d-flex justify-content-between align-items-center">
                 <Form.Select
                     className="my-2 w-auto"
-                    value={table.getState().pagination.pageSize}
+                    value={pageSize}
                     onChange={(e) => {
-                        table.setPageSize(Number(e.target.value));
+                        setPageSize(Number(e.target.value));
                     }}
                 >
                     {[10, 20, 30].map((pageSize: number) => (
@@ -192,9 +296,9 @@ export default function TaskTable() {
                     ))}
                 </Form.Select>
                 <SimplePagination
-                    pageIndex={table.getState().pagination.pageIndex}
-                    totalPages={table.getPageCount()}
-                    setPageIndex={table.setPageIndex}
+                    pageIndex={pageIndex}
+                    totalPages={Math.ceil(data.count / pageSize)}
+                    setPageIndex={setPageIndex}
                 />
             </div>
         </>

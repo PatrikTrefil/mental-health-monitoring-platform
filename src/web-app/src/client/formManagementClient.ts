@@ -191,18 +191,66 @@ export async function deleteFormById(
 
 /**
  * Load forms from the form management system.
- * @param formioToken - JWT token for formio.
- * @param tags - List of tags which must be present on the form.
+ * @param root0 - Options for loading forms.
+ * @param root0.formioToken - JWT token for formio.
+ * @param root0.pagination - Pagination settings.
+ * @param root0.pagination.limit - Maximum number of forms to load.
+ * @param root0.pagination.offset - Offset of the first form to load.
+ * @param root0.sort - Sorting settings.
+ * @param root0.sort.field - Field to sort by.
+ * @param root0.sort.order - Order to sort by. (ascending or descending).
+ * @param root0.tags - List of tags which must be present on the form.
+ * @param root0.filters - List of filters to apply.
  * @returns List of forms.
  * @throws {TypeError} If the response is not valid json or when a network error is encountered or CORS is misconfigured on the server-side.
+ * @throws {Error} If the Content-Range header in the response is invalid or the total count is unknown.
  */
-export async function loadForms(
-    formioToken: string,
-    tags?: string[]
-): Promise<Form[]> {
+export async function loadForms({
+    formioToken,
+    pagination,
+    sort,
+    tags,
+    filters,
+}: {
+    formioToken: string;
+    pagination: {
+        limit: number;
+        offset: number;
+    };
+    sort?: {
+        field: keyof Form;
+        order: "asc" | "desc";
+    };
+    filters?: {
+        fieldPath: string;
+        operation: "contains";
+        comparedValue: string;
+    }[];
+    tags?: string[];
+}): Promise<{ data: Form[]; totalCount: number }> {
     const url = new URL(`${getFormioUrl()}/form/`);
 
     url.searchParams.set("type", "form");
+
+    // paginaton
+    url.searchParams.set("limit", pagination.limit.toString());
+    url.searchParams.set("skip", pagination.offset.toString());
+
+    if (sort)
+        url.searchParams.set(
+            `${sort.order === "desc" ? "-" : ""}sort`,
+            sort.field
+        );
+
+    if (filters !== undefined) {
+        for (const filter of filters) {
+            url.searchParams.set(
+                `${filter.fieldPath}__regex`,
+                `/${filter.comparedValue}/i`
+            );
+        }
+    }
+
     // https://apidocs.form.io/#cd97fc97-7a86-aa65-8e5a-3e9e6eb4a22d
     if (tags) url.searchParams.set("tags__in", tags.join(","));
 
@@ -211,7 +259,15 @@ export async function loadForms(
             "x-jwt-token": formioToken,
         },
     });
-    return (await response.json()) as Form[];
+    const totalCount = Number(
+        response.headers.get("Content-Range")?.match(/\d+$/)
+    );
+    if (isNaN(totalCount)) throw new Error("Invalid Content-Range header.");
+
+    return {
+        data: (await response.json()) as Form[],
+        totalCount,
+    };
 }
 
 /**
@@ -307,27 +363,78 @@ export async function loadSubmission(
 /**
  * Get submissions of a form.
  * @param formId - Id of the form to load submissions from.
- * @param formioToken - JWT token for formio.
+ * @param root0 - Options for loading submissions.
+ * @param root0.formioToken - JWT token for formio.
+ * @param root0.pagination - Pagination settings.
+ * @param root0.pagination.limit - Maximum number of submissions to load.
+ * @param root0.pagination.offset - Offset of the first submission to load.
+ * @param root0.sort - Sorting settings.
+ * @param root0.sort.field - Field to sort by.
+ * @param root0.sort.order - Order to sort by. (ascending or descending).
+ * @param root0.filters - List of filters to apply.
  * @returns List of submissions.
  * @throws {RequestError} If the http request fails.
  * @throws {TypeError} If the response is not valid json or when a network error is encountered or CORS is misconfigured on the server-side.
+ * @throws {Error} If the Content-Range header is invalid or unknown.
  */
 export async function loadSubmissions(
     formId: string,
-    formioToken: string
-): Promise<Submission[]> {
+    {
+        formioToken,
+        pagination,
+        sort,
+        filters,
+    }: {
+        formioToken: string;
+        pagination: {
+            limit: number;
+            offset: number;
+        };
+        sort?: { field: string; order: "asc" | "desc" };
+        filters?: {
+            fieldPath: string;
+            operation: "contains";
+            comparedValue: string;
+        }[];
+    }
+): Promise<{ data: Submission[]; totalCount: number }> {
+    const url = new URL(`${getFormioUrl()}/form/${formId}/submission`);
+    // pagination
+    url.searchParams.set("limit", pagination.limit.toString());
+    url.searchParams.set("skip", pagination.offset.toString());
+
+    if (sort)
+        url.searchParams.set(
+            `sort`,
+            `${sort.order === "desc" ? "-" : ""}${sort.field}`
+        );
+
+    if (filters !== undefined) {
+        for (const filter of filters) {
+            url.searchParams.set(
+                `${filter.fieldPath}__regex`,
+                `/${filter.comparedValue}/i`
+            );
+        }
+    }
+
     console.log("Fetching submissions of form...", {
         formId,
     });
-    const response = await safeFetch(`${getFormioUrl()}/${formId}/submission`, {
+    const response = await safeFetch(url, {
         headers: {
             "x-jwt-token": formioToken,
         },
     });
-    console.log("Submissions of form fetched.", {
+    console.debug("Submissions of form fetched.", {
         formId,
     });
-    return (await response.json()) as Submission[];
+    const totalCount = Number(
+        response.headers.get("Content-Range")?.match(/\d+$/)
+    );
+    if (isNaN(totalCount)) throw new Error("Invalid Content-Range header.");
+
+    return { data: (await response.json()) as Submission[], totalCount };
 }
 
 /**

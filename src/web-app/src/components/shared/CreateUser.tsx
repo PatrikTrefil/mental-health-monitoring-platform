@@ -1,6 +1,10 @@
 "use client";
 
-import { employeesQuery, usersQuery } from "@/client/queries/userManagement";
+import {
+    spravceDotaznikuQuery,
+    usersQuery,
+    zadavatelDotaznikuQuery,
+} from "@/client/queries/userManagement";
 import { createUser } from "@/client/userManagementClient";
 import UserRoleTitles from "@/constants/userRoleTitles";
 import { UserRoleTitle } from "@/types/userManagement/UserRoleTitle";
@@ -88,16 +92,17 @@ export default function CreateUser({
                 toast.success("Uživatel vytvořen");
                 switch (userRoleTitle) {
                     case UserRoleTitles.ZADAVATEL_DOTAZNIKU:
+                        queryClient.invalidateQueries(
+                            zadavatelDotaznikuQuery.list._def
+                        );
+                        break;
                     case UserRoleTitles.SPRAVCE_DOTAZNIKU:
                         queryClient.invalidateQueries(
-                            employeesQuery.list(data?.user.formioToken!)
-                                .queryKey
+                            spravceDotaznikuQuery.list._def
                         );
                         break;
                     case UserRoleTitles.KLIENT_PACIENT:
-                        queryClient.invalidateQueries(
-                            usersQuery.list(data?.user.formioToken!).queryKey
-                        );
+                        queryClient.invalidateQueries(usersQuery.list._def);
                         break;
                 }
                 onChangeDone?.();

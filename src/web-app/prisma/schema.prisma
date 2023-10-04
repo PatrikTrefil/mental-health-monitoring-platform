@@ -10,8 +10,6 @@ datasource db {
     url      = env("DATABASE_URL")
 }
 
-// TODO: Test deadlines
-
 model Task {
     /// Artificial ID of the task
     id                  String    @id @default(uuid())
@@ -35,6 +33,8 @@ model Task {
     submissionId        String?
     /// Task deadline
     deadline            Deadline?
+    /// The task may not be completed before this date and time
+    start               DateTime?
 }
 
 // Deadline is defined as a separate entity, because the canBeCompletedAfterDeadline field

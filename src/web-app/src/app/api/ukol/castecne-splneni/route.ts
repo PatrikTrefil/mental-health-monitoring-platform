@@ -50,7 +50,7 @@ export async function POST(req: Request) {
     );
 
     try {
-        partiallyCompleteTask(
+        await partiallyCompleteTask(
             body.data.request.data.taskId,
             body.data.request.form
         );
@@ -90,6 +90,7 @@ async function partiallyCompleteTask(
 ): Promise<void> {
     // mark the task as completed if it is not already completed and the deadline
     // is either not set, not "hard" (canBeCompletedAfterDeadline: true) or has not passed
+    // and the start date is not set or it has already passed
     const result = await prisma.task.updateMany({
         where: {
             AND: [
@@ -116,6 +117,18 @@ async function partiallyCompleteTask(
                                 dueDateTime: {
                                     gte: new Date(),
                                 },
+                            },
+                        },
+                    ],
+                },
+                {
+                    OR: [
+                        {
+                            start: { equals: null },
+                        },
+                        {
+                            start: {
+                                lte: new Date(),
                             },
                         },
                     ],
