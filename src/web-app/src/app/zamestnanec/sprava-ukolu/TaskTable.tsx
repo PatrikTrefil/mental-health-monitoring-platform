@@ -263,45 +263,6 @@ export default function TaskTable() {
             : [];
     }, [searchParams]);
 
-    useEffect(() => {
-        // Prefetch next page
-        const nextPageIndex = pageIndex + 1;
-        utils.task.listTasks.prefetch({
-            pagination: {
-                limit: pageSize,
-                offset: nextPageIndex * pageSize,
-            },
-            sort:
-                sorting[0] !== undefined
-                    ? {
-                          field: sorting[0].id as keyof inferProcedureOutput<
-                              AppRouter["task"]["createTask"]
-                          >,
-                          order: sorting[0].desc ? "desc" : "asc",
-                      }
-                    : undefined,
-        });
-        // Prefetch previous page
-        const prevPageIndex = pageIndex - 1;
-        if (prevPageIndex >= 0)
-            utils.task.listTasks.prefetch({
-                pagination: {
-                    limit: pageSize,
-                    offset: prevPageIndex * pageSize,
-                },
-                sort:
-                    sorting[0] !== undefined
-                        ? {
-                              field: sorting[0]
-                                  .id as keyof inferProcedureOutput<
-                                  AppRouter["task"]["createTask"]
-                              >,
-                              order: sorting[0].desc ? "desc" : "asc",
-                          }
-                        : undefined,
-            });
-    }, [pageSize, pageIndex, utils, sorting]);
-
     const {
         isLoading,
         isError,
@@ -335,6 +296,73 @@ export default function TaskTable() {
 
     const tasks = taskQueryData?.data;
     const totalTaskCount = taskQueryData?.count;
+    const totalPages = Math.ceil((totalTaskCount ?? 0) / pageSize);
+
+    useEffect(
+        function prefetch() {
+            // Prefetch next page
+            const nextPageIndex = pageIndex + 1;
+            if (nextPageIndex < totalPages)
+                utils.task.listTasks.prefetch({
+                    pagination: {
+                        limit: pageSize,
+                        offset: nextPageIndex * pageSize,
+                    },
+                    sort:
+                        sorting[0] !== undefined
+                            ? {
+                                  field: sorting[0]
+                                      .id as keyof inferProcedureOutput<
+                                      AppRouter["task"]["createTask"]
+                                  >,
+                                  order: sorting[0].desc ? "desc" : "asc",
+                              }
+                            : undefined,
+                    filters:
+                        columnFilters[0] !== undefined
+                            ? [
+                                  {
+                                      fieldPath: columnFilters[0].id,
+                                      operation: "contains",
+                                      comparedValue: columnFilters[0]
+                                          .value as string,
+                                  } as const,
+                              ]
+                            : undefined,
+                });
+            // Prefetch previous page
+            const prevPageIndex = pageIndex - 1;
+            if (prevPageIndex >= 0)
+                utils.task.listTasks.prefetch({
+                    pagination: {
+                        limit: pageSize,
+                        offset: prevPageIndex * pageSize,
+                    },
+                    sort:
+                        sorting[0] !== undefined
+                            ? {
+                                  field: sorting[0]
+                                      .id as keyof inferProcedureOutput<
+                                      AppRouter["task"]["createTask"]
+                                  >,
+                                  order: sorting[0].desc ? "desc" : "asc",
+                              }
+                            : undefined,
+                    filters:
+                        columnFilters[0] !== undefined
+                            ? [
+                                  {
+                                      fieldPath: columnFilters[0].id,
+                                      operation: "contains",
+                                      comparedValue: columnFilters[0]
+                                          .value as string,
+                                  } as const,
+                              ]
+                            : undefined,
+                });
+        },
+        [pageSize, pageIndex, utils, sorting, columnFilters, totalPages]
+    );
 
     const table = useReactTable({
         columns,
@@ -481,7 +509,7 @@ export default function TaskTable() {
                 </Form.Select>
                 <SimplePagination
                     pageIndex={pageIndex}
-                    totalPages={Math.ceil((totalTaskCount ?? 0) / pageSize)}
+                    totalPages={totalPages}
                     setPageIndex={setPageIndex}
                 />
             </div>

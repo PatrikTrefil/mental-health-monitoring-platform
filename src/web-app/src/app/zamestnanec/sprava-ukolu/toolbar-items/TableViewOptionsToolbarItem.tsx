@@ -6,7 +6,8 @@ import { Dropdown, Form } from "react-bootstrap";
 /**
  * Renders a dropdown with view options for the table.
  * @param root0 - Props for the component.
- * @param root0.table - Table for which to render options.
+ * @param root0.table - Table for which to render options. It is expected that
+ * each column has a meta property `viewOptionsLabel` of type string that is displayed by this component.
  * @param root0.style - Style for the dropdown container.
  * @throws {Error} If any column in the table does not have a label.
  */

@@ -1,3 +1,4 @@
+import TableViewOptions from "@/app/zamestnanec/sprava-ukolu/toolbar-items/TableViewOptionsToolbarItem";
 import FilterToolbarItem from "@/components/FilterToolbarItem";
 import { Table } from "@tanstack/react-table";
 import FrequencyVisualization from "./FrequencyVisualization";
@@ -34,6 +35,7 @@ export default function ResultTableToolbar<TTable>({
                 />
             </div>
             <FrequencyVisualization {...frequencyVisualizationProps} />
+            <TableViewOptions style={{ marginLeft: "auto" }} table={table} />
         </div>
     );
 }

@@ -18,7 +18,7 @@ import {
     SelectBoxDataValue,
     Submission,
 } from "@/types/formManagement/submission";
-import { useQueries, useQuery } from "@tanstack/react-query";
+import { useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
     ColumnFiltersState,
     SortingState,
@@ -29,7 +29,7 @@ import {
 } from "@tanstack/react-table";
 import { useSession } from "next-auth/react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Alert, Form, Spinner, Table } from "react-bootstrap";
 import ResultTableToolbar from "./ResultTableToolbar";
 import stringifyResult from "./stringifyResult";
@@ -178,12 +178,93 @@ export default function ResultTable({ formId }: { formId: string }) {
         [form]
     );
 
+    const totalPages = Math.ceil(
+        (submissionsQueryData?.totalCount ?? 0) / pageSize
+    );
+
+    const queryClient = useQueryClient();
+    useEffect(
+        function prefetch() {
+            // Prefetch next page
+            const nextPageIndex = pageIndex + 1;
+            if (nextPageIndex < totalPages)
+                queryClient.prefetchQuery(
+                    formsQuery.submissions(formId, {
+                        formioToken: data?.user.formioToken!,
+                        pagination: {
+                            limit: pageSize,
+                            offset: pageSize * nextPageIndex,
+                        },
+                        sort:
+                            sorting[0] !== undefined
+                                ? {
+                                      field: sorting[0].id,
+                                      order: sorting[0].desc ? "desc" : "asc",
+                                  }
+                                : undefined,
+                        filters:
+                            columnFilters[0] !== undefined
+                                ? [
+                                      {
+                                          fieldPath: columnFilters[0].id,
+                                          operation: "contains",
+                                          comparedValue: columnFilters[0]
+                                              .value as string,
+                                      },
+                                  ]
+                                : undefined,
+                    })
+                );
+            // Prefetch previous page
+            const prevPageIndex = pageIndex - 1;
+            if (prevPageIndex >= 0)
+                queryClient.prefetchQuery(
+                    formsQuery.submissions(formId, {
+                        formioToken: data?.user.formioToken!,
+                        pagination: {
+                            limit: pageSize,
+                            offset: pageSize * prevPageIndex,
+                        },
+                        sort:
+                            sorting[0] !== undefined
+                                ? {
+                                      field: sorting[0].id,
+                                      order: sorting[0].desc ? "desc" : "asc",
+                                  }
+                                : undefined,
+                        filters:
+                            columnFilters[0] !== undefined
+                                ? [
+                                      {
+                                          fieldPath: columnFilters[0].id,
+                                          operation: "contains",
+                                          comparedValue: columnFilters[0]
+                                              .value as string,
+                                      },
+                                  ]
+                                : undefined,
+                    })
+                );
+        },
+        [
+            pageSize,
+            pageIndex,
+            sorting,
+            columnFilters,
+            totalPages,
+            queryClient,
+            formId,
+            data?.user.formioToken,
+        ]
+    );
+
     const columnHelper =
         createColumnHelper<Exclude<typeof tableData, undefined>[number]>();
     const columns = useMemo(() => {
         const cols = [
             columnHelper.accessor("owner", {
                 id: "owner",
+                meta: { viewOptionsLabel: "Autor" },
                 header: ({ column }) => (
                     <TableHeader text="Autor" column={column} />
                 ),
@@ -191,6 +272,7 @@ export default function ResultTable({ formId }: { formId: string }) {
             }),
             columnHelper.accessor("created", {
                 id: "created",
+                meta: { viewOptionsLabel: "Vytvořeno dne" },
                 header: ({ column }) => (
                     <TableHeader text="Vytvořeno dne" column={column} />
                 ),
@@ -208,6 +290,7 @@ export default function ResultTable({ formId }: { formId: string }) {
                         `data.${comp.key}` as keyof Submission,
                         {
                             id: `data.${comp.key}`,
+                            meta: { viewOptionsLabel: comp.label },
                             header: ({ column }) => (
                                 <TableHeader
                                     text={comp.label}
@@ -374,9 +457,7 @@ export default function ResultTable({ formId }: { formId: string }) {
                 </Form.Select>
                 <SimplePagination
                     pageIndex={pageIndex}
-                    totalPages={Math.ceil(
-                        submissionsQueryData?.totalCount ?? 0 / pageSize
-                    )}
+                    totalPages={totalPages}
                     setPageIndex={setPageIndex}
                 />
             </div>
