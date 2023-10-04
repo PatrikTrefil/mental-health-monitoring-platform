@@ -23,27 +23,59 @@ import Select from "react-select";
 import { toast } from "react-toastify";
 import { z } from "zod";
 
-const formSchema = z.object({
-    taskName: z.string(),
-    taskDescription: z.string(),
-    taskUserIds: z.object({ label: z.string(), value: z.string() }).array(),
-    taskFormId: z.object({ label: z.string(), value: z.string() }),
-    start: z.string().refine(
-        (value) => {
-            const isSet = value !== "";
-            if (!isSet) return true;
+const formSchema = z
+    .object({
+        taskName: z.string(),
+        taskDescription: z.string(),
+        taskUserIds: z.object({ label: z.string(), value: z.string() }).array(),
+        taskFormId: z.object({ label: z.string(), value: z.string() }),
+        start: z.string().refine(
+            (value) => {
+                const isSet = value !== "";
+                if (!isSet) return true;
 
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-            const startDate = new Date(value);
-            return startDate >= today;
-        },
-        { message: "Začátek nemůže být v minulosti" }
-    ),
-    repetition: z
-        .object({
-            frequency: z.object({
-                value: z
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                const startDate = new Date(value);
+                return startDate >= today;
+            },
+            { message: "Začátek nemůže být v minulosti" }
+        ),
+        repetition: z
+            .object({
+                frequency: z.object({
+                    value: z
+                        .string()
+                        .superRefine(function isNumberGreaterThanOne(
+                            value,
+                            ctx
+                        ) {
+                            if (value !== "") {
+                                const numberValue = Number(value);
+                                if (isNaN(numberValue))
+                                    ctx.addIssue({
+                                        message: "Musí být číslo",
+                                        code: z.ZodIssueCode.custom,
+                                    });
+                                if (numberValue < 1)
+                                    ctx.addIssue({
+                                        message: "Musí být alespoň 1",
+                                        code: z.ZodIssueCode.custom,
+                                    });
+                            }
+                        }),
+                    unit: z.string().superRefine(function isNumber(value, ctx) {
+                        if (value !== "") {
+                            const numberValue = Number(value);
+                            if (isNaN(numberValue))
+                                ctx.addIssue({
+                                    message: "Musí být číslo",
+                                    code: z.ZodIssueCode.custom,
+                                });
+                        }
+                    }),
+                }),
+                count: z
                     .string()
                     .superRefine(function isNumberGreaterThanOne(value, ctx) {
                         if (value !== "") {
@@ -60,126 +92,116 @@ const formSchema = z.object({
                                 });
                         }
                     }),
-                unit: z.string().superRefine(function isNumber(value, ctx) {
-                    if (value !== "") {
-                        const numberValue = Number(value);
-                        if (isNaN(numberValue))
-                            ctx.addIssue({
-                                message: "Musí být číslo",
-                                code: z.ZodIssueCode.custom,
-                            });
-                    }
-                }),
+            })
+            .superRefine(function isRepetitionComplete(
+                { frequency: { unit, value }, count },
+                ctx
+            ) {
+                if (unit !== "" || value !== "" || count !== "") {
+                    if (unit === "")
+                        ctx.addIssue({
+                            message: "Vyplňte jednotku opakování",
+                            path: ["frequency", "unit"],
+                            code: z.ZodIssueCode.custom,
+                        });
+                    if (value === "")
+                        ctx.addIssue({
+                            message: "Vyplňte hodnotu opakování",
+                            path: ["frequency", "value"],
+                            code: z.ZodIssueCode.custom,
+                        });
+                    if (count === "")
+                        ctx.addIssue({
+                            message: "Vyplňte počet opakování",
+                            path: ["count"],
+                            code: z.ZodIssueCode.custom,
+                        });
+                }
             }),
-            count: z
-                .string()
-                .superRefine(function isNumberGreaterThanOne(value, ctx) {
-                    if (value !== "") {
-                        const numberValue = Number(value);
-                        if (isNaN(numberValue))
-                            ctx.addIssue({
-                                message: "Musí být číslo",
-                                code: z.ZodIssueCode.custom,
-                            });
-                        if (numberValue < 1)
-                            ctx.addIssue({
-                                message: "Musí být alespoň 1",
-                                code: z.ZodIssueCode.custom,
-                            });
-                    }
-                }),
-        })
-        .superRefine(function isRepetitionComplete(
-            { frequency: { unit, value }, count },
-            ctx
-        ) {
-            if (unit !== "" || value !== "" || count !== "") {
-                if (unit === "")
+        deadline: z
+            .object({
+                taskDueDate: z.string(),
+                taskDueTime: z.string(),
+                taskCanBeCompletedAfterDeadline: z.boolean(),
+            })
+            .superRefine(function isDeadlineComplete(
+                { taskDueDate, taskDueTime },
+                ctx
+            ) {
+                if (taskDueDate !== "" && taskDueTime === "")
                     ctx.addIssue({
-                        message: "Vyplňte jednotku opakování",
-                        path: ["frequency", "unit"],
+                        message: "Doplňte čas deadline",
+                        path: ["taskDueTime"],
                         code: z.ZodIssueCode.custom,
                     });
-                if (value === "")
+                if (taskDueDate === "" && taskDueTime !== "") {
                     ctx.addIssue({
-                        message: "Vyplňte hodnotu opakování",
-                        path: ["frequency", "value"],
+                        message: "Doplňte datum deadline",
+                        path: ["taskDueDate"],
                         code: z.ZodIssueCode.custom,
                     });
-                if (count === "")
-                    ctx.addIssue({
-                        message: "Vyplňte počet opakování",
-                        path: ["count"],
-                        code: z.ZodIssueCode.custom,
-                    });
-            }
-        }),
-    deadline: z
-        .object({
-            taskDueDate: z.string(),
-            taskDueTime: z.string(),
-            taskCanBeCompletedAfterDeadline: z.boolean(),
-        })
-        .superRefine(function isDeadlineComplete(
-            { taskDueDate, taskDueTime },
-            ctx
-        ) {
-            if (taskDueDate !== "" && taskDueTime === "")
-                ctx.addIssue({
-                    message: "Doplňte čas deadline",
-                    path: ["taskDueTime"],
-                    code: z.ZodIssueCode.custom,
-                });
-            if (taskDueDate === "" && taskDueTime !== "") {
-                ctx.addIssue({
-                    message: "Doplňte datum deadline",
+                }
+            })
+            .refine(
+                function isDeadlineDateInFuture({
+                    taskDueDate: taskDueDateString,
+                }) {
+                    if (taskDueDateString === "") return true;
+                    const taskDueDate = new Date(taskDueDateString);
+                    const currentDate = new Date();
+                    currentDate.setHours(0, 0, 0, 0);
+                    return taskDueDate >= currentDate;
+                },
+                {
+                    message: "Datum nemůže být v minulosti",
                     path: ["taskDueDate"],
-                    code: z.ZodIssueCode.custom,
-                });
-            }
-        })
-        .refine(
-            function isDeadlineDateInFuture({
-                taskDueDate: taskDueDateString,
-            }) {
-                if (taskDueDateString === "") return true;
-                const taskDueDate = new Date(taskDueDateString);
-                const currentDate = new Date();
-                currentDate.setHours(0, 0, 0, 0);
-                return taskDueDate >= currentDate;
-            },
-            { message: "Datum nemůže být v minulosti", path: ["taskDueDate"] }
-        )
-        .refine(
-            function isDeadlineTimeInFuture({
-                taskDueDate: taskDueDateString,
-                taskDueTime: taskDueTimeString,
-            }) {
-                if (taskDueDateString === "" || taskDueTimeString === "")
-                    return true;
-                const taskDueDate = new Date(taskDueDateString);
-                if (
-                    taskDueDate.toISOString().split("T")[0] !==
-                    new Date().toISOString().split("T")[0]
-                )
-                    return true;
+                }
+            )
+            .refine(
+                function isDeadlineTimeInFuture({
+                    taskDueDate: taskDueDateString,
+                    taskDueTime: taskDueTimeString,
+                }) {
+                    if (taskDueDateString === "" || taskDueTimeString === "")
+                        return true;
+                    const taskDueDate = new Date(taskDueDateString);
+                    if (
+                        taskDueDate.toISOString().split("T")[0] !==
+                        new Date().toISOString().split("T")[0]
+                    )
+                        return true;
 
-                const currDate = new Date();
-                const minHours = currDate.getHours();
-                const minMinutes = currDate.getMinutes();
-                const [hours, minutes] = taskDueTimeString
-                    .split(":")
-                    .map(Number);
-                if (hours === undefined || minutes === undefined) return false;
+                    const currDate = new Date();
+                    const minHours = currDate.getHours();
+                    const minMinutes = currDate.getMinutes();
+                    const [hours, minutes] = taskDueTimeString
+                        .split(":")
+                        .map(Number);
+                    if (hours === undefined || minutes === undefined)
+                        return false;
 
-                return (
-                    hours > minHours ||
-                    (hours === minHours && minutes >= minMinutes)
-                );
-            },
-            { message: "Zvolte čas v budoucnosti", path: ["taskDueTime"] }
-        ),
-});
+                    return (
+                        hours > minHours ||
+                        (hours === minHours && minutes >= minMinutes)
+                    );
+                },
+                { message: "Zvolte čas v budoucnosti", path: ["taskDueTime"] }
+            ),
+    })
+    .superRefine(function isStartAfterDeadline({ deadline, start }, ctx) {
+        const isStartSet = start !== "";
+        if (!isStartSet) return;
+
+        const startDate = new Date(start);
+        const deadlineDate = new Date(deadline.taskDueDate);
+
+        if (startDate >= deadlineDate)
+            ctx.addIssue({
+                message: "Start nemůže být po deadline",
+                path: ["start"],
+                code: z.ZodIssueCode.custom,
+            });
+    });
 
 type FormInput = z.infer<typeof formSchema>;
 
