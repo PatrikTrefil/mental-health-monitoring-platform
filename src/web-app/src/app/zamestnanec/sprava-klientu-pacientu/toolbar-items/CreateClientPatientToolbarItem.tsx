@@ -42,9 +42,7 @@ export default function CreateClientPatientToolbarItem() {
                         onChangeDone={() => {
                             setShowCreateUserModal(false);
                             queryClient.invalidateQueries({
-                                queryKey: usersQuery.list(
-                                    session.data!.user.formioToken
-                                ).queryKey,
+                                queryKey: usersQuery.list._def,
                             });
                         }}
                     />

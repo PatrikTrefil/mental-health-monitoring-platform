@@ -3,21 +3,34 @@
 import ExportButton from "@/app/zamestnanec/sprava-formularu/ExportButton";
 import { deleteFormById } from "@/client/formManagementClient";
 import { formsQuery } from "@/client/queries/formManagement";
+import TableHeader from "@/components/TableHeader";
 import SimplePagination from "@/components/shared/SimplePagination";
+import {
+    filterUrlParamName,
+    orderUrlParamAscValue,
+    orderUrlParamDescValue,
+    orderUrlParamName,
+    sortUrlParamName,
+} from "@/constants/urlParamNames";
 import { Form as FormDefinition } from "@/types/formManagement/forms";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
+    ColumnFiltersState,
+    SortingState,
     createColumnHelper,
     flexRender,
     getCoreRowModel,
-    getPaginationRowModel,
     useReactTable,
 } from "@tanstack/react-table";
 import { useSession } from "next-auth/react";
-import { useMemo } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useMemo, useState } from "react";
 import { Alert, Button, Form, Spinner, Table } from "react-bootstrap";
 import { toast } from "react-toastify";
 import FormTableToolbar from "./FormTableToolbar";
+
+const defaultPageSize = 10;
+const filterColumnId = "name";
 
 /**
  * Table of form definitions available to clients/patients.
@@ -49,8 +62,7 @@ export default function FormDefinitionsTable() {
         onSuccess: (_, { formId }) => {
             console.debug("Form deleted.", { formId });
             queryClient.invalidateQueries({
-                queryKey: formsQuery.list(session.data?.user.formioToken!)
-                    .queryKey,
+                queryKey: formsQuery._def,
             });
             queryClient.invalidateQueries({
                 queryKey: formsQuery.detail(
@@ -90,16 +102,24 @@ export default function FormDefinitionsTable() {
                 },
             }),
             columnHelper.accessor("name", {
-                header: "Název",
+                id: "name",
+                header: ({ column }) => (
+                    <TableHeader text="Název" column={column} />
+                ),
             }),
             columnHelper.accessor("created", {
-                header: "Vytvořeno dne",
+                id: "created",
+                header: ({ column }) => (
+                    <TableHeader text="Vytvořeno dne" column={column} />
+                ),
                 cell: (props) =>
                     new Date(props.row.original.created).toLocaleString(),
             }),
             columnHelper.display({
                 id: "actions",
-                header: "Akce",
+                header: ({ column }) => (
+                    <TableHeader text="Akce" column={column} />
+                ),
                 cell: (props) => (
                     <div className="d-flex align-items-center gap-2">
                         <Button
@@ -141,26 +161,113 @@ export default function FormDefinitionsTable() {
         [columnHelper, deleteFormMutate, session.data]
     );
 
+    const [pageSize, setPageSize] = useState(defaultPageSize);
+    const [pageIndex, setPageIndex] = useState(0);
+
+    const router = useRouter();
+    const pathname = usePathname();
+    const searchParams = useSearchParams()!;
+
+    const sorting: SortingState = useMemo(() => {
+        const sortParam = searchParams.get(sortUrlParamName);
+        return sortParam !== null
+            ? [
+                  {
+                      id: sortParam,
+                      desc:
+                          searchParams.get(orderUrlParamName) ===
+                          orderUrlParamDescValue
+                              ? true
+                              : false,
+                  },
+              ]
+            : [];
+    }, [searchParams]);
+
+    const columnFilters = useMemo(() => {
+        const filterParam = searchParams.get(filterUrlParamName);
+        return filterParam !== null
+            ? [{ id: filterColumnId, value: filterParam }]
+            : [];
+    }, [searchParams]);
+
     const { isLoading, isError, error, data } = useQuery({
-        ...formsQuery.list(session.data?.user.formioToken!, ["klientPacient"]),
+        ...formsQuery.list({
+            formioToken: session.data?.user.formioToken!,
+            pagination: {
+                limit: pageSize,
+                offset: pageSize * pageIndex,
+            },
+            sort:
+                sorting[0] !== undefined
+                    ? {
+                          field: sorting[0].id as keyof FormDefinition,
+                          order: sorting[0].desc ? "desc" : "asc",
+                      }
+                    : undefined,
+            filters:
+                columnFilters[0] !== undefined
+                    ? [
+                          {
+                              fieldPath: columnFilters[0].id,
+                              operation: "contains",
+                              comparedValue: columnFilters[0].value as string,
+                          },
+                      ]
+                    : undefined,
+            tags: ["klientPacient"],
+        }),
         enabled: !!session.data?.user.formioToken,
     });
 
     const table = useReactTable({
         columns,
-        data: data ?? [],
-        getCoreRowModel: getCoreRowModel(),
-        getPaginationRowModel: getPaginationRowModel(),
-    });
+        data: data?.data ?? [],
+        state: {
+            sorting,
+        },
+        manualSorting: true,
+        onSortingChange: (updaterOrValue) => {
+            let newValue: SortingState;
+            if (typeof updaterOrValue === "function")
+                newValue = updaterOrValue(sorting);
+            else newValue = updaterOrValue;
 
-    if (isLoading)
-        return (
-            <div className="position-absolute top-50 start-50 translate-middle">
-                <Spinner animation="border" role="status">
-                    <span className="visually-hidden">Načítání...</span>
-                </Spinner>
-            </div>
-        );
+            // HACK: using toString first because of type issue https://github.com/vercel/next.js/issues/49245
+            const newParams = new URLSearchParams(searchParams.toString());
+            if (newValue[0] !== undefined) {
+                newParams.set(sortUrlParamName, newValue[0].id);
+                newParams.set(
+                    orderUrlParamName,
+                    newValue[0].desc
+                        ? orderUrlParamDescValue
+                        : orderUrlParamAscValue
+                );
+            } else {
+                newParams.delete(sortUrlParamName);
+                newParams.delete(orderUrlParamName);
+            }
+
+            router.replace(pathname + "?" + newParams.toString());
+        },
+        onColumnFiltersChange: (updaterOrValue) => {
+            let newValue: ColumnFiltersState;
+            if (typeof updaterOrValue === "function")
+                newValue = updaterOrValue(columnFilters);
+            else newValue = updaterOrValue;
+
+            // HACK: using toString first because of type issue https://github.com/vercel/next.js/issues/49245
+            const newParams = new URLSearchParams(searchParams.toString());
+            if (newValue[0] !== undefined)
+                newParams.set(filterUrlParamName, newValue[0].value as string);
+            else newParams.delete(filterUrlParamName);
+
+            router.replace(pathname + "?" + newParams.toString());
+        },
+        getCoreRowModel: getCoreRowModel(),
+        manualPagination: true,
+        autoResetPageIndex: false,
+    });
 
     if (isError) {
         console.error(error);
@@ -171,75 +278,83 @@ export default function FormDefinitionsTable() {
 
     return (
         <>
-            <FormTableToolbar table={table} />
+            <FormTableToolbar table={table} filterColumnId={filterColumnId} />
             <div className="mt-2 d-block text-nowrap overflow-auto w-100">
-                <Table striped bordered hover>
-                    <thead>
-                        {table.getHeaderGroups().map((headerGroup) => (
-                            <tr key={headerGroup.id}>
-                                {headerGroup.headers.map((header) => (
-                                    <th key={header.id}>
-                                        {header.isPlaceholder
-                                            ? null
-                                            : flexRender(
-                                                  header.column.columnDef
-                                                      .header,
-                                                  header.getContext()
-                                              )}
-                                    </th>
-                                ))}
-                            </tr>
-                        ))}
-                    </thead>
-                    <tbody>
-                        {table.getRowModel().rows.map((row) => (
-                            <tr key={row.id}>
-                                {row.getVisibleCells().map((cell) => (
-                                    <td
-                                        key={cell.id}
-                                        className="align-middle"
-                                        style={{
-                                            width:
-                                                typeof cell.column.columnDef
-                                                    .meta === "object" &&
-                                                "isNarrow" in
-                                                    cell.column.columnDef
-                                                        .meta &&
-                                                cell.column.columnDef.meta
-                                                    ?.isNarrow
-                                                    ? "0"
-                                                    : undefined,
-                                        }}
-                                    >
-                                        {flexRender(
-                                            cell.column.columnDef.cell,
-                                            cell.getContext()
-                                        )}
-                                    </td>
-                                ))}
-                            </tr>
-                        ))}
-                    </tbody>
-                </Table>
+                {isLoading ? (
+                    <div className="position-absolute top-50 start-50 translate-middle">
+                        <Spinner animation="border" role="status">
+                            <span className="visually-hidden">Načítání...</span>
+                        </Spinner>
+                    </div>
+                ) : (
+                    <Table striped bordered hover>
+                        <thead>
+                            {table.getHeaderGroups().map((headerGroup) => (
+                                <tr key={headerGroup.id}>
+                                    {headerGroup.headers.map((header) => (
+                                        <th key={header.id}>
+                                            {header.isPlaceholder
+                                                ? null
+                                                : flexRender(
+                                                      header.column.columnDef
+                                                          .header,
+                                                      header.getContext()
+                                                  )}
+                                        </th>
+                                    ))}
+                                </tr>
+                            ))}
+                        </thead>
+                        <tbody>
+                            {table.getRowModel().rows.map((row) => (
+                                <tr key={row.id}>
+                                    {row.getVisibleCells().map((cell) => (
+                                        <td
+                                            key={cell.id}
+                                            className="align-middle"
+                                            style={{
+                                                width:
+                                                    typeof cell.column.columnDef
+                                                        .meta === "object" &&
+                                                    "isNarrow" in
+                                                        cell.column.columnDef
+                                                            .meta &&
+                                                    cell.column.columnDef.meta
+                                                        ?.isNarrow
+                                                        ? "0"
+                                                        : undefined,
+                                            }}
+                                        >
+                                            {flexRender(
+                                                cell.column.columnDef.cell,
+                                                cell.getContext()
+                                            )}
+                                        </td>
+                                    ))}
+                                </tr>
+                            ))}
+                        </tbody>
+                    </Table>
+                )}
             </div>
             <div className="d-flex justify-content-between align-items-center">
                 <Form.Select
                     className="my-2 w-auto"
-                    value={table.getState().pagination.pageSize}
+                    value={pageSize}
                     onChange={(e) => {
-                        table.setPageSize(Number(e.target.value));
+                        setPageSize(Number(e.target.value));
                     }}
                 >
-                    {[10, 20, 30].map((pageSize: number) => (
-                        <option key={pageSize} value={pageSize}>
-                            Zobrazit {pageSize}
+                    {[10, 20, 30].map((currPageSize: number) => (
+                        <option key={currPageSize} value={currPageSize}>
+                            Zobrazit {currPageSize}
                         </option>
                     ))}
                 </Form.Select>
                 <SimplePagination
-                    pageIndex={table.getState().pagination.pageIndex}
-                    totalPages={table.getPageCount()}
-                    setPageIndex={table.setPageIndex}
+                    pageIndex={pageIndex}
+                    totalPages={Math.ceil(data?.totalCount ?? 0 / pageSize)}
+                    setPageIndex={setPageIndex}
                 />
             </div>
         </>
