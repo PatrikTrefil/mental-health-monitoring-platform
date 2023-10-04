@@ -184,6 +184,7 @@ export default function ResultTable({ formId }: { formId: string }) {
         const cols = [
             columnHelper.accessor("owner", {
                 id: "owner",
+                meta: { viewOptionsLabel: "Autor" },
                 header: ({ column }) => (
                     <TableHeader text="Autor" column={column} />
                 ),
@@ -191,6 +192,7 @@ export default function ResultTable({ formId }: { formId: string }) {
             }),
             columnHelper.accessor("created", {
                 id: "created",
+                meta: { viewOptionsLabel: "Vytvořeno dne" },
                 header: ({ column }) => (
                     <TableHeader text="Vytvořeno dne" column={column} />
                 ),
@@ -208,6 +210,7 @@ export default function ResultTable({ formId }: { formId: string }) {
                         `data.${comp.key}` as keyof Submission,
                         {
                             id: `data.${comp.key}`,
+                            meta: { viewOptionsLabel: comp.label },
                             header: ({ column }) => (
                                 <TableHeader
                                     text={comp.label}
