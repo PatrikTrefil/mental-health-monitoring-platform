@@ -377,22 +377,30 @@ export default function TaskCreationForm() {
                 });
             } else {
                 const currentDueDate = new Date(deadline.dueDateTime);
+                const currentStartDate =
+                    start !== undefined ? new Date(start) : undefined;
                 for (let i = 0; i < repetition.count; ++i) {
-                    currentDueDate.setDate(
-                        currentDueDate.getDate() + repetition.frequencyInDays
-                    );
                     createTaskMutation.mutate({
                         name: taskName,
                         description: taskDescription,
                         forUserId: userId,
                         formId: taskFormId,
                         deadline: {
-                            dueDateTime: currentDueDate,
+                            dueDateTime: new Date(currentDueDate),
                             canBeCompletedAfterDeadline:
                                 deadline.canBeCompletedAfterDeadline,
                         },
-                        start,
+                        start:
+                            currentStartDate !== undefined
+                                ? new Date(currentStartDate)
+                                : undefined,
                     });
+                    currentDueDate.setDate(
+                        currentDueDate.getDate() + repetition.frequencyInDays
+                    );
+                    currentStartDate?.setDate(
+                        currentStartDate.getDate() + repetition.frequencyInDays
+                    );
                 }
             }
         }
