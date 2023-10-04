@@ -5,6 +5,7 @@ import TableHeader from "@/components/TableHeader";
 import SimplePagination from "@/components/shared/SimplePagination";
 import TaskStateBadge from "@/components/shared/TaskStateBadge";
 import {
+    filterUrlParamName,
     orderUrlParamAscValue,
     orderUrlParamDescValue,
     orderUrlParamName,
@@ -13,6 +14,7 @@ import {
 import { AppRouter } from "@/server/routers/root";
 import { TaskState } from "@prisma/client";
 import {
+    ColumnFiltersState,
     SortingState,
     createColumnHelper,
     flexRender,
@@ -21,7 +23,7 @@ import {
 } from "@tanstack/react-table";
 import { inferProcedureOutput } from "@trpc/server";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
     Alert,
     Button,
@@ -32,8 +34,10 @@ import {
     Tooltip,
 } from "react-bootstrap";
 import { OverlayChildren } from "react-bootstrap/esm/Overlay";
+import TaskTableToolbar from "./TaskTableToolbar";
 
 const defaultPageSize = 10;
+const filterColumnId = "name";
 
 /**
  * Table of tasks of the current user.
@@ -47,12 +51,14 @@ export default function TaskTable() {
         () => [
             columnHelper.accessor("name", {
                 id: "name",
+                meta: { viewOptionsLabel: "Název" },
                 header: ({ column }) => (
                     <TableHeader text="Název" column={column} />
                 ),
             }),
             columnHelper.accessor("createdAt", {
                 id: "createdAt",
+                meta: { viewOptionsLabel: "Vytvořeno dne" },
                 header: ({ column }) => (
                     <TableHeader text="Vytvořeno dne" column={column} />
                 ),
@@ -61,6 +67,7 @@ export default function TaskTable() {
             }),
             columnHelper.accessor("description", {
                 id: "description",
+                meta: { viewOptionsLabel: "Popis" },
                 header: ({ column }) => (
                     <TableHeader text="Popis" column={column} />
                 ),
@@ -68,6 +75,7 @@ export default function TaskTable() {
             }),
             columnHelper.accessor("start", {
                 id: "start",
+                meta: { viewOptionsLabel: "Začátek" },
                 header: ({ column }) => (
                     <TableHeader text="Začátek" column={column} />
                 ),
@@ -76,6 +84,7 @@ export default function TaskTable() {
             }),
             columnHelper.accessor("deadline.dueDateTime", {
                 id: "deadline.dueDateTime",
+                meta: { viewOptionsLabel: "Deadline" },
                 header: ({ column }) => (
                     <TableHeader text="Deadline" column={column} />
                 ),
@@ -85,6 +94,7 @@ export default function TaskTable() {
             }),
             columnHelper.accessor("state", {
                 id: "state",
+                meta: { viewOptionsLabel: "Stav" },
                 header: ({ column }) => (
                     <TableHeader text="Stav" column={column} />
                 ),
@@ -94,6 +104,7 @@ export default function TaskTable() {
             }),
             columnHelper.display({
                 id: "actions",
+                meta: { viewOptionsLabel: "Akce" },
                 header: ({ column }) => (
                     <TableHeader text="Akce" column={column} />
                 ),
@@ -165,6 +176,13 @@ export default function TaskTable() {
     const pathname = usePathname();
     const searchParams = useSearchParams()!;
 
+    const columnFilters = useMemo(() => {
+        const filterParam = searchParams.get(filterUrlParamName);
+        return filterParam !== null
+            ? [{ id: filterColumnId, value: filterParam }]
+            : [];
+    }, [searchParams]);
+
     const sorting: SortingState = useMemo(() => {
         const sortParam = searchParams.get(sortUrlParamName);
         return sortParam !== null
@@ -192,6 +210,16 @@ export default function TaskTable() {
                       field: sorting[0].id,
                       order: sorting[0].desc ? "desc" : "asc",
                   }
+                : undefined,
+        filters:
+            columnFilters[0] !== undefined
+                ? [
+                      {
+                          fieldPath: columnFilters[0].id,
+                          operation: "contains",
+                          comparedValue: columnFilters[0].value as string,
+                      } as const,
+                  ]
                 : undefined,
     });
 
@@ -226,18 +254,93 @@ export default function TaskTable() {
 
             router.replace(pathname + "?" + newParams.toString());
         },
+        onColumnFiltersChange: (updaterOrValue) => {
+            let newValue: ColumnFiltersState;
+            if (typeof updaterOrValue === "function")
+                newValue = updaterOrValue(columnFilters);
+            else newValue = updaterOrValue;
+
+            // HACK: using toString first because of type issue https://github.com/vercel/next.js/issues/49245
+            const newParams = new URLSearchParams(searchParams.toString());
+            if (newValue[0] !== undefined)
+                newParams.set(filterUrlParamName, newValue[0].value as string);
+            else newParams.delete(filterUrlParamName);
+
+            router.replace(pathname + "?" + newParams.toString());
+        },
         manualPagination: true,
         autoResetPageIndex: false,
     });
 
-    if (isLoading)
-        return (
-            <div className="position-absolute top-50 start-50 translate-middle">
-                <Spinner animation="border" role="status">
-                    <span className="visually-hidden">Načítání...</span>
-                </Spinner>
-            </div>
-        );
+    const totalPages = Math.ceil((data?.count ?? 0) / pageSize);
+    const utils = trpc.useContext();
+
+    useEffect(
+        function prefetch() {
+            // Prefetch next page
+            const nextPageIndex = pageIndex + 1;
+            if (nextPageIndex < totalPages)
+                utils.task.listTasks.prefetch({
+                    pagination: {
+                        limit: pageSize,
+                        offset: nextPageIndex * pageSize,
+                    },
+                    sort:
+                        sorting[0] !== undefined
+                            ? {
+                                  field: sorting[0].id,
+                                  order: sorting[0].desc ? "desc" : "asc",
+                              }
+                            : undefined,
+                    filters:
+                        columnFilters[0] !== undefined
+                            ? [
+                                  {
+                                      fieldPath: columnFilters[0].id,
+                                      operation: "contains",
+                                      comparedValue: columnFilters[0]
+                                          .value as string,
+                                  } as const,
+                              ]
+                            : undefined,
+                });
+            // Prefetch previous page
+            const prevPageIndex = pageIndex - 1;
+            if (prevPageIndex >= 0)
+                utils.task.listTasks.prefetch({
+                    pagination: {
+                        limit: pageSize,
+                        offset: prevPageIndex * pageSize,
+                    },
+                    sort:
+                        sorting[0] !== undefined
+                            ? {
+                                  field: sorting[0].id,
+                                  order: sorting[0].desc ? "desc" : "asc",
+                              }
+                            : undefined,
+                    filters:
+                        columnFilters[0] !== undefined
+                            ? [
+                                  {
+                                      fieldPath: columnFilters[0].id,
+                                      operation: "contains",
+                                      comparedValue: columnFilters[0]
+                                          .value as string,
+                                  } as const,
+                              ]
+                            : undefined,
+                });
+        },
+        [
+            columnFilters,
+            pageIndex,
+            pageSize,
+            sorting,
+            totalPages,
+            utils.task.listTasks,
+        ]
+    );
 
     if (isError) {
         console.error(error);
@@ -246,40 +349,52 @@ export default function TaskTable() {
 
     return (
         <>
+            <TaskTableToolbar table={table} filterColumnId={filterColumnId} />
             <div className="my-2 d-block text-nowrap overflow-auto w-100">
-                <Table striped bordered hover>
-                    <thead>
-                        {table.getHeaderGroups().map((headerGroup) => (
-                            <tr key={headerGroup.id}>
-                                {headerGroup.headers.map((header) => (
-                                    <th key={header.id}>
-                                        {header.isPlaceholder
-                                            ? null
-                                            : flexRender(
-                                                  header.column.columnDef
-                                                      .header,
-                                                  header.getContext()
-                                              )}
-                                    </th>
-                                ))}
-                            </tr>
-                        ))}
-                    </thead>
-                    <tbody>
-                        {table.getRowModel().rows.map((row) => (
-                            <tr key={row.id}>
-                                {row.getVisibleCells().map((cell) => (
-                                    <td key={cell.id} className="align-middle">
-                                        {flexRender(
-                                            cell.column.columnDef.cell,
-                                            cell.getContext()
-                                        )}
-                                    </td>
-                                ))}
-                            </tr>
-                        ))}
-                    </tbody>
-                </Table>
+                {isLoading ? (
+                    <div className="position-absolute top-50 start-50 translate-middle">
+                        <Spinner animation="border" role="status">
+                            <span className="visually-hidden">Načítání...</span>
+                        </Spinner>
+                    </div>
+                ) : (
+                    <Table striped bordered hover>
+                        <thead>
+                            {table.getHeaderGroups().map((headerGroup) => (
+                                <tr key={headerGroup.id}>
+                                    {headerGroup.headers.map((header) => (
+                                        <th key={header.id}>
+                                            {header.isPlaceholder
+                                                ? null
+                                                : flexRender(
+                                                      header.column.columnDef
+                                                          .header,
+                                                      header.getContext()
+                                                  )}
+                                        </th>
+                                    ))}
+                                </tr>
+                            ))}
+                        </thead>
+                        <tbody>
+                            {table.getRowModel().rows.map((row) => (
+                                <tr key={row.id}>
+                                    {row.getVisibleCells().map((cell) => (
+                                        <td
+                                            key={cell.id}
+                                            className="align-middle"
+                                        >
+                                            {flexRender(
+                                                cell.column.columnDef.cell,
+                                                cell.getContext()
+                                            )}
+                                        </td>
+                                    ))}
+                                </tr>
+                            ))}
+                        </tbody>
+                    </Table>
+                )}
             </div>
             <div className="d-flex justify-content-between align-items-center">
                 <Form.Select
@@ -297,7 +412,7 @@ export default function TaskTable() {
                 </Form.Select>
                 <SimplePagination
                     pageIndex={pageIndex}
-                    totalPages={Math.ceil(data.count / pageSize)}
+                    totalPages={totalPages}
                     setPageIndex={setPageIndex}
                 />
             </div>

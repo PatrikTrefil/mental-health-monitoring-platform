@@ -24,7 +24,7 @@ import {
 } from "@tanstack/react-table";
 import { useSession } from "next-auth/react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Alert, Button, Form, Spinner, Table } from "react-bootstrap";
 import { toast } from "react-toastify";
 import FormTableToolbar from "./FormTableToolbar";
@@ -269,6 +269,85 @@ export default function FormDefinitionsTable() {
         autoResetPageIndex: false,
     });
 
+    const totalPages = Math.ceil((data?.totalCount ?? 0) / pageSize);
+    useEffect(
+        function prefetch() {
+            // Prefetch next page
+            const nextPageIndex = pageIndex + 1;
+            if (nextPageIndex < totalPages)
+                queryClient.prefetchQuery(
+                    formsQuery.list({
+                        formioToken: session.data?.user.formioToken!,
+                        pagination: {
+                            limit: pageSize,
+                            offset: pageSize * nextPageIndex,
+                        },
+                        sort:
+                            sorting[0] !== undefined
+                                ? {
+                                      field: sorting[0]
+                                          .id as keyof FormDefinition,
+                                      order: sorting[0].desc ? "desc" : "asc",
+                                  }
+                                : undefined,
+                        filters:
+                            columnFilters[0] !== undefined
+                                ? [
+                                      {
+                                          fieldPath: columnFilters[0].id,
+                                          operation: "contains",
+                                          comparedValue: columnFilters[0]
+                                              .value as string,
+                                      },
+                                  ]
+                                : undefined,
+                        tags: ["klientPacient"],
+                    })
+                );
+            // Prefetch previous page
+            const prevPageIndex = pageIndex - 1;
+            if (prevPageIndex >= 0)
+                queryClient.prefetchQuery(
+                    formsQuery.list({
+                        formioToken: session.data?.user.formioToken!,
+                        pagination: {
+                            limit: pageSize,
+                            offset: pageSize * prevPageIndex,
+                        },
+                        sort:
+                            sorting[0] !== undefined
+                                ? {
+                                      field: sorting[0]
+                                          .id as keyof FormDefinition,
+                                      order: sorting[0].desc ? "desc" : "asc",
+                                  }
+                                : undefined,
+                        filters:
+                            columnFilters[0] !== undefined
+                                ? [
+                                      {
+                                          fieldPath: columnFilters[0].id,
+                                          operation: "contains",
+                                          comparedValue: columnFilters[0]
+                                              .value as string,
+                                      },
+                                  ]
+                                : undefined,
+                        tags: ["klientPacient"],
+                    })
+                );
+        },
+        [
+            columnFilters,
+            pageIndex,
+            pageSize,
+            queryClient,
+            session.data?.user.formioToken,
+            sorting,
+            totalPages,
+        ]
+    );
+
     if (isError) {
         console.error(error);
         return (
@@ -353,7 +432,7 @@ export default function FormDefinitionsTable() {
                 </Form.Select>
                 <SimplePagination
                     pageIndex={pageIndex}
-                    totalPages={Math.ceil(data?.totalCount ?? 0 / pageSize)}
+                    totalPages={totalPages}
                     setPageIndex={setPageIndex}
                 />
             </div>

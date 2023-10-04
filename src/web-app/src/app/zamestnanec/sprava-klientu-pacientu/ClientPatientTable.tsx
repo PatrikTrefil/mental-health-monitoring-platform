@@ -25,7 +25,7 @@ import {
 } from "@tanstack/react-table";
 import { useSession } from "next-auth/react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Alert, Button, Form, Modal, Spinner, Table } from "react-bootstrap";
 import { toast } from "react-toastify";
 import ClientPatientTableToolbar from "./ClientPatientTableToolbar";
@@ -272,6 +272,81 @@ export default function ClientPatientTable() {
         autoResetPageIndex: false,
     });
 
+    const totalPages = Math.ceil((data?.totalCount ?? 0) / pageSize);
+    useEffect(
+        function prefetch() {
+            // Prefetch next page
+            const nextPageIndex = pageIndex + 1;
+            if (nextPageIndex < totalPages)
+                queryClient.prefetchQuery(
+                    usersQuery.list({
+                        formioToken: session.data?.user.formioToken!,
+                        pagination: {
+                            limit: pageSize,
+                            offset: nextPageIndex * pageSize,
+                        },
+                        sort:
+                            sorting[0] !== undefined
+                                ? {
+                                      field: sorting[0].id,
+                                      order: sorting[0].desc ? "desc" : "asc",
+                                  }
+                                : undefined,
+                        filters:
+                            columnFilters[0] !== undefined
+                                ? [
+                                      {
+                                          fieldPath: columnFilters[0].id,
+                                          operation: "contains",
+                                          comparedValue: columnFilters[0]
+                                              .value as string,
+                                      },
+                                  ]
+                                : undefined,
+                    })
+                );
+            // Prefetch previous page
+            const prevPageIndex = pageIndex - 1;
+            if (prevPageIndex >= 0)
+                queryClient.prefetchQuery(
+                    usersQuery.list({
+                        formioToken: session.data?.user.formioToken!,
+                        pagination: {
+                            limit: pageSize,
+                            offset: prevPageIndex * pageSize,
+                        },
+                        sort:
+                            sorting[0] !== undefined
+                                ? {
+                                      field: sorting[0].id,
+                                      order: sorting[0].desc ? "desc" : "asc",
+                                  }
+                                : undefined,
+                        filters:
+                            columnFilters[0] !== undefined
+                                ? [
+                                      {
+                                          fieldPath: columnFilters[0].id,
+                                          operation: "contains",
+                                          comparedValue: columnFilters[0]
+                                              .value as string,
+                                      },
+                                  ]
+                                : undefined,
+                    })
+                );
+        },
+        [
+            pageSize,
+            pageIndex,
+            sorting,
+            columnFilters,
+            totalPages,
+            queryClient,
+            session.data?.user.formioToken,
+        ]
+    );
+
     if (isError) {
         console.error(error);
         return (
@@ -366,7 +441,7 @@ export default function ClientPatientTable() {
                 </Form.Select>
                 <SimplePagination
                     pageIndex={pageIndex}
-                    totalPages={Math.ceil(data?.totalCount ?? 0 / pageSize)}
+                    totalPages={totalPages}
                     setPageIndex={setPageIndex}
                 />
             </div>
