@@ -30,6 +30,9 @@ const formSchema = z.object({
     taskFormId: z.object({ label: z.string(), value: z.string() }),
     start: z.string().refine(
         (value) => {
+            const isSet = value !== "";
+            if (!isSet) return true;
+
             const today = new Date();
             today.setHours(0, 0, 0, 0);
             const startDate = new Date(value);
