@@ -26,8 +26,8 @@ import { z } from "zod";
 const formSchema = z.object({
     taskName: z.string(),
     taskDescription: z.string(),
-    taskUserIds: z.string().array(),
-    taskFormId: z.string(),
+    taskUserIds: z.object({ label: z.string(), value: z.string() }).array(),
+    taskFormId: z.object({ label: z.string(), value: z.string() }),
     start: z.string().refine(
         (value) => {
             const today = new Date();
@@ -187,6 +187,9 @@ export default function TaskCreationForm() {
     const session = useSession();
     const router = useRouter();
 
+    const [userFilter, setUserFilter] = useState("");
+    const [formFilter, setFormFilter] = useState("");
+
     const {
         isLoading: isLoadingUsers,
         isError: isErrorUsers,
@@ -196,8 +199,17 @@ export default function TaskCreationForm() {
     } = useQuery({
         ...usersQuery.list({
             formioToken: session.data?.user.formioToken!,
-            // HACK: find a better solution
-            pagination: { limit: 1000, offset: 0 },
+            pagination: { limit: 10, offset: 0 },
+            filters:
+                userFilter !== ""
+                    ? [
+                          {
+                              comparedValue: userFilter,
+                              operation: "contains",
+                              fieldPath: "data.id",
+                          },
+                      ]
+                    : undefined,
         }),
         enabled: !!session.data?.user.formioToken,
     });
@@ -219,8 +231,17 @@ export default function TaskCreationForm() {
         ...formsQuery.list({
             formioToken: session.data?.user.formioToken!,
             tags: ["klientPacient"],
-            // HACK: find a better solution
-            pagination: { limit: 1000, offset: 0 },
+            pagination: { limit: 10, offset: 0 },
+            filters:
+                formFilter !== ""
+                    ? [
+                          {
+                              comparedValue: formFilter,
+                              operation: "contains",
+                              fieldPath: "name",
+                          },
+                      ]
+                    : undefined,
         }),
         keepPreviousData: true,
         enabled: !!session.data?.user.formioToken,
@@ -248,7 +269,7 @@ export default function TaskCreationForm() {
 
     const {
         handleSubmit,
-        formState: { errors, touchedFields },
+        formState: { errors },
         watch,
         register,
         control,
@@ -419,16 +440,14 @@ export default function TaskCreationForm() {
                 required
                 options={userOptionsList}
                 isLoading={isLoadingUsers}
-                isSearchable
                 isMulti
+                isClearable
                 placeholder="Vyberte uživatele"
-                value={userOptionsList?.filter((item) =>
-                    taskUserIdsValue.includes(item.value)
-                )}
+                onInputChange={(inputValue) => setUserFilter(inputValue)}
+                inputValue={userFilter}
+                value={taskUserIdsValue}
                 onChange={(selected) =>
-                    taskUserIdsOnChange(
-                        Array.from(selected.values()).map((item) => item.value)
-                    )
+                    taskUserIdsOnChange(Array.from(selected.values()))
                 }
                 {...restTaskUserIdsField}
             />
@@ -436,21 +455,14 @@ export default function TaskCreationForm() {
             <Select
                 inputId="task-form-id"
                 required
+                isClearable
                 options={formSelectOptions}
                 isLoading={isLoadingForms}
                 placeholder="Vyberte formulář"
-                value={
-                    taskFormIdValue
-                        ? formSelectOptions?.find(
-                              (item) => item.value === taskFormIdValue
-                          )
-                        : taskFormIdValue
-                }
-                onChange={(selected) => {
-                    if (typeof selected === "object")
-                        taskFormIdOnChange(selected?.value);
-                    else taskFormIdOnChange(selected);
-                }}
+                value={taskFormIdValue}
+                inputValue={formFilter}
+                onInputChange={(inputValue) => setFormFilter(inputValue)}
+                onChange={(selected) => taskFormIdOnChange(selected)}
                 {...restTaskFormIdField}
             />
             <Form.Group controlId="start-date">
@@ -834,6 +846,8 @@ function preprocessFormData(data: FormInput) {
 
     return {
         ...data,
+        taskUserIds: data.taskUserIds.map((user) => user.value),
+        taskFormId: data.taskFormId.value,
         start,
         repetition:
             data.repetition.count === ""
