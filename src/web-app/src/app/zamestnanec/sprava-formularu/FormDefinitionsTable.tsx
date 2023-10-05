@@ -12,6 +12,8 @@ import {
     orderUrlParamName,
     sortUrlParamName,
 } from "@/constants/urlParamNames";
+import { useURLLimit } from "@/hooks/useURLLimit";
+import { useURLPageIndex } from "@/hooks/useURLPageIndex";
 import { Form as FormDefinition } from "@/types/formManagement/forms";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -24,12 +26,11 @@ import {
 } from "@tanstack/react-table";
 import { useSession } from "next-auth/react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo } from "react";
 import { Alert, Button, Form, Spinner, Table } from "react-bootstrap";
 import { toast } from "react-toastify";
 import FormTableToolbar from "./FormTableToolbar";
 
-const defaultPageSize = 10;
 const filterColumnId = "name";
 
 /**
@@ -161,12 +162,16 @@ export default function FormDefinitionsTable() {
         [columnHelper, deleteFormMutate, session.data]
     );
 
-    const [pageSize, setPageSize] = useState(defaultPageSize);
-    const [pageIndex, setPageIndex] = useState(0);
-
     const router = useRouter();
     const pathname = usePathname();
     const searchParams = useSearchParams()!;
+
+    const { pageIndex, setPageIndex } = useURLPageIndex();
+
+    const validLimitValues = useMemo(() => [10, 20, 30], []);
+    const { limit, setLimit } = useURLLimit({
+        validValues: validLimitValues,
+    });
 
     const sorting: SortingState = useMemo(() => {
         const sortParam = searchParams.get(sortUrlParamName);
@@ -195,8 +200,8 @@ export default function FormDefinitionsTable() {
         ...formsQuery.list({
             formioToken: session.data?.user.formioToken!,
             pagination: {
-                limit: pageSize,
-                offset: pageSize * pageIndex,
+                limit,
+                offset: limit * pageIndex,
             },
             sort:
                 sorting[0] !== undefined
@@ -269,7 +274,7 @@ export default function FormDefinitionsTable() {
         autoResetPageIndex: false,
     });
 
-    const totalPages = Math.ceil((data?.totalCount ?? 0) / pageSize);
+    const totalPages = Math.ceil((data?.totalCount ?? 0) / limit);
     useEffect(
         function prefetch() {
             // Prefetch next page
@@ -279,8 +284,8 @@ export default function FormDefinitionsTable() {
                     formsQuery.list({
                         formioToken: session.data?.user.formioToken!,
                         pagination: {
-                            limit: pageSize,
-                            offset: pageSize * nextPageIndex,
+                            limit,
+                            offset: limit * nextPageIndex,
                         },
                         sort:
                             sorting[0] !== undefined
@@ -311,8 +316,8 @@ export default function FormDefinitionsTable() {
                     formsQuery.list({
                         formioToken: session.data?.user.formioToken!,
                         pagination: {
-                            limit: pageSize,
-                            offset: pageSize * prevPageIndex,
+                            limit,
+                            offset: limit * prevPageIndex,
                         },
                         sort:
                             sorting[0] !== undefined
@@ -340,7 +345,7 @@ export default function FormDefinitionsTable() {
         [
             columnFilters,
             pageIndex,
-            pageSize,
+            limit,
             queryClient,
             session.data?.user.formioToken,
             sorting,
@@ -419,12 +424,10 @@ export default function FormDefinitionsTable() {
             <div className="d-flex justify-content-between align-items-center">
                 <Form.Select
                     className="my-2 w-auto"
-                    value={pageSize}
-                    onChange={(e) => {
-                        setPageSize(Number(e.target.value));
-                    }}
+                    value={limit}
+                    onChange={(e) => setLimit(e.target.value)}
                 >
-                    {[10, 20, 30].map((currPageSize: number) => (
+                    {validLimitValues.map((currPageSize: number) => (
                         <option key={currPageSize} value={currPageSize}>
                             Zobrazit {currPageSize}
                         </option>
