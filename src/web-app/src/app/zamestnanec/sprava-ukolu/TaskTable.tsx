@@ -11,6 +11,8 @@ import {
     orderUrlParamName,
     sortUrlParamName,
 } from "@/constants/urlParamNames";
+import { useURLLimit } from "@/hooks/useURLLimit";
+import { useURLPageIndex } from "@/hooks/useURLPageIndex";
 import { AppRouter } from "@/server/routers/root";
 import { TaskState } from "@prisma/client";
 import {
@@ -23,7 +25,7 @@ import {
 } from "@tanstack/react-table";
 import { inferProcedureOutput } from "@trpc/server";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo } from "react";
 import {
     Alert,
     Button,
@@ -36,7 +38,6 @@ import {
 import { toast } from "react-toastify";
 import TaskTableToolbar from "./TaskTableToolbar";
 
-const defaultPageSize = 10;
 const filterColumnId = "name";
 
 /**
@@ -233,8 +234,9 @@ export default function TaskTable() {
         ],
         [columnHelper, deleteTodo]
     );
-    const [pageSize, setPageSize] = useState(defaultPageSize);
-    const [pageIndex, setPageIndex] = useState(0);
+    const validLimitValues = useMemo(() => [10, 20, 30], []);
+    const { limit, setLimit } = useURLLimit({ validValues: validLimitValues });
+    const { pageIndex, setPageIndex } = useURLPageIndex();
 
     const router = useRouter();
     const pathname = usePathname();
@@ -270,8 +272,8 @@ export default function TaskTable() {
         data: taskQueryData,
     } = trpc.task.listTasks.useQuery({
         pagination: {
-            limit: pageSize,
-            offset: pageIndex * pageSize,
+            limit: limit,
+            offset: pageIndex * limit,
         },
         sort:
             sorting[0] !== undefined
@@ -296,7 +298,7 @@ export default function TaskTable() {
 
     const tasks = taskQueryData?.data;
     const totalTaskCount = taskQueryData?.count;
-    const totalPages = Math.ceil((totalTaskCount ?? 0) / pageSize);
+    const totalPages = Math.ceil((totalTaskCount ?? 0) / limit);
 
     useEffect(
         function prefetch() {
@@ -305,8 +307,8 @@ export default function TaskTable() {
             if (nextPageIndex < totalPages)
                 utils.task.listTasks.prefetch({
                     pagination: {
-                        limit: pageSize,
-                        offset: nextPageIndex * pageSize,
+                        limit: limit,
+                        offset: nextPageIndex * limit,
                     },
                     sort:
                         sorting[0] !== undefined
@@ -335,8 +337,8 @@ export default function TaskTable() {
             if (prevPageIndex >= 0)
                 utils.task.listTasks.prefetch({
                     pagination: {
-                        limit: pageSize,
-                        offset: prevPageIndex * pageSize,
+                        limit: limit,
+                        offset: prevPageIndex * limit,
                     },
                     sort:
                         sorting[0] !== undefined
@@ -361,7 +363,7 @@ export default function TaskTable() {
                             : undefined,
                 });
         },
-        [pageSize, pageIndex, utils, sorting, columnFilters, totalPages]
+        [limit, pageIndex, utils, sorting, columnFilters, totalPages]
     );
 
     const table = useReactTable({
@@ -496,12 +498,12 @@ export default function TaskTable() {
             <div className="d-flex justify-content-between align-items-center">
                 <Form.Select
                     className="my-2 w-auto"
-                    value={pageSize}
+                    value={limit}
                     onChange={(e) => {
-                        setPageSize(Number(e.target.value));
+                        setLimit(Number(e.target.value));
                     }}
                 >
-                    {[10, 20, 30].map((currPageSize: number) => (
+                    {validLimitValues.map((currPageSize: number) => (
                         <option key={currPageSize} value={currPageSize}>
                             Zobrazit {currPageSize}
                         </option>

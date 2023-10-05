@@ -12,6 +12,8 @@ import {
     orderUrlParamName,
     sortUrlParamName,
 } from "@/constants/urlParamNames";
+import { useURLLimit } from "@/hooks/useURLLimit";
+import { useURLPageIndex } from "@/hooks/useURLPageIndex";
 import { Form as FormFormio } from "@/types/formManagement/forms";
 import {
     DataValue,
@@ -29,12 +31,10 @@ import {
 } from "@tanstack/react-table";
 import { useSession } from "next-auth/react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo } from "react";
 import { Alert, Form, Spinner, Table } from "react-bootstrap";
 import ResultTableToolbar from "./ResultTableToolbar";
 import stringifyResult from "./stringifyResult";
-
-const defaultPageSize = 10;
 
 /**
  * Display table with results from form with given formId.
@@ -55,8 +55,9 @@ export default function ResultTable({ formId }: { formId: string }) {
         enabled: !!data?.user.formioToken,
     });
 
-    const [pageSize, setPageSize] = useState(defaultPageSize);
-    const [pageIndex, setPageIndex] = useState(0);
+    const validLimitValues = useMemo(() => [10, 20, 30], []);
+    const { limit, setLimit } = useURLLimit({ validValues: validLimitValues });
+    const { pageIndex, setPageIndex } = useURLPageIndex();
 
     const router = useRouter();
     const pathname = usePathname();
@@ -95,7 +96,7 @@ export default function ResultTable({ formId }: { formId: string }) {
     } = useQuery({
         ...formsQuery.submissions(formId, {
             formioToken: data?.user.formioToken!,
-            pagination: { limit: pageSize, offset: pageSize * pageIndex },
+            pagination: { limit: limit, offset: limit * pageIndex },
             sort:
                 sorting[0] !== undefined
                     ? {
@@ -179,7 +180,7 @@ export default function ResultTable({ formId }: { formId: string }) {
     );
 
     const totalPages = Math.ceil(
-        (submissionsQueryData?.totalCount ?? 0) / pageSize
+        (submissionsQueryData?.totalCount ?? 0) / limit
     );
 
     const queryClient = useQueryClient();
@@ -192,8 +193,8 @@ export default function ResultTable({ formId }: { formId: string }) {
                     formsQuery.submissions(formId, {
                         formioToken: data?.user.formioToken!,
                         pagination: {
-                            limit: pageSize,
-                            offset: pageSize * nextPageIndex,
+                            limit: limit,
+                            offset: limit * nextPageIndex,
                         },
                         sort:
                             sorting[0] !== undefined
@@ -222,8 +223,8 @@ export default function ResultTable({ formId }: { formId: string }) {
                     formsQuery.submissions(formId, {
                         formioToken: data?.user.formioToken!,
                         pagination: {
-                            limit: pageSize,
-                            offset: pageSize * prevPageIndex,
+                            limit: limit,
+                            offset: limit * prevPageIndex,
                         },
                         sort:
                             sorting[0] !== undefined
@@ -247,7 +248,7 @@ export default function ResultTable({ formId }: { formId: string }) {
                 );
         },
         [
-            pageSize,
+            limit,
             pageIndex,
             sorting,
             columnFilters,
@@ -444,12 +445,10 @@ export default function ResultTable({ formId }: { formId: string }) {
             <div className="d-flex justify-content-between align-items-center">
                 <Form.Select
                     className="my-2 w-auto"
-                    value={pageSize}
-                    onChange={(e) => {
-                        setPageSize(Number(e.target.value));
-                    }}
+                    value={limit}
+                    onChange={(e) => setLimit(e.target.value)}
                 >
-                    {[10, 20, 30].map((pageSize: number) => (
+                    {validLimitValues.map((pageSize: number) => (
                         <option key={pageSize} value={pageSize}>
                             Zobrazit {pageSize}
                         </option>
