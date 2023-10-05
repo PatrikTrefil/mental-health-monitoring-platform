@@ -2,9 +2,9 @@
 
 import { usersQuery } from "@/client/queries/userManagement";
 import { deleteClientPacient } from "@/client/userManagementClient";
+import ChangePasswordUser from "@/components/ChangePasswordUser";
+import SimplePagination from "@/components/SimplePagination";
 import TableHeader from "@/components/TableHeader";
-import ChangePasswordUser from "@/components/shared/ChangePasswordUser";
-import SimplePagination from "@/components/shared/SimplePagination";
 import {
     filterUrlParamName,
     orderUrlParamAscValue,
@@ -28,7 +28,14 @@ import {
 import { useSession } from "next-auth/react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
-import { Alert, Button, Form, Modal, Spinner, Table } from "react-bootstrap";
+import {
+    Alert,
+    Button,
+    Form,
+    Modal,
+    Placeholder,
+    Table,
+} from "react-bootstrap";
 import { toast } from "react-toastify";
 import ClientPatientTableToolbar from "./ClientPatientTableToolbar";
 
@@ -364,11 +371,43 @@ export default function ClientPatientTable() {
             />
             <div className="my-2 d-block text-nowrap overflow-auto">
                 {isLoading ? (
-                    <div className="position-absolute top-50 start-50 translate-middle">
-                        <Spinner animation="border" role="status">
-                            <span className="visually-hidden">Načítání...</span>
-                        </Spinner>
-                    </div>
+                    <Table striped bordered>
+                        <thead>
+                            {table.getHeaderGroups().map((headerGroup) => (
+                                <tr key={headerGroup.id}>
+                                    {headerGroup.headers.map((header) => (
+                                        <th key={header.id}>
+                                            {header.isPlaceholder
+                                                ? null
+                                                : flexRender(
+                                                      header.column.columnDef
+                                                          .header,
+                                                      header.getContext()
+                                                  )}
+                                        </th>
+                                    ))}
+                                </tr>
+                            ))}
+                        </thead>
+                        <tbody>
+                            {Array.from({ length: limit }).map((_, i) => (
+                                <tr key={i}>
+                                    {table
+                                        .getVisibleFlatColumns()
+                                        .map((_, i) => (
+                                            <td key={i}>
+                                                <Placeholder animation="wave">
+                                                    <Placeholder
+                                                        className="w-100"
+                                                        bg="secondary"
+                                                    />
+                                                </Placeholder>
+                                            </td>
+                                        ))}
+                                </tr>
+                            ))}
+                        </tbody>
+                    </Table>
                 ) : (
                     <Table bordered hover>
                         <thead>
@@ -389,40 +428,53 @@ export default function ClientPatientTable() {
                             ))}
                         </thead>
                         <tbody>
-                            {table.getRowModel().rows.map((row) => (
-                                <tr
-                                    key={row.id}
-                                    className={`${
-                                        row.getIsSelected()
-                                            ? "table-active"
-                                            : ""
-                                    }`}
-                                >
-                                    {row.getVisibleCells().map((cell) => (
-                                        <td
-                                            key={cell.id}
-                                            className="align-middle"
-                                            style={{
-                                                width:
-                                                    typeof cell.column.columnDef
-                                                        .meta === "object" &&
-                                                    "isNarrow" in
-                                                        cell.column.columnDef
-                                                            .meta &&
-                                                    cell.column.columnDef.meta
-                                                        ?.isNarrow
-                                                        ? "0"
-                                                        : undefined,
-                                            }}
-                                        >
-                                            {flexRender(
-                                                cell.column.columnDef.cell,
-                                                cell.getContext()
-                                            )}
-                                        </td>
-                                    ))}
+                            {table.getRowModel().rows.length === 0 ? (
+                                <tr>
+                                    <td
+                                        colSpan={table.getAllColumns().length}
+                                        className="text-center align-middle"
+                                    >
+                                        Žádná data
+                                    </td>
                                 </tr>
-                            ))}
+                            ) : (
+                                table.getRowModel().rows.map((row) => (
+                                    <tr
+                                        key={row.id}
+                                        className={`${
+                                            row.getIsSelected()
+                                                ? "table-active"
+                                                : ""
+                                        }`}
+                                    >
+                                        {row.getVisibleCells().map((cell) => (
+                                            <td
+                                                key={cell.id}
+                                                className="align-middle"
+                                                style={{
+                                                    width:
+                                                        typeof cell.column
+                                                            .columnDef.meta ===
+                                                            "object" &&
+                                                        "isNarrow" in
+                                                            cell.column
+                                                                .columnDef
+                                                                .meta &&
+                                                        cell.column.columnDef
+                                                            .meta?.isNarrow
+                                                            ? "0"
+                                                            : undefined,
+                                                }}
+                                            >
+                                                {flexRender(
+                                                    cell.column.columnDef.cell,
+                                                    cell.getContext()
+                                                )}
+                                            </td>
+                                        ))}
+                                    </tr>
+                                ))
+                            )}
                         </tbody>
                     </Table>
                 )}

@@ -3,7 +3,7 @@
 import { loadSubmission } from "@/client/formManagementClient";
 import { formsQuery } from "@/client/queries/formManagement";
 import { usersQuery } from "@/client/queries/userManagement";
-import DynamicFormWithAuth from "@/components/shared/formio/DynamicFormWithAuth";
+import DynamicFormWithAuth from "@/components/formio/DynamicFormWithAuth";
 import { useSmartFetch } from "@/hooks/useSmartFetch";
 import { useQuery } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";

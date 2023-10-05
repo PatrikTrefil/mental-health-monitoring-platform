@@ -1,9 +1,9 @@
 "use client";
 
 import { trpc } from "@/client/trpcClient";
+import SimplePagination from "@/components/SimplePagination";
 import TableHeader from "@/components/TableHeader";
-import SimplePagination from "@/components/shared/SimplePagination";
-import TaskStateBadge from "@/components/shared/TaskStateBadge";
+import TaskStateBadge from "@/components/TaskStateBadge";
 import {
     filterUrlParamName,
     orderUrlParamAscValue,
@@ -31,7 +31,7 @@ import {
     Button,
     Form,
     OverlayTrigger,
-    Spinner,
+    Placeholder,
     Table,
     Tooltip,
 } from "react-bootstrap";
@@ -354,11 +354,43 @@ export default function TaskTable() {
             <TaskTableToolbar table={table} filterColumnId={filterColumnId} />
             <div className="my-2 d-block text-nowrap overflow-auto w-100">
                 {isLoading ? (
-                    <div className="position-absolute top-50 start-50 translate-middle">
-                        <Spinner animation="border" role="status">
-                            <span className="visually-hidden">Načítání...</span>
-                        </Spinner>
-                    </div>
+                    <Table striped bordered>
+                        <thead>
+                            {table.getHeaderGroups().map((headerGroup) => (
+                                <tr key={headerGroup.id}>
+                                    {headerGroup.headers.map((header) => (
+                                        <th key={header.id}>
+                                            {header.isPlaceholder
+                                                ? null
+                                                : flexRender(
+                                                      header.column.columnDef
+                                                          .header,
+                                                      header.getContext()
+                                                  )}
+                                        </th>
+                                    ))}
+                                </tr>
+                            ))}
+                        </thead>
+                        <tbody>
+                            {Array.from({ length: limit }).map((_, i) => (
+                                <tr key={i}>
+                                    {table
+                                        .getVisibleFlatColumns()
+                                        .map((_, i) => (
+                                            <td key={i}>
+                                                <Placeholder animation="wave">
+                                                    <Placeholder
+                                                        className="w-100"
+                                                        bg="secondary"
+                                                    />
+                                                </Placeholder>
+                                            </td>
+                                        ))}
+                                </tr>
+                            ))}
+                        </tbody>
+                    </Table>
                 ) : (
                     <Table striped bordered hover>
                         <thead>
@@ -379,21 +411,35 @@ export default function TaskTable() {
                             ))}
                         </thead>
                         <tbody>
-                            {table.getRowModel().rows.map((row) => (
-                                <tr key={row.id}>
-                                    {row.getVisibleCells().map((cell) => (
-                                        <td
-                                            key={cell.id}
-                                            className="align-middle"
-                                        >
-                                            {flexRender(
-                                                cell.column.columnDef.cell,
-                                                cell.getContext()
-                                            )}
-                                        </td>
-                                    ))}
+                            {table.getRowModel().rows.length === 0 ? (
+                                <tr>
+                                    <td
+                                        colSpan={
+                                            // TODO: use everywhere
+                                            table.getVisibleFlatColumns().length
+                                        }
+                                        className="text-center align-middle"
+                                    >
+                                        Žádná data
+                                    </td>
                                 </tr>
-                            ))}
+                            ) : (
+                                table.getRowModel().rows.map((row) => (
+                                    <tr key={row.id}>
+                                        {row.getVisibleCells().map((cell) => (
+                                            <td
+                                                key={cell.id}
+                                                className="align-middle"
+                                            >
+                                                {flexRender(
+                                                    cell.column.columnDef.cell,
+                                                    cell.getContext()
+                                                )}
+                                            </td>
+                                        ))}
+                                    </tr>
+                                ))
+                            )}
                         </tbody>
                     </Table>
                 )}

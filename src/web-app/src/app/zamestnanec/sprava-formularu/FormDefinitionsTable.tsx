@@ -3,8 +3,8 @@
 import ExportButton from "@/app/zamestnanec/sprava-formularu/ExportButton";
 import { deleteFormById } from "@/client/formManagementClient";
 import { formsQuery } from "@/client/queries/formManagement";
+import SimplePagination from "@/components/SimplePagination";
 import TableHeader from "@/components/TableHeader";
-import SimplePagination from "@/components/shared/SimplePagination";
 import {
     filterUrlParamName,
     orderUrlParamAscValue,
@@ -27,7 +27,7 @@ import {
 import { useSession } from "next-auth/react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo } from "react";
-import { Alert, Button, Form, Spinner, Table } from "react-bootstrap";
+import { Alert, Button, Form, Placeholder, Table } from "react-bootstrap";
 import { toast } from "react-toastify";
 import FormTableToolbar from "./FormTableToolbar";
 
@@ -365,11 +365,43 @@ export default function FormDefinitionsTable() {
             <FormTableToolbar table={table} filterColumnId={filterColumnId} />
             <div className="mt-2 d-block text-nowrap overflow-auto w-100">
                 {isLoading ? (
-                    <div className="position-absolute top-50 start-50 translate-middle">
-                        <Spinner animation="border" role="status">
-                            <span className="visually-hidden">Načítání...</span>
-                        </Spinner>
-                    </div>
+                    <Table striped bordered>
+                        <thead>
+                            {table.getHeaderGroups().map((headerGroup) => (
+                                <tr key={headerGroup.id}>
+                                    {headerGroup.headers.map((header) => (
+                                        <th key={header.id}>
+                                            {header.isPlaceholder
+                                                ? null
+                                                : flexRender(
+                                                      header.column.columnDef
+                                                          .header,
+                                                      header.getContext()
+                                                  )}
+                                        </th>
+                                    ))}
+                                </tr>
+                            ))}
+                        </thead>
+                        <tbody>
+                            {Array.from({ length: limit }).map((_, i) => (
+                                <tr key={i}>
+                                    {table
+                                        .getVisibleFlatColumns()
+                                        .map((_, i) => (
+                                            <td key={i}>
+                                                <Placeholder animation="wave">
+                                                    <Placeholder
+                                                        className="w-100"
+                                                        bg="secondary"
+                                                    />
+                                                </Placeholder>
+                                            </td>
+                                        ))}
+                                </tr>
+                            ))}
+                        </tbody>
+                    </Table>
                 ) : (
                     <Table striped bordered hover>
                         <thead>
@@ -390,33 +422,46 @@ export default function FormDefinitionsTable() {
                             ))}
                         </thead>
                         <tbody>
-                            {table.getRowModel().rows.map((row) => (
-                                <tr key={row.id}>
-                                    {row.getVisibleCells().map((cell) => (
-                                        <td
-                                            key={cell.id}
-                                            className="align-middle"
-                                            style={{
-                                                width:
-                                                    typeof cell.column.columnDef
-                                                        .meta === "object" &&
-                                                    "isNarrow" in
-                                                        cell.column.columnDef
-                                                            .meta &&
-                                                    cell.column.columnDef.meta
-                                                        ?.isNarrow
-                                                        ? "0"
-                                                        : undefined,
-                                            }}
-                                        >
-                                            {flexRender(
-                                                cell.column.columnDef.cell,
-                                                cell.getContext()
-                                            )}
-                                        </td>
-                                    ))}
+                            {table.getRowModel().rows.length === 0 ? (
+                                <tr>
+                                    <td
+                                        colSpan={table.getAllColumns().length}
+                                        className="text-center align-middle"
+                                    >
+                                        Žádná data
+                                    </td>
                                 </tr>
-                            ))}
+                            ) : (
+                                table.getRowModel().rows.map((row) => (
+                                    <tr key={row.id}>
+                                        {row.getVisibleCells().map((cell) => (
+                                            <td
+                                                key={cell.id}
+                                                className="align-middle"
+                                                style={{
+                                                    width:
+                                                        typeof cell.column
+                                                            .columnDef.meta ===
+                                                            "object" &&
+                                                        "isNarrow" in
+                                                            cell.column
+                                                                .columnDef
+                                                                .meta &&
+                                                        cell.column.columnDef
+                                                            .meta?.isNarrow
+                                                            ? "0"
+                                                            : undefined,
+                                                }}
+                                            >
+                                                {flexRender(
+                                                    cell.column.columnDef.cell,
+                                                    cell.getContext()
+                                                )}
+                                            </td>
+                                        ))}
+                                    </tr>
+                                ))
+                            )}
                         </tbody>
                     </Table>
                 )}

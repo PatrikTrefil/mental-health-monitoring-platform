@@ -1,7 +1,7 @@
 "use client";
 
-import ChangePasswordUser from "@/components/shared/ChangePasswordUser";
-import SignOutButton from "@/components/shared/SignOutButton";
+import ChangePasswordUser from "@/components/ChangePasswordUser";
+import SignOutButton from "@/components/SignOutButton";
 import UserRoleTitles from "@/constants/userRoleTitles";
 import { useSession } from "next-auth/react";
 import { usePathname } from "next/navigation";
