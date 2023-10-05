@@ -389,40 +389,53 @@ export default function ClientPatientTable() {
                             ))}
                         </thead>
                         <tbody>
-                            {table.getRowModel().rows.map((row) => (
-                                <tr
-                                    key={row.id}
-                                    className={`${
-                                        row.getIsSelected()
-                                            ? "table-active"
-                                            : ""
-                                    }`}
-                                >
-                                    {row.getVisibleCells().map((cell) => (
-                                        <td
-                                            key={cell.id}
-                                            className="align-middle"
-                                            style={{
-                                                width:
-                                                    typeof cell.column.columnDef
-                                                        .meta === "object" &&
-                                                    "isNarrow" in
-                                                        cell.column.columnDef
-                                                            .meta &&
-                                                    cell.column.columnDef.meta
-                                                        ?.isNarrow
-                                                        ? "0"
-                                                        : undefined,
-                                            }}
-                                        >
-                                            {flexRender(
-                                                cell.column.columnDef.cell,
-                                                cell.getContext()
-                                            )}
-                                        </td>
-                                    ))}
+                            {table.getRowModel().rows.length === 0 ? (
+                                <tr>
+                                    <td
+                                        colSpan={table.getAllColumns().length}
+                                        className="text-center align-middle"
+                                    >
+                                        Žádná data
+                                    </td>
                                 </tr>
-                            ))}
+                            ) : (
+                                table.getRowModel().rows.map((row) => (
+                                    <tr
+                                        key={row.id}
+                                        className={`${
+                                            row.getIsSelected()
+                                                ? "table-active"
+                                                : ""
+                                        }`}
+                                    >
+                                        {row.getVisibleCells().map((cell) => (
+                                            <td
+                                                key={cell.id}
+                                                className="align-middle"
+                                                style={{
+                                                    width:
+                                                        typeof cell.column
+                                                            .columnDef.meta ===
+                                                            "object" &&
+                                                        "isNarrow" in
+                                                            cell.column
+                                                                .columnDef
+                                                                .meta &&
+                                                        cell.column.columnDef
+                                                            .meta?.isNarrow
+                                                            ? "0"
+                                                            : undefined,
+                                                }}
+                                            >
+                                                {flexRender(
+                                                    cell.column.columnDef.cell,
+                                                    cell.getContext()
+                                                )}
+                                            </td>
+                                        ))}
+                                    </tr>
+                                ))
+                            )}
                         </tbody>
                     </Table>
                 )}
