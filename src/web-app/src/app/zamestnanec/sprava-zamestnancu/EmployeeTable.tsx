@@ -33,7 +33,14 @@ import {
 import { signOut, useSession } from "next-auth/react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useMemo, useState } from "react";
-import { Alert, Button, Form, Modal, Spinner, Table } from "react-bootstrap";
+import {
+    Alert,
+    Button,
+    Form,
+    Modal,
+    Placeholder,
+    Table,
+} from "react-bootstrap";
 import { toast } from "react-toastify";
 import EmployeeTableToolbar from "./EmployeeTableToolbar";
 
@@ -346,11 +353,43 @@ export default function EmployeeTable() {
             />
             <div className="my-2 d-block text-nowrap overflow-auto">
                 {isLoading ? (
-                    <div className="position-absolute top-50 start-50 translate-middle">
-                        <Spinner animation="border" role="status">
-                            <span className="visually-hidden">Načítání...</span>
-                        </Spinner>
-                    </div>
+                    <Table striped bordered>
+                        <thead>
+                            {table.getHeaderGroups().map((headerGroup) => (
+                                <tr key={headerGroup.id}>
+                                    {headerGroup.headers.map((header) => (
+                                        <th key={header.id}>
+                                            {header.isPlaceholder
+                                                ? null
+                                                : flexRender(
+                                                      header.column.columnDef
+                                                          .header,
+                                                      header.getContext()
+                                                  )}
+                                        </th>
+                                    ))}
+                                </tr>
+                            ))}
+                        </thead>
+                        <tbody>
+                            {Array.from({ length: pageSize }).map((_, i) => (
+                                <tr key={i}>
+                                    {table
+                                        .getVisibleFlatColumns()
+                                        .map((_, i) => (
+                                            <td key={i}>
+                                                <Placeholder animation="wave">
+                                                    <Placeholder
+                                                        className="w-100"
+                                                        bg="secondary"
+                                                    />
+                                                </Placeholder>
+                                            </td>
+                                        ))}
+                                </tr>
+                            ))}
+                        </tbody>
+                    </Table>
                 ) : (
                     <Table bordered hover>
                         <thead>

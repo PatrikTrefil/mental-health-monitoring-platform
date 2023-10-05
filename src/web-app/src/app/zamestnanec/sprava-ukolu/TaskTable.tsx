@@ -31,7 +31,7 @@ import {
     Button,
     Form,
     OverlayTrigger,
-    Spinner,
+    Placeholder,
     Table,
     Tooltip,
 } from "react-bootstrap";
@@ -432,11 +432,43 @@ export default function TaskTable() {
             <TaskTableToolbar table={table} filterColumnId={filterColumnId} />
             <div className="mt-2 d-block text-nowrap overflow-auto">
                 {isLoading ? (
-                    <div className="position-absolute top-50 start-50 translate-middle">
-                        <Spinner animation="border" role="status">
-                            <span className="visually-hidden">Načítání...</span>
-                        </Spinner>
-                    </div>
+                    <Table striped bordered>
+                        <thead>
+                            {table.getHeaderGroups().map((headerGroup) => (
+                                <tr key={headerGroup.id}>
+                                    {headerGroup.headers.map((header) => (
+                                        <th key={header.id}>
+                                            {header.isPlaceholder
+                                                ? null
+                                                : flexRender(
+                                                      header.column.columnDef
+                                                          .header,
+                                                      header.getContext()
+                                                  )}
+                                        </th>
+                                    ))}
+                                </tr>
+                            ))}
+                        </thead>
+                        <tbody>
+                            {Array.from({ length: limit }).map((_, i) => (
+                                <tr key={i}>
+                                    {table
+                                        .getVisibleFlatColumns()
+                                        .map((_, i) => (
+                                            <td key={i}>
+                                                <Placeholder animation="wave">
+                                                    <Placeholder
+                                                        className="w-100"
+                                                        bg="secondary"
+                                                    />
+                                                </Placeholder>
+                                            </td>
+                                        ))}
+                                </tr>
+                            ))}
+                        </tbody>
+                    </Table>
                 ) : (
                     <Table bordered hover>
                         <thead>
