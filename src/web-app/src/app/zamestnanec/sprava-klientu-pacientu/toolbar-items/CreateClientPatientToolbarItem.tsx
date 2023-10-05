@@ -1,7 +1,7 @@
 "use client";
 
 import { usersQuery } from "@/client/queries/userManagement";
-import CreateUser from "@/components/shared/CreateUser";
+import CreateUser from "@/components/CreateUser";
 import UserRoleTitles from "@/constants/userRoleTitles";
 import { useQueryClient } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";

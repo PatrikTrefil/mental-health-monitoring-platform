@@ -1,7 +1,7 @@
 "use client";
 
 import { loadFormById, updateForm } from "@/client/formManagementClient";
-import DynamicFormEdit from "@/components/shared/formio/DynamicFormEdit";
+import DynamicFormEdit from "@/components/formio/DynamicFormEdit";
 import { useSmartFetch } from "@/hooks/useSmartFetch";
 import { Form } from "@/types/formManagement/forms";
 import { useSession } from "next-auth/react";

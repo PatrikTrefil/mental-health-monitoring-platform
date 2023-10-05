@@ -1,7 +1,7 @@
 "use client";
 
 import { formsQuery } from "@/client/queries/formManagement";
-import DynamicFormWithAuth from "@/components/shared/formio/DynamicFormWithAuth";
+import DynamicFormWithAuth from "@/components/formio/DynamicFormWithAuth";
 import { useQuery } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
 import { Alert, Spinner } from "react-bootstrap";

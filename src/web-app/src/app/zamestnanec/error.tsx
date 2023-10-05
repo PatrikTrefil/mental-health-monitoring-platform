@@ -1,3 +1,3 @@
 "use client";
 
-export { default } from "@/components/shared/errorAlert";
+export { default } from "@/components/ErrorAlert";

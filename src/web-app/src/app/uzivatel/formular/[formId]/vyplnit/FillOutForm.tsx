@@ -3,7 +3,7 @@
 import { submitForm } from "@/client/formManagementClient";
 import { formsQuery } from "@/client/queries/formManagement";
 import { trpc } from "@/client/trpcClient";
-import DynamicFormWithAuth from "@/components/shared/formio/DynamicFormWithAuth";
+import DynamicFormWithAuth from "@/components/formio/DynamicFormWithAuth";
 import "@/styles/saveDraft.css";
 import { DataValue } from "@/types/formManagement/submission";
 import { useQuery } from "@tanstack/react-query";

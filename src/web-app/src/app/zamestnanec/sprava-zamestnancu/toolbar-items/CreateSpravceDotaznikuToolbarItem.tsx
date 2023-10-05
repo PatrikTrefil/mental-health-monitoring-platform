@@ -1,6 +1,6 @@
 "use client";
 
-import CreateUser from "@/components/shared/CreateUser";
+import CreateUser from "@/components/CreateUser";
 import UserRoleTitles from "@/constants/userRoleTitles";
 import { useState } from "react";
 import { Button, Modal } from "react-bootstrap";

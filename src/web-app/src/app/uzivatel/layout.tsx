@@ -1,4 +1,4 @@
-import { Container } from "@/components/shared/client-react-bootstrap";
+import { Container } from "@/components/client-react-bootstrap";
 import NavigationBarClientPatient from "./NavigationBar";
 
 /**

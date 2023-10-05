@@ -32,18 +32,20 @@ export default function DynamicFormEdit({
         });
     }, loading);
 
-    const language = props.language ?? "cs";
+    // Props should not be mutated, so let's make a copy.
+    const propsClone = { ...props };
+    const language = propsClone.language ?? "cs";
 
-    if (props.options) {
-        props.language ??= language;
+    if (propsClone.options) {
+        propsClone.language ??= language;
 
-        if (props.options.language === "cs") {
-            if (props.options.i18n)
-                (props.options.i18n as { [key: string]: unknown }).cs ??=
+        if (propsClone.options.language === "cs") {
+            if (propsClone.options.i18n)
+                (propsClone.options.i18n as { [key: string]: unknown }).cs ??=
                     csTranslation;
-            else props.options.i18n = { cs: csTranslation };
+            else propsClone.options.i18n = { cs: csTranslation };
         }
-    } else props.options = { i18n: { cs: csTranslation }, language };
+    } else propsClone.options = { i18n: { cs: csTranslation }, language };
 
-    return <Component {...props} />;
+    return <Component {...propsClone} />;
 }
