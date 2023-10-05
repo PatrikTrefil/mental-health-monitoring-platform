@@ -1,5 +1,5 @@
 "use client";
-import ErrorAlert from "@/components/errorAlert";
+import ErrorAlert from "@/components/ErrorAlert";
 import ErrorProps from "@/types/errorProps";
 
 /**
