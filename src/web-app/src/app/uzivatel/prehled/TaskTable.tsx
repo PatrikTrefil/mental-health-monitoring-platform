@@ -1,9 +1,9 @@
 "use client";
 
 import { trpc } from "@/client/trpcClient";
+import SimplePagination from "@/components/SimplePagination";
 import TableHeader from "@/components/TableHeader";
-import SimplePagination from "@/components/shared/SimplePagination";
-import TaskStateBadge from "@/components/shared/TaskStateBadge";
+import TaskStateBadge from "@/components/TaskStateBadge";
 import {
     filterUrlParamName,
     orderUrlParamAscValue,

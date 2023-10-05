@@ -2,9 +2,9 @@
 
 import { usersQuery } from "@/client/queries/userManagement";
 import { deleteClientPacient } from "@/client/userManagementClient";
+import ChangePasswordUser from "@/components/ChangePasswordUser";
+import SimplePagination from "@/components/SimplePagination";
 import TableHeader from "@/components/TableHeader";
-import ChangePasswordUser from "@/components/shared/ChangePasswordUser";
-import SimplePagination from "@/components/shared/SimplePagination";
 import {
     filterUrlParamName,
     orderUrlParamAscValue,

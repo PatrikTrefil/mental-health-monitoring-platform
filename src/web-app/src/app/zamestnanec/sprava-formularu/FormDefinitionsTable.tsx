@@ -3,8 +3,8 @@
 import ExportButton from "@/app/zamestnanec/sprava-formularu/ExportButton";
 import { deleteFormById } from "@/client/formManagementClient";
 import { formsQuery } from "@/client/queries/formManagement";
+import SimplePagination from "@/components/SimplePagination";
 import TableHeader from "@/components/TableHeader";
-import SimplePagination from "@/components/shared/SimplePagination";
 import {
     filterUrlParamName,
     orderUrlParamAscValue,

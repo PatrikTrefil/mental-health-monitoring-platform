@@ -6,8 +6,8 @@ import {
     zadavatelDotaznikuQuery,
 } from "@/client/queries/userManagement";
 import { deleteUser } from "@/client/userManagementClient";
+import ChangePasswordUser from "@/components/ChangePasswordUser";
 import TableHeader from "@/components/TableHeader";
-import ChangePasswordUser from "@/components/shared/ChangePasswordUser";
 import {
     filterUrlParamName,
     orderUrlParamAscValue,

@@ -2,8 +2,8 @@
 
 import { formsQuery } from "@/client/queries/formManagement";
 import { usersQuery } from "@/client/queries/userManagement";
+import SimplePagination from "@/components/SimplePagination";
 import TableHeader from "@/components/TableHeader";
-import SimplePagination from "@/components/shared/SimplePagination";
 import {
     filterColumnIdUrlParamName,
     filterUrlParamName,
