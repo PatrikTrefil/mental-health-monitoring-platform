@@ -93,6 +93,11 @@ const nextConfig = {
             destination: "/uzivatel/prehled",
             permanent: true,
         },
+        {
+            source: "/",
+            destination: "/login",
+            permanent: false,
+        },
     ],
     poweredByHeader: false,
     async headers() {

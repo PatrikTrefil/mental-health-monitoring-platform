@@ -1,0 +1,16 @@
+name: Validate line endings
+
+on:
+  pull_request:
+
+jobs:
+  validate-line-endings:
+    name: Check CRLF
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository contents
+        uses: actions/checkout@v1
+
+      - name: Use action to check for CRLF endings
+        uses: erclu/check-crlf@v1
