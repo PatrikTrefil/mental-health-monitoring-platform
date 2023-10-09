@@ -40,7 +40,7 @@ export default function TableHeader<TData, TValue>({
 
     return (
         <div
-            className="d-flex"
+            className="d-flex text-nowrap"
             style={{ cursor: "pointer" }}
             onClick={() => {
                 console.log("click");

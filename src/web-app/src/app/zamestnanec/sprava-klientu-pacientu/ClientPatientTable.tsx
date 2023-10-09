@@ -2,7 +2,9 @@
 
 import { usersQuery } from "@/client/queries/userManagement";
 import { deleteClientPacient } from "@/client/userManagementClient";
+import AppTable from "@/components/AppTable";
 import ChangePasswordUser from "@/components/ChangePasswordUser";
+import PlaceholderAppTable from "@/components/PlaceholderAppTable";
 import SimplePagination from "@/components/SimplePagination";
 import TableHeader from "@/components/TableHeader";
 import {
@@ -21,21 +23,13 @@ import {
     ColumnFiltersState,
     SortingState,
     createColumnHelper,
-    flexRender,
     getCoreRowModel,
     useReactTable,
 } from "@tanstack/react-table";
 import { useSession } from "next-auth/react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
-import {
-    Alert,
-    Button,
-    Form,
-    Modal,
-    Placeholder,
-    Table,
-} from "react-bootstrap";
+import { Alert, Button, Form, Modal } from "react-bootstrap";
 import { toast } from "react-toastify";
 import ClientPatientTableToolbar from "./ClientPatientTableToolbar";
 
@@ -369,114 +363,11 @@ export default function ClientPatientTable() {
                 table={table}
                 filterColumnId={filterColumnId}
             />
-            <div className="my-2 d-block text-nowrap overflow-auto">
+            <div className="my-2">
                 {isLoading ? (
-                    <Table striped bordered>
-                        <thead>
-                            {table.getHeaderGroups().map((headerGroup) => (
-                                <tr key={headerGroup.id}>
-                                    {headerGroup.headers.map((header) => (
-                                        <th key={header.id}>
-                                            {header.isPlaceholder
-                                                ? null
-                                                : flexRender(
-                                                      header.column.columnDef
-                                                          .header,
-                                                      header.getContext()
-                                                  )}
-                                        </th>
-                                    ))}
-                                </tr>
-                            ))}
-                        </thead>
-                        <tbody>
-                            {Array.from({ length: limit }).map((_, i) => (
-                                <tr key={i}>
-                                    {table
-                                        .getVisibleFlatColumns()
-                                        .map((_, i) => (
-                                            <td key={i}>
-                                                <Placeholder animation="wave">
-                                                    <Placeholder
-                                                        className="w-100"
-                                                        bg="secondary"
-                                                    />
-                                                </Placeholder>
-                                            </td>
-                                        ))}
-                                </tr>
-                            ))}
-                        </tbody>
-                    </Table>
+                    <PlaceholderAppTable table={table} rowCount={limit} />
                 ) : (
-                    <Table bordered hover>
-                        <thead>
-                            {table.getHeaderGroups().map((headerGroup) => (
-                                <tr key={headerGroup.id}>
-                                    {headerGroup.headers.map((header) => (
-                                        <th key={header.id}>
-                                            {header.isPlaceholder
-                                                ? null
-                                                : flexRender(
-                                                      header.column.columnDef
-                                                          .header,
-                                                      header.getContext()
-                                                  )}
-                                        </th>
-                                    ))}
-                                </tr>
-                            ))}
-                        </thead>
-                        <tbody>
-                            {table.getRowModel().rows.length === 0 ? (
-                                <tr>
-                                    <td
-                                        colSpan={table.getAllColumns().length}
-                                        className="text-center align-middle"
-                                    >
-                                        Žádná data
-                                    </td>
-                                </tr>
-                            ) : (
-                                table.getRowModel().rows.map((row) => (
-                                    <tr
-                                        key={row.id}
-                                        className={`${
-                                            row.getIsSelected()
-                                                ? "table-active"
-                                                : ""
-                                        }`}
-                                    >
-                                        {row.getVisibleCells().map((cell) => (
-                                            <td
-                                                key={cell.id}
-                                                className="align-middle"
-                                                style={{
-                                                    width:
-                                                        typeof cell.column
-                                                            .columnDef.meta ===
-                                                            "object" &&
-                                                        "isNarrow" in
-                                                            cell.column
-                                                                .columnDef
-                                                                .meta &&
-                                                        cell.column.columnDef
-                                                            .meta?.isNarrow
-                                                            ? "0"
-                                                            : undefined,
-                                                }}
-                                            >
-                                                {flexRender(
-                                                    cell.column.columnDef.cell,
-                                                    cell.getContext()
-                                                )}
-                                            </td>
-                                        ))}
-                                    </tr>
-                                ))
-                            )}
-                        </tbody>
-                    </Table>
+                    <AppTable table={table} />
                 )}
             </div>
             <div className="d-flex justify-content-between align-items-center">
