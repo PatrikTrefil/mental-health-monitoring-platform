@@ -23,34 +23,63 @@ export default function DeleteEmployeeToolbarItem({
     const queryClient = useQueryClient();
     const session = useSession();
 
-    const { mutate: deleteEmployeeMutate } = useMutation({
+    const { mutateAsync: deleteEmployeeMutateAsync } = useMutation({
         mutationFn: async ({
-            userSubmissionId,
+            employee: { submissionId, roleTitle },
             formioToken,
-            userRoleTitle,
         }: {
-            userSubmissionId: string;
+            employee: {
+                submissionId: string;
+                roleTitle: UserRoleTitle;
+                displayName: string;
+            };
             formioToken: string;
-            userRoleTitle: UserRoleTitle;
-        }) => {
-            deleteUser(formioToken, userSubmissionId, userRoleTitle);
-        },
-        onMutate: ({ userSubmissionId }) => {
+        }) => deleteUser(formioToken, submissionId, roleTitle),
+        onMutate: ({ employee }) => {
             console.debug("Deleting employee ...", {
-                userSubmissionId,
+                employee,
             });
         },
-        onError: (e: unknown, { userSubmissionId }) => {
+        onError: (e: unknown, { employee }) => {
             console.error("Failed to delete employee.", {
-                userSubmissionId,
+                employee,
                 error: e,
             });
 
-            toast.error("Smazání účtu selhalo.");
+            toast.error(`Smazání účtu "${employee.displayName}" selhalo.`);
         },
-        onSuccess: (_, { userSubmissionId }) => {
+        onSuccess: (_, { employee }) => {
             console.debug("Employee deleted.", {
-                userSubmissionId,
+                employee,
+            });
+        },
+    });
+    const { mutate: deleteEmployeesMutate } = useMutation({
+        mutationFn: async ({
+            employees,
+            formioToken,
+        }: {
+            employees: {
+                submissionId: string;
+                roleTitle: UserRoleTitle;
+                displayName: string;
+            }[];
+            formioToken: string;
+        }) => {
+            await Promise.all(
+                employees.map((employee) =>
+                    deleteEmployeeMutateAsync({
+                        employee,
+                        formioToken,
+                    })
+                )
+            );
+        },
+        onSuccess: (_, { employees }) => {
+            toast.success(`Zaměstnanecké účty (${employees.length}) smazány.`);
+
+            queryClient.invalidateQueries({
+                queryKey: employeesInfiniteQuery.list._def,
             });
         },
     });
@@ -64,25 +93,15 @@ export default function DeleteEmployeeToolbarItem({
                     : "visually-hidden"
             }`}
             onClick={() => {
-                for (const row of table.getSelectedRowModel().rows) {
-                    const mainRoleTitle = row.original.mainUserRoleTitle;
-
-                    deleteEmployeeMutate({
-                        formioToken: session.data?.user.formioToken!,
-                        userSubmissionId: row.original._id,
-                        userRoleTitle: mainRoleTitle,
-                    });
-                }
+                deleteEmployeesMutate({
+                    employees: table.getSelectedRowModel().rows.map((row) => ({
+                        roleTitle: row.original.mainUserRoleTitle,
+                        submissionId: row.original._id,
+                        displayName: row.original.data.id,
+                    })),
+                    formioToken: session.data?.user.formioToken!,
+                });
                 table.toggleAllPageRowsSelected(false);
-                // Invalidate after all changes are done
-                // need to set a delay because the server tends to return the old data
-                setTimeout(
-                    () =>
-                        queryClient.invalidateQueries({
-                            queryKey: employeesInfiniteQuery.list._def,
-                        }),
-                    500
-                );
             }}
         >
             <i className="bi bi-trash"></i>

@@ -2,6 +2,7 @@
 
 import { trpc } from "@/client/trpcClient";
 import { AppRouter } from "@/server/routers/root";
+import { useMutation } from "@tanstack/react-query";
 import { Table } from "@tanstack/react-table";
 import type { inferProcedureOutput } from "@trpc/server";
 import { Button } from "react-bootstrap";
@@ -18,12 +19,22 @@ export default function DeleteTodoToolbarItem({
     table: Table<inferProcedureOutput<AppRouter["task"]["createTask"]>>;
 }) {
     const utils = trpc.useContext();
-    const deleteTodo = trpc.task.deleteTask.useMutation({
-        onSuccess: () => {
-            utils.task.listTasks.invalidate();
+    const deleteTodoTrpc = trpc.task.deleteTask.useMutation();
+    const { mutateAsync: deleteTodoMutateAsync } = useMutation({
+        mutationFn: ({ id }: { id: string; name: string }) =>
+            deleteTodoTrpc.mutateAsync({ id }),
+        onError: (_, { name }) =>
+            toast.error(`Smazání úkolu "${name}" selhalo.`),
+    });
+    const deleteTodos = useMutation({
+        mutationFn: async (todos: { id: string; name: string }[]) => {
+            await Promise.all(
+                todos.map(({ id, name }) => deleteTodoMutateAsync({ id, name }))
+            );
         },
-        onError: () => {
-            toast.error("Smazání úkolu selhalo.");
+        onSuccess: (_, input) => {
+            toast.success(`Úkoly (${input.length}) byly smazány.`);
+            utils.task.listTasks.invalidate();
         },
     });
 
@@ -36,8 +47,12 @@ export default function DeleteTodoToolbarItem({
                     : "visually-hidden"
             }`}
             onClick={() => {
-                for (const row of table.getSelectedRowModel().rows)
-                    deleteTodo.mutate({ id: row.original.id });
+                deleteTodos.mutate(
+                    table.getSelectedRowModel().rows.map((row) => ({
+                        id: row.original.id,
+                        name: row.original.name,
+                    }))
+                );
                 table.toggleAllPageRowsSelected(false);
             }}
         >
