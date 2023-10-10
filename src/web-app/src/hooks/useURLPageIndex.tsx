@@ -17,8 +17,7 @@ export function useURLPageIndex() {
         pageIndexParam !== null ? Number(pageIndexParam) : defaultPageIndex;
 
     if (isNaN(pageIndex)) {
-        // HACK: Calling toString to avoid TS error (bug in nextjs).
-        const newSearchParams = new URLSearchParams(searchParams.toString());
+        const newSearchParams = new URLSearchParams(searchParams);
         newSearchParams.set(pageIndexUrlParamName, String(defaultPageIndex));
         router.replace(pathname + "?" + newSearchParams.toString());
         pageIndex = defaultPageIndex;
@@ -27,10 +26,7 @@ export function useURLPageIndex() {
     return {
         pageIndex,
         setPageIndex: (newValue: string | number) => {
-            // HACK: using toString to get around TS error
-            const newSearchParams = new URLSearchParams(
-                searchParams.toString()
-            );
+            const newSearchParams = new URLSearchParams(searchParams);
             newSearchParams.set(pageIndexUrlParamName, String(newValue));
             router.replace(pathname + "?" + newSearchParams.toString());
         },

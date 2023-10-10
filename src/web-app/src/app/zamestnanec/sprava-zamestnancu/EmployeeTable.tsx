@@ -296,8 +296,7 @@ export default function EmployeeTable() {
                 newValue = updaterOrValue(sorting);
             else newValue = updaterOrValue;
 
-            // HACK: using toString first because of type issue https://github.com/vercel/next.js/issues/49245
-            const newParams = new URLSearchParams(searchParams.toString());
+            const newParams = new URLSearchParams(searchParams);
             if (newValue[0] !== undefined) {
                 newParams.set(sortUrlParamName, newValue[0].id);
                 newParams.set(
@@ -319,8 +318,7 @@ export default function EmployeeTable() {
                 newValue = updaterOrValue(columnFilters);
             else newValue = updaterOrValue;
 
-            // HACK: using toString first because of type issue https://github.com/vercel/next.js/issues/49245
-            const newParams = new URLSearchParams(searchParams.toString());
+            const newParams = new URLSearchParams(searchParams);
             if (newValue[0] !== undefined)
                 newParams.set(filterUrlParamName, newValue[0].value as string);
             else newParams.delete(filterUrlParamName);
