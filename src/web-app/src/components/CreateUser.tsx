@@ -1,6 +1,7 @@
 "use client";
 
 import {
+    employeesInfiniteQuery,
     spravceDotaznikuQuery,
     usersQuery,
     zadavatelDotaznikuQuery,
@@ -95,10 +96,16 @@ export default function CreateUser({
                         queryClient.invalidateQueries(
                             zadavatelDotaznikuQuery.list._def
                         );
+                        queryClient.invalidateQueries(
+                            employeesInfiniteQuery.list._def
+                        );
                         break;
                     case UserRoleTitles.SPRAVCE_DOTAZNIKU:
                         queryClient.invalidateQueries(
                             spravceDotaznikuQuery.list._def
+                        );
+                        queryClient.invalidateQueries(
+                            employeesInfiniteQuery.list._def
                         );
                         break;
                     case UserRoleTitles.KLIENT_PACIENT:
