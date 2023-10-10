@@ -54,7 +54,7 @@ services:
     restart: on-failure
     depends_on:
       - mongo
-    # TODO: this is horrible design by form.io, trying to communicate with them to remove this
+    # TODO: This mount is required by Formio and it seems like they are not going to fix it.
     volumes:
       - ./src/formio/:/app:rw
     environment:
