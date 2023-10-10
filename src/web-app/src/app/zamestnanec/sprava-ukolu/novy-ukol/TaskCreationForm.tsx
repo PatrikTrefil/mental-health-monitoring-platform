@@ -64,16 +64,7 @@ const formSchema = z
                                     });
                             }
                         }),
-                    unit: z.string().superRefine(function isNumber(value, ctx) {
-                        if (value !== "") {
-                            const numberValue = Number(value);
-                            if (isNaN(numberValue))
-                                ctx.addIssue({
-                                    message: "Musí být číslo",
-                                    code: z.ZodIssueCode.custom,
-                                });
-                        }
-                    }),
+                    unit: z.enum(["day", "week", "month", "year", ""]), // Must allow empty "" because the type is used for watch() calls, which should be able to return empty string
                 }),
                 count: z
                     .string()
@@ -395,12 +386,40 @@ export default function TaskCreationForm() {
                                 ? new Date(currentStartDate)
                                 : undefined,
                     });
-                    currentDueDate.setDate(
-                        currentDueDate.getDate() + repetition.frequencyInDays
-                    );
-                    currentStartDate?.setDate(
-                        currentStartDate.getDate() + repetition.frequencyInDays
-                    );
+                    switch (repetition.unit) {
+                        case "day":
+                            currentDueDate.setDate(
+                                currentDueDate.getDate() + 1
+                            );
+                            currentStartDate?.setDate(
+                                currentStartDate.getDate() + 1
+                            );
+                            break;
+                        case "week":
+                            currentDueDate.setDate(
+                                currentDueDate.getDate() + 7
+                            );
+                            currentStartDate?.setDate(
+                                currentStartDate.getDate() + 7
+                            );
+                            break;
+                        case "month":
+                            currentDueDate.setMonth(
+                                currentDueDate.getMonth() + 1
+                            );
+                            currentStartDate?.setMonth(
+                                currentStartDate.getMonth() + 1
+                            );
+                            break;
+                        case "year":
+                            currentDueDate.setFullYear(
+                                currentDueDate.getFullYear() + 1
+                            );
+                            currentStartDate?.setFullYear(
+                                currentStartDate.getFullYear() + 1
+                            );
+                            break;
+                    }
                 }
             }
         }
@@ -411,10 +430,10 @@ export default function TaskCreationForm() {
 
     const frequencyUnitSelectOptions = useMemo(
         () => [
-            { label: "Dny", value: "1" },
-            { label: "Týdny", value: "7" },
-            { label: "Měsíce", value: "30" },
-            { label: "Roky", value: "365" },
+            { label: "Dny", value: "day" },
+            { label: "Týdny", value: "week" },
+            { label: "Měsíce", value: "month" },
+            { label: "Roky", value: "year" },
         ],
         []
     );
@@ -877,6 +896,11 @@ function preprocessFormData(data: FormInput) {
         start.setHours(0, 0, 0, 0);
     }
 
+    if (data.repetition.frequency.unit === "")
+        throw new Error(
+            "Unit is empty which should never happen because the field is required"
+        );
+
     return {
         ...data,
         taskUserIds: data.taskUserIds.map((user) => user.value),
@@ -887,9 +911,8 @@ function preprocessFormData(data: FormInput) {
                 ? undefined
                 : {
                       count: Number(data.repetition.count),
-                      frequencyInDays:
-                          Number(data.repetition.frequency.unit) *
-                          Number(data.repetition.frequency.value),
+                      value: Number(data.repetition.frequency.value),
+                      unit: data.repetition.frequency.unit,
                   },
         deadline:
             data.deadline.taskDueDate === ""
