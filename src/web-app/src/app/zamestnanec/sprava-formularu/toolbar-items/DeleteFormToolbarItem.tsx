@@ -22,38 +22,58 @@ export default function DeleteFormToolbarItem({
     const queryClient = useQueryClient();
     const session = useSession();
 
-    const { mutate: deleteFormMutate } = useMutation({
+    const { mutateAsync: deleteFormMutateAsync } = useMutation({
         mutationFn: async ({
-            formId,
+            form: { id },
             formioToken,
         }: {
-            formId: string;
+            form: { id: string; name: string };
             formioToken: string;
         }) => {
-            await deleteFormById(formioToken, formId);
+            await deleteFormById(formioToken, id);
         },
-        onMutate: ({ formId }) => {
-            console.debug("Deleting form...", { formPath: formId });
+        onMutate: ({ form }) => {
+            console.debug("Deleting form...", { form });
         },
-        onError: (e: unknown, { formId }) => {
+        onError: (e: unknown, { form }) => {
             console.error("Failed to delete form.", {
                 error: e,
-                formPath: formId,
+                form,
             });
-            toast.error("Smazání formuláře selhalo.");
+            toast.error(`Smazání formuláře "${form.name}" selhalo.`);
         },
-        onSuccess: (_, { formId }) => {
-            console.debug("Form deleted.", { formId });
+        onSuccess: (_, { form }) => {
+            console.debug("Form deleted.", { form });
+        },
+    });
+    const { mutate: deleteFormsMutate } = useMutation({
+        mutationFn: ({
+            forms,
+            formioToken,
+        }: {
+            forms: { id: string; name: string }[];
+            formioToken: string;
+        }) => {
+            return Promise.all(
+                forms.map((form) =>
+                    deleteFormMutateAsync({ form, formioToken })
+                )
+            );
+        },
+        onSuccess: (_, { forms }) => {
+            console.debug("Forms deleted.", { forms });
+            toast.success(`Formuláře (${forms.length}) byl smazány`);
+
             queryClient.invalidateQueries({
                 queryKey: formsQuery.list._def,
             });
-            queryClient.invalidateQueries({
-                queryKey: formsQuery.detail(
-                    session.data?.user.formioToken!,
-                    formId
-                ).queryKey,
-            });
-            toast.success("Formulář byl smazán");
+            for (const { id: formId } of forms)
+                queryClient.invalidateQueries({
+                    queryKey: formsQuery.detail(
+                        session.data?.user.formioToken!,
+                        formId
+                    ).queryKey,
+                });
         },
     });
 
@@ -66,11 +86,13 @@ export default function DeleteFormToolbarItem({
                     : "visually-hidden"
             }`}
             onClick={() => {
-                for (const row of table.getSelectedRowModel().rows)
-                    deleteFormMutate({
-                        formId: row.original._id,
-                        formioToken: session.data?.user.formioToken!,
-                    });
+                deleteFormsMutate({
+                    forms: table.getSelectedRowModel().rows.map((r) => ({
+                        id: r.original._id,
+                        name: r.original.name,
+                    })),
+                    formioToken: session.data?.user.formioToken!,
+                });
                 table.toggleAllPageRowsSelected(false);
             }}
         >

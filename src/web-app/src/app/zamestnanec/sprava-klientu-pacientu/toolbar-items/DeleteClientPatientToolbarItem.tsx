@@ -22,41 +22,67 @@ export default function DeleteClientPatientToolbarItem({
     const queryClient = useQueryClient();
     const session = useSession();
 
-    const { mutate: deleteUserMutate } = useMutation({
-        mutationFn: async ({
+    const { mutateAsync: deleteUserMutateAsync } = useMutation({
+        mutationFn: ({
             formioToken,
-            userSubmissionId,
+            user: { submissionId },
         }: {
             formioToken: string;
-            userSubmissionId: string;
+            user: { submissionId: string; displayName: string };
+        }) => deleteClientPacient(formioToken, submissionId),
+        onMutate: ({ user }) => {
+            console.debug("Deleting client/patient ...", { user });
+        },
+        onError: (_, { user }) =>
+            toast.error(`Smazání účtu "${user.displayName}" selhalo.`),
+        onSuccess: (_, { user }) => {
+            console.debug("Deleted client/patient ...", {
+                user,
+            });
+        },
+    });
+    const { mutate: deleteUsersMutate } = useMutation({
+        mutationFn: async ({
+            formioToken,
+            users,
+        }: {
+            formioToken: string;
+            users: { submissionId: string; displayName: string }[];
         }) => {
-            await deleteClientPacient(formioToken, userSubmissionId);
+            await Promise.all(
+                users.map((user) =>
+                    deleteUserMutateAsync({
+                        formioToken,
+                        user,
+                    })
+                )
+            );
         },
-        onError: (e: unknown, { userSubmissionId }) => {
-            console.error("Failed to delete user.", {
-                userSubmissionId,
-                error: e,
+        onError: (error: unknown, { users }) => {
+            console.error("Failed to delete users.", {
+                users,
+                error,
             });
-
-            toast.error("Smazání účtu selhalo.");
         },
-        onSuccess: (_, { userSubmissionId }) => {
-            console.debug("User deleted.", {
-                userSubmissionId,
+        onSuccess: (_, { users }) => {
+            console.debug("Users deleted.", {
+                users,
             });
+            toast.success(`Účty (${users.length}) byly smazány.`);
             queryClient.invalidateQueries({
                 queryKey: usersQuery.list._def,
             });
-            queryClient.invalidateQueries({
-                queryKey: usersQuery.detail(
-                    session.data!.user.formioToken,
-                    userSubmissionId
-                ).queryKey,
-            });
+            for (const { submissionId } of users)
+                queryClient.invalidateQueries({
+                    queryKey: usersQuery.detail(
+                        session.data!.user.formioToken,
+                        submissionId
+                    ).queryKey,
+                });
         },
-        onMutate: ({ userSubmissionId }) => {
-            console.debug("Deleting user ...", {
-                userSubmissionId,
+        onMutate: ({ users }) => {
+            console.debug("Deleting users ...", {
+                users,
             });
         },
     });
@@ -70,11 +96,13 @@ export default function DeleteClientPatientToolbarItem({
                     : "visually-hidden"
             }`}
             onClick={() => {
-                for (const row of table.getSelectedRowModel().rows)
-                    deleteUserMutate({
-                        userSubmissionId: row.original._id,
-                        formioToken: session.data?.user.formioToken!,
-                    });
+                deleteUsersMutate({
+                    users: table.getSelectedRowModel().rows.map((row) => ({
+                        submissionId: row.original._id,
+                        displayName: row.original.data.id,
+                    })),
+                    formioToken: session.data?.user.formioToken!,
+                });
                 table.toggleAllPageRowsSelected(false);
             }}
         >
