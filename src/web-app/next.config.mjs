@@ -5,7 +5,13 @@ import {
     PHASE_PRODUCTION_SERVER,
     PHASE_TEST,
 } from "next/constants.js";
+
+// As of 10.10.2023 there is no way to implement strict CSP as far as I know.
+// The NextJS team seems to be working hard to fix these issues.
+
+// Docs on security
 // https://nextjs.org/docs/advanced-features/security-headers
+// https://nextjs.org/docs/app/building-your-application/configuring/content-security-policy
 
 /* HACK: setting `worker-src blob:` is dangerous (formio should fix this,
    see issue https://github.com/formio/formio.js/issues/5146) */
