@@ -31,8 +31,7 @@ export function useURLLimit({
             : defaultLimit;
 
     if (isNaN(limit) || !validValues.includes(limit)) {
-        // HACK: Calling toString to avoid TS error (bug in nextjs).
-        const newSearchParams = new URLSearchParams(searchParams.toString());
+        const newSearchParams = new URLSearchParams(searchParams);
         newSearchParams.set(limitUrlParamName, String(defaultLimit));
         router.replace(pathname + "?" + newSearchParams.toString());
         limit = defaultLimit;
@@ -41,10 +40,7 @@ export function useURLLimit({
     return {
         limit,
         setLimit: (newValue: number | string) => {
-            // HACK: using toString to get around TS error
-            const newSearchParams = new URLSearchParams(
-                searchParams.toString()
-            );
+            const newSearchParams = new URLSearchParams(searchParams);
             newSearchParams.set(limitUrlParamName, String(newValue));
             newSearchParams.set(pageIndexUrlParamName, "0");
             router.replace(pathname + "?" + newSearchParams.toString());
