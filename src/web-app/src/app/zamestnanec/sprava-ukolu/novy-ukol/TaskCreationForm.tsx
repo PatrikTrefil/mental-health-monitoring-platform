@@ -896,9 +896,9 @@ function preprocessFormData(data: FormInput) {
         start.setHours(0, 0, 0, 0);
     }
 
-    if (data.repetition.frequency.unit === "")
+    if (data.repetition.count !== "" && data.repetition.frequency.unit === "")
         throw new Error(
-            "Unit is empty which should never happen because the field is required"
+            "Unit is empty which should never happen when data.repetition.count is not empty"
         );
 
     return {
