@@ -361,7 +361,13 @@ export default function FormDefinitionsTable() {
 
     return (
         <>
-            <FormTableToolbar table={table} filterColumnId={filterColumnId} />
+            <FormTableToolbar
+                table={table}
+                filterProps={{
+                    columnId: filterColumnId,
+                    placeholder: "Filtrovat dle názvu",
+                }}
+            />
             <div className="my-2">
                 {isLoading ? (
                     <PlaceholderAppTable table={table} rowCount={limit} />

@@ -9,19 +9,21 @@ import FrequencyVisualization from "./FrequencyVisualization";
  * @param root0.frequencyVisualizationProps - Props for the frequency visualization.
  * @param root0.table - Table for which to render the toolbar.
  * @param root0.filterProps - Props for the filter toolbar item.
- * @param root0.filterProps.filterColumnId - ID of the column to filter by.
  * @param root0.filterProps.pathLabelMap - Map of paths in the submission object to their labels (display names).
+ * @param root0.filterProps.placeholder - Placeholder for the filter input.
+ * @param root0.filterProps.columnId - ID of the column to filter by.
  */
 export default function ResultTableToolbar<TTable>({
     frequencyVisualizationProps,
     table,
-    filterProps: { filterColumnId, pathLabelMap },
+    filterProps: { columnId: filterColumnId, pathLabelMap, placeholder },
 }: {
     frequencyVisualizationProps: Parameters<typeof FrequencyVisualization>[0];
     table: Table<TTable>;
     filterProps: {
-        filterColumnId: string;
+        columnId: string;
         pathLabelMap: { [key: string]: string };
+        placeholder: string;
     };
 }) {
     return (
@@ -30,7 +32,7 @@ export default function ResultTableToolbar<TTable>({
                 <FilterToolbarItem
                     table={table}
                     filterColumnId={filterColumnId}
-                    placeholder="Filtrovat klienty/pacienty"
+                    placeholder={placeholder}
                     pathLabelMap={pathLabelMap}
                 />
             </div>

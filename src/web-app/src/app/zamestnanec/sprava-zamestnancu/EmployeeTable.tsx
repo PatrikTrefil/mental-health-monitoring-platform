@@ -341,7 +341,10 @@ export default function EmployeeTable() {
         <>
             <EmployeeTableToolbar
                 table={table}
-                filterColumnId={filterColumnId}
+                filterProps={{
+                    columnId: filterColumnId,
+                    placeholder: "Filtrovat dle ID",
+                }}
             />
             <div className="my-2">
                 {isLoading ? (
