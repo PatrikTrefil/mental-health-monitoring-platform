@@ -271,7 +271,7 @@ export default function EmployeeTable() {
                                     });
                                 }}
                             >
-                                Upravit {isOwnAccount && "vlastní účet"}
+                                Změnit heslo {isOwnAccount && "vlastního účtu"}
                             </Button>
                         );
                     }
@@ -341,7 +341,10 @@ export default function EmployeeTable() {
         <>
             <EmployeeTableToolbar
                 table={table}
-                filterColumnId={filterColumnId}
+                filterProps={{
+                    columnId: filterColumnId,
+                    placeholder: "Filtrovat dle ID",
+                }}
             />
             <div className="my-2">
                 {isLoading ? (

@@ -1,5 +1,7 @@
 "use client";
 
+import "./DynamicFormEdit.css";
+
 import { FormioComponentLoader } from "@/lib/formiojsWrapper";
 import { formEditCsTranslation as csTranslation } from "@/lib/formioTranslation";
 

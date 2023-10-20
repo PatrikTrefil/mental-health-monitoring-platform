@@ -12,24 +12,26 @@ import DeleteEmployeeToolbarItem from "./toolbar-items/DeleteEmployeeToolbarItem
  * Toolbar for the employee table.
  * @param root0 - Props for the component.
  * @param root0.table - Table for which the toolbar is rendered.
- * @param root0.filterColumnId - Id of the column by which the table is filtered.
+ * @param root0.filterProps.columnId - Id of the column by which the table is filtered.
+ * @param root0.filterProps.placeholder - Placeholder for the filter input.
+ * @param root0.filterProps - Props for the filter toolbar item.
  */
 export default function EmployeeTableToolbar({
     table,
-    filterColumnId,
+    filterProps: { columnId, placeholder },
 }: {
     table: Table<User & { mainUserRoleTitle: UserRoleTitle }>;
-    filterColumnId: string;
+    filterProps: { columnId: string; placeholder: string };
 }) {
     const session = useSession();
 
     return (
         <div className="d-flex gap-2">
-            <div style={{ maxWidth: "200px" }}>
+            <div style={{ maxWidth: "225px" }}>
                 <FilterToolbarItem
                     table={table}
-                    filterColumnId={filterColumnId}
-                    placeholder="Filtrovat zaměstnance"
+                    filterColumnId={columnId}
+                    placeholder={placeholder}
                 />
             </div>
             {session?.data?.user.roleTitles.includes(

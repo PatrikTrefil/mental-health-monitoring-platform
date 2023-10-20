@@ -391,7 +391,8 @@ export default function ResultTable({ formId }: { formId: string }) {
                 }}
                 table={table}
                 filterProps={{
-                    filterColumnId: filterColumnId,
+                    placeholder: "",
+                    columnId: filterColumnId,
                     pathLabelMap: filterPathLabelMap,
                 }}
             />
