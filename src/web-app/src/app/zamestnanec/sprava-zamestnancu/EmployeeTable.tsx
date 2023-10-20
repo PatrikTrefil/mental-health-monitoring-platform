@@ -271,7 +271,7 @@ export default function EmployeeTable() {
                                     });
                                 }}
                             >
-                                Upravit {isOwnAccount && "vlastní účet"}
+                                Změnit heslo {isOwnAccount && "vlastního účtu"}
                             </Button>
                         );
                     }

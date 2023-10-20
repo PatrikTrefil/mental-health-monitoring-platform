@@ -143,7 +143,7 @@ export default function ClientPatientTable() {
                                 })
                             }
                         >
-                            Upravit
+                            Změnit heslo
                         </Button>
                         <Button
                             variant="danger"
