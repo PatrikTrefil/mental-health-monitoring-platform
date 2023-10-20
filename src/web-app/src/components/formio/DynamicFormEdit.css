@@ -1,0 +1,4 @@
+/* Hide premium section */
+div[ref="sidebar-groups"] > div:last-child {
+    display: none;
+}
