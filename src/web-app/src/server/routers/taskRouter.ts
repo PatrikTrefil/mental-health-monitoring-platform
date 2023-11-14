@@ -7,7 +7,7 @@ import { z } from "zod";
 import { prisma } from "../db";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 
-type TaskWithDeadline = Task & { deadline: Deadline | null };
+export type TaskWithDeadline = Task & { deadline: Deadline | null };
 
 /**
  * Convert object values to zod enum.
