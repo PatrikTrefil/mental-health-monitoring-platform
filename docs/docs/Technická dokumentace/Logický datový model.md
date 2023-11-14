@@ -2,71 +2,57 @@
 slug: datovy-model
 ---
 
+Nyní popíšeme jak data budete ukládat na logické úrovni. Nebudeme se však
+zabývat detaily ukládání dat o uživatelích a formulářích, jelikož o to se stará
+software Form.io. Entity, jejich reprezentací se nechceme zabývat jsou označeny
+šedou barvou. Budeme se zabývat ukládáním úkolů a částečných vyplnění formulářů.
+Zvolme relační datový model pro modelování těchto dat. Třídy v UML diagramu
+budou reprezentovat tabulky v databázi.
+
 ```plantuml
 @startuml
-enum Role {
-    KLIENT_PACIENT,
-    ZAMESTNANEC
-}
-class Administrátor {
-    ID: String
-    email: String
-    heslo: String
-    vytvořenAdministrátorem: String
-    role: Role
-}
-class Uživatel {
-    ID: String
-    heslo: String
-    vytvořenoUživatelem: String
-    role: Role
-}
+skinparam dpi 300
 
-class Dotazník {
-    ID: String
+class User as "Uživatel" #grey {}
+class Employee as "Zaměstnanec" #grey {}
+class FormDefinition as "Definice formuláře" #grey {}
+class Submission as "Vyplnění formuláře" #grey {}
+
+class Task as "Úkol" {
+    id: String
     název: String
-    vytvořenoUživatelem: String
+    popis: String?
+    vytvořeno: DateTime
+    aktualizováno: DateTime
+    start DateTime?
+}
+
+Task "*" -- "1" User : "přiděleno"
+Task "*" -- "1" FormDefinition : "definice formuláře"
+Task "1" -- "0..1" Submission : "vyplnění formuláře"
+Task "*" -- "1" Employee : "autor"
+
+class Deadline {
+    datum: DateTime
+    můžeBýtDokončenoPoDeadline: Boolean
+}
+
+Deadline "0..1" --* "1" Task : "deadline"
+
+enum TaskState as "Stav úkolu" {
+    NEDOKONČENO
+    ČÁSTEČNĚ_DOKONČENO
+    DOKONČENO
+}
+
+TaskState "1" --* "*" Task : "stav"
+
+class Draft as "Nedokončené vyplnění formuláře" {
     data
 }
 
-class VypracováníDotazníků {
-    ID: String
-    vypracovánoUživatelem: String
-    dotazník: String
-    data
-}
-
-class ZadáníDotazníku {
-    String: ID
-    splnitDo: Date
-    zadáno: Date
-    opakování: TimeSpan
-    vytořenoUživatelem: String
-    zadánoProUživatele: String
-    dotazník: String
-}
-
-Administrátor::vytvořenAdministrátorem "0..n" --> "1" Administrátor::ID : vytvořil
-
-ZadáníDotazníku::zadánoProUživatele "0..n" --> "1" Uživatel::ID : zadáno pro
-ZadáníDotazníku::dotazník "0..n" --> "1" Dotazník::ID : zádání
-ZadáníDotazníku "1" --> "0..1" VypracováníDotazníků : vypracování
-ZadáníDotazníku::vytvořenoUživatelem --> Uživatel::ID : vytvořil
-
-VypracováníDotazníků::dotazník "0..n" --> "1" Dotazník::ID : vyplňuje dotazník
-VypracováníDotazníků::vypracovánoUživatelem "0..n" --> "1" Uživatel::ID : vypracoval
-
-Administrátor::ID "0..1" --> "0..n" Uživatel::vytvořenoUživatelem : vytvořil uživatele
-Uživatel::vytvořenoUživatelem "0..1" --> "0..n" Uživatel::ID : vytvořil uživatele
-
-Uživatel::ID "1" --> "0..n" Dotazník::vytvořenoUživatelem : vytvořil dotazník
-
-Uživatel::role "1" --> "0..n" Role : má roli
-Administrátor::role "1" --> "0..n" Role : má roli
+Draft "0..1" --* "1" Task : "koncept"
+Draft "*" -- "1" User : "autor"
 
 @enduml
 ```
-
-Entita _ZadáníDotazníků_ používá relační datový model. Ostatní entity používají
-hierarchický datový model. Navzdory rozdílu v datových modelech, jsou všechny
-entity v jednom diagramu pro přehlednost.
