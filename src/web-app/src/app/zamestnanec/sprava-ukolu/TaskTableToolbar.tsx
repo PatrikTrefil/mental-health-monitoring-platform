@@ -2,8 +2,8 @@ import FilterToolbarItem from "@/components/FilterToolbarItem";
 import { AppRouter } from "@/server/routers/root";
 import { Table } from "@tanstack/react-table";
 import type { inferProcedureOutput } from "@trpc/server";
+import TableViewOptions from "../../../components/TableViewOptionsToolbarItem";
 import DeleteTodoToolbarItem from "./toolbar-items/DeleteTodoToolbarItem";
-import TableViewOptions from "./toolbar-items/TableViewOptionsToolbarItem";
 import TaskCreationToolbarItem from "./toolbar-items/TaskCreationToolbarItem";
 
 /**
@@ -35,7 +35,11 @@ export default function TaskTableToolbar({
             </div>
             <TaskCreationToolbarItem />
             <DeleteTodoToolbarItem table={table} />
-            <TableViewOptions style={{ marginLeft: "auto" }} table={table} />
+            <TableViewOptions
+                style={{ marginLeft: "auto" }}
+                table={table}
+                localStorageKey="employeeTaskTableViewOptions"
+            />
         </div>
     );
 }

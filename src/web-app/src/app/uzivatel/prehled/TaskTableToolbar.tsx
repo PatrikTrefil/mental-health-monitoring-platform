@@ -1,5 +1,5 @@
-import TableViewOptions from "@/app/zamestnanec/sprava-ukolu/toolbar-items/TableViewOptionsToolbarItem";
 import FilterToolbarItem from "@/components/FilterToolbarItem";
+import TableViewOptions from "@/components/TableViewOptionsToolbarItem";
 import { Table } from "@tanstack/react-table";
 
 /**
@@ -29,7 +29,11 @@ export default function TaskTableToolbar<TTable>({
                     placeholder={filterPlaceholder}
                 />
             </div>
-            <TableViewOptions style={{ marginLeft: "auto" }} table={table} />
+            <TableViewOptions
+                style={{ marginLeft: "auto" }}
+                table={table}
+                localStorageKey="userTaskTableViewOptions"
+            />
         </div>
     );
 }
