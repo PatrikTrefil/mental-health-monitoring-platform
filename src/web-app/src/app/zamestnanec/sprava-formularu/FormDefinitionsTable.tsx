@@ -48,7 +48,7 @@ export default function FormDefinitionsTable() {
             formId: string;
             formioToken: string;
         }) => {
-            await deleteFormById(formioToken, formId);
+            await deleteFormById(formId, formioToken);
         },
         onMutate: ({ formId }) => {
             console.debug("Deleting form...", { formPath: formId });

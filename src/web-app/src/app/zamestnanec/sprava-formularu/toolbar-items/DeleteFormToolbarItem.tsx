@@ -30,7 +30,7 @@ export default function DeleteFormToolbarItem({
             form: { id: string; name: string };
             formioToken: string;
         }) => {
-            await deleteFormById(formioToken, id);
+            await deleteFormById(id, formioToken);
         },
         onMutate: ({ form }) => {
             console.debug("Deleting form...", { form });

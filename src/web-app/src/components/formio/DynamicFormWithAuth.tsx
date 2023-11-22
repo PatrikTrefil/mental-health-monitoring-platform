@@ -108,7 +108,7 @@ export default function DynamicFormWithAuth(
             toast.error("Odeslání formuláře selhalo, zkuste to znovu");
         else {
             try {
-                await submitForm(data.user.formioToken, form.path, submission);
+                await submitForm(form.path, submission, data.user.formioToken);
             } catch (e) {
                 console.error(e);
                 toast.error("Odeslání formuláře selhalo, zkuste to znovu");

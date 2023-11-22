@@ -76,15 +76,15 @@ export async function loadFormById(
 
 /**
  * Submit form to formio.
- * @param token - JWT token for formio.
  * @param formSchema - Schema of the form to submit.
+ * @param token - JWT token for formio.
  * @returns Created form.
  * @throws {RequestError} If the http request fails.
  * @throws {TypeError} If the response is not valid json or when a network error is encountered or CORS is misconfigured on the server-side.
  */
 export async function createForm(
-    token: string,
-    formSchema: FormSchema
+    formSchema: FormSchema,
+    token: string
 ): Promise<Form> {
     const response = await safeFetch(`${getFormioUrl()}/form`, {
         headers: {
@@ -101,17 +101,17 @@ export async function createForm(
 
 /**
  * Make a submission to a formio form.
- * @param token - JWT token for formio.
  * @param formPath - Path of the form to submit to (including leading slash).
  * @param submissionData - Form data to submit.
+ * @param token - JWT token for formio.
  * @returns Created submission.
  * @throws {RequestError} If the http request fails.
  * @throws {TypeError} If the response is not valid json or when a network error is encountered or CORS is misconfigured on the server-side.
  */
 export async function submitForm(
-    token: string,
     formPath: string,
-    submissionData: unknown
+    submissionData: unknown,
+    token: string
 ): Promise<Submission> {
     const response = await safeFetch(`${getFormioUrl()}${formPath}`, {
         headers: {
@@ -130,8 +130,9 @@ export async function submitForm(
  * Export form submissions from formio.
  * @param token - JWT token for formio.
  * @param formId - Id of the form to export.
- * @param format - Format of the exported data.
- * @param filters - List of filters to apply.
+ * @param root0 - Options for exporting form submissions.
+ * @param root0.format - Format to export the submissions in.
+ * @param root0.filters - List of filters to apply.
  * @returns Blob with exported data in given format.
  * @throws {RequestError} If the http request fails.
  * @throws {TypeError} When a network error is encountered or CORS is misconfigured on the server-side.
@@ -139,12 +140,17 @@ export async function submitForm(
 export async function exportFormSubmissions(
     token: string,
     formId: string,
-    format: "csv" | "json",
-    filters?: {
-        fieldPath: string;
-        operation: "contains";
-        comparedValue: string;
-    }[]
+    {
+        format,
+        filters,
+    }: {
+        format: "csv" | "json";
+        filters?: {
+            fieldPath: string;
+            operation: "contains";
+            comparedValue: string;
+        }[];
+    }
 ): Promise<Blob> {
     const url = new URL(`${getFormioUrl()}/form/${formId}/export`);
 
@@ -168,14 +174,14 @@ export async function exportFormSubmissions(
 
 /**
  * Delete form from the form management system.
- * @param token - JWT token for formio.
  * @param formPath - Path of the form to delete.
+ * @param token - JWT token for formio.
  * @throws {RequestError} If the http request fails.
  * @throws {TypeError} When a network error is encountered or CORS is misconfigured on the server-side.
  */
 export async function deleteForm(
-    token: string,
-    formPath: string
+    formPath: string,
+    token: string
 ): Promise<void> {
     await safeFetch(`${getFormioUrl()}${formPath}`, {
         headers: {
@@ -187,14 +193,14 @@ export async function deleteForm(
 
 /**
  * Delete form from the form management system.
- * @param token - JWT token for formio.
  * @param formId - Id of the form to delete.
+ * @param token - JWT token for formio.
  * @throws {RequestError} If the http request fails.
  * @throws {TypeError} When a network error is encountered or CORS is misconfigured on the server-side.
  */
 export async function deleteFormById(
-    token: string,
-    formId: string
+    formId: string,
+    token: string
 ): Promise<void> {
     await safeFetch(`${getFormioUrl()}/form/${formId}`, {
         headers: {

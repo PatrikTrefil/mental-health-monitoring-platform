@@ -46,20 +46,24 @@ export default function ExportButton<TTable>({
                                 blob = await exportFormSubmissions(
                                     token!,
                                     formId,
-                                    data.format,
-                                    data.useCurrentFilters &&
-                                        columnFilters[0] !== undefined
-                                        ? [
-                                              {
-                                                  fieldPath:
-                                                      columnFilters[0].id,
-                                                  operation: "contains",
-                                                  comparedValue:
-                                                      columnFilters[0]
-                                                          .value as string,
-                                              },
-                                          ]
-                                        : undefined
+                                    {
+                                        format: data.format,
+                                        filters:
+                                            data.useCurrentFilters &&
+                                            columnFilters[0] !== undefined
+                                                ? [
+                                                      {
+                                                          fieldPath:
+                                                              columnFilters[0]
+                                                                  .id,
+                                                          operation: "contains",
+                                                          comparedValue:
+                                                              columnFilters[0]
+                                                                  .value as string,
+                                                      },
+                                                  ]
+                                                : undefined,
+                                    }
                                 );
                             } catch (e) {
                                 console.error(e);
