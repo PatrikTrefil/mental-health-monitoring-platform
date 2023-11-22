@@ -385,6 +385,7 @@ export default function ResultTable({ formId }: { formId: string }) {
         <>
             <h1>Výsledky formuláře - {form?.title ?? "Načítání..."}</h1>
             <ResultTableToolbar
+                formId={formId}
                 frequencyVisualizationProps={{
                     data: labeledSubmissions.map((s) => s.data),
                     keyLabelMap: dataVisualizationKeyLabelMap,
