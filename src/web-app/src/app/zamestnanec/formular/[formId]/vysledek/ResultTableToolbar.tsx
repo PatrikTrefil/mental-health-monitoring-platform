@@ -49,7 +49,7 @@ export default function ResultTableToolbar<TTable>({
             <TableViewOptions
                 style={{ marginLeft: "auto" }}
                 table={table}
-                localStorageKey="resultTableViewOptions"
+                localStorageKey={`resultTableViewOptions-${formId}`}
             />
         </div>
     );
