@@ -1,7 +1,8 @@
-import TableViewOptions from "@/app/zamestnanec/sprava-ukolu/toolbar-items/TableViewOptionsToolbarItem";
 import FilterToolbarItem from "@/components/FilterToolbarItem";
+import TableViewOptions from "@/components/TableViewOptionsToolbarItem";
 import { Table } from "@tanstack/react-table";
-import FrequencyVisualization from "./FrequencyVisualization";
+import ExportButtonToolbarItem from "./toolbar-items/ExportButtonToolbarItem";
+import FrequencyVisualizationToolbarItem from "./toolbar-items/FrequencyVisualizationToolbarItem";
 
 /**
  * Tollbar for the result table.
@@ -9,19 +10,26 @@ import FrequencyVisualization from "./FrequencyVisualization";
  * @param root0.frequencyVisualizationProps - Props for the frequency visualization.
  * @param root0.table - Table for which to render the toolbar.
  * @param root0.filterProps - Props for the filter toolbar item.
- * @param root0.filterProps.filterColumnId - ID of the column to filter by.
  * @param root0.filterProps.pathLabelMap - Map of paths in the submission object to their labels (display names).
+ * @param root0.filterProps.placeholder - Placeholder for the filter input.
+ * @param root0.filterProps.columnId - ID of the column to filter by.
+ * @param root0.formId - ID of the form for which the results are being displayed.
  */
 export default function ResultTableToolbar<TTable>({
+    formId,
     frequencyVisualizationProps,
     table,
-    filterProps: { filterColumnId, pathLabelMap },
+    filterProps: { columnId: filterColumnId, pathLabelMap, placeholder },
 }: {
-    frequencyVisualizationProps: Parameters<typeof FrequencyVisualization>[0];
+    formId: string;
+    frequencyVisualizationProps: Parameters<
+        typeof FrequencyVisualizationToolbarItem
+    >[0];
     table: Table<TTable>;
     filterProps: {
-        filterColumnId: string;
+        columnId: string;
         pathLabelMap: { [key: string]: string };
+        placeholder: string;
     };
 }) {
     return (
@@ -30,12 +38,19 @@ export default function ResultTableToolbar<TTable>({
                 <FilterToolbarItem
                     table={table}
                     filterColumnId={filterColumnId}
-                    placeholder="Filtrovat klienty/pacienty"
+                    placeholder={placeholder}
                     pathLabelMap={pathLabelMap}
                 />
             </div>
-            <FrequencyVisualization {...frequencyVisualizationProps} />
-            <TableViewOptions style={{ marginLeft: "auto" }} table={table} />
+            <FrequencyVisualizationToolbarItem
+                {...frequencyVisualizationProps}
+            />
+            <ExportButtonToolbarItem formId={formId} table={table} />
+            <TableViewOptions
+                style={{ marginLeft: "auto" }}
+                table={table}
+                localStorageKey={`resultTableViewOptions-${formId}`}
+            />
         </div>
     );
 }

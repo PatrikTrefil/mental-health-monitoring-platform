@@ -29,7 +29,7 @@ export default function DeleteClientPatientToolbarItem({
         }: {
             formioToken: string;
             user: { submissionId: string; displayName: string };
-        }) => deleteClientPacient(formioToken, submissionId),
+        }) => deleteClientPacient(submissionId, formioToken),
         onMutate: ({ user }) => {
             console.debug("Deleting client/patient ...", { user });
         },

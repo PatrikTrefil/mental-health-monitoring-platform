@@ -8,22 +8,27 @@ import DeleteClientPatientToolbarItem from "./toolbar-items/DeleteClientPatientT
  * Toolbar for the table of clients and patients.
  * @param root0 - Props for the component.
  * @param root0.table - Table for which to render the toolbar.
- * @param root0.filterColumnId - ID of the column to filter by (passed down to a filter toolbar item).
+ * @param root0.filterProps - Props for the filter toolbar item.
+ * @param root0.filterProps.placeholder - Placeholder for the filter input (passed down to a filter toolbar item).
+ * @param root0.filterProps.columnId - ID of the column to filter by (passed down to a filter toolbar item).
  */
 export default function ClientPatientTableToolbar({
     table,
-    filterColumnId,
+    filterProps: { columnId, placeholder },
 }: {
     table: Table<User>;
-    filterColumnId: string;
+    filterProps: {
+        columnId: string;
+        placeholder: string;
+    };
 }) {
     return (
         <div className="d-flex gap-2 flex-wrap">
-            <div style={{ maxWidth: "300px" }}>
+            <div style={{ maxWidth: "225px" }}>
                 <FilterToolbarItem
                     table={table}
-                    filterColumnId={filterColumnId}
-                    placeholder="Filtrovat klienty/pacienty"
+                    filterColumnId={columnId}
+                    placeholder={placeholder}
                 />
             </div>
             <CreateClientPatientToolbarItem />

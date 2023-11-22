@@ -7,7 +7,7 @@ import { z } from "zod";
 import { prisma } from "../db";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 
-type TaskWithDeadline = Task & { deadline: Deadline | null };
+export type TaskWithDeadline = Task & { deadline: Deadline | null };
 
 /**
  * Convert object values to zod enum.
@@ -280,7 +280,7 @@ const taskRouter = createTRPCRouter({
                 });
 
             const user = await loadClientsAndPatients({
-                formioToken: opts.ctx.session.user.formioToken,
+                token: opts.ctx.session.user.formioToken,
                 pagination: {
                     limit: 1,
                     offset: 0,

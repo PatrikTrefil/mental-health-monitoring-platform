@@ -1,4 +1,4 @@
-import { LabeledDataValue } from "./ResultTable";
+import { LabeledDataValue } from "../ResultTable";
 
 /**
  * Converts value to human readable string.

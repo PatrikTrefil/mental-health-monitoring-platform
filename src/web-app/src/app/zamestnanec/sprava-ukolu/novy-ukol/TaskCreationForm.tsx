@@ -888,6 +888,7 @@ function DeadlineText({
 /**
  * Preprocess form data to make the object more idiomatic. Replace empty strings with undefined etc.
  * @param data - Form data to preprocess.
+ * @throws {Error} - If data.repetition.count is not empty and data.repetition.frequency.unit is empty.
  */
 function preprocessFormData(data: FormInput) {
     let start: Date | undefined = undefined;

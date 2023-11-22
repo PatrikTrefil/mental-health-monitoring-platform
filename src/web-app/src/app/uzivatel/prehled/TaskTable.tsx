@@ -342,7 +342,13 @@ export default function TaskTable() {
 
     return (
         <>
-            <TaskTableToolbar table={table} filterColumnId={filterColumnId} />
+            <TaskTableToolbar
+                table={table}
+                filterProps={{
+                    columnId: filterColumnId,
+                    placeholder: "Filtrovat dle názvu",
+                }}
+            />
             <div className="my-2">
                 {isLoading ? (
                     <PlaceholderAppTable table={table} rowCount={limit} />

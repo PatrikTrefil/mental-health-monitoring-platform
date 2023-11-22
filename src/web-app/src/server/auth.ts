@@ -67,7 +67,7 @@ export const authOptions: AuthOptions = {
                 if (!credentials) return null; // invalid credentials because they were not provided
 
                 try {
-                    const { user, formioToken } = await loginUser(
+                    const { user, token: formioToken } = await loginUser(
                         credentials.ID,
                         credentials.password
                     );

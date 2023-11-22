@@ -34,7 +34,7 @@ export default function DeleteEmployeeToolbarItem({
                 displayName: string;
             };
             formioToken: string;
-        }) => deleteUser(formioToken, submissionId, roleTitle),
+        }) => deleteUser(submissionId, roleTitle, formioToken),
         onMutate: ({ employee }) => {
             console.debug("Deleting employee ...", {
                 employee,

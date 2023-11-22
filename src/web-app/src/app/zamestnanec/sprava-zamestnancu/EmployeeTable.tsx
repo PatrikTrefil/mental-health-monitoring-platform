@@ -34,7 +34,7 @@ import {
 import { signOut, useSession } from "next-auth/react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useMemo, useState } from "react";
-import { Alert, Button, Form, Modal } from "react-bootstrap";
+import { Alert, Button, Modal } from "react-bootstrap";
 import { toast } from "react-toastify";
 import EmployeeTableToolbar from "./EmployeeTableToolbar";
 
@@ -64,7 +64,7 @@ export default function EmployeeTable() {
             formioToken: string;
             userRoleTitle: UserRoleTitle;
         }) => {
-            deleteUser(formioToken, userSubmissionId, userRoleTitle);
+            deleteUser(userSubmissionId, userRoleTitle, formioToken);
         },
         onMutate: ({ userSubmissionId }) => {
             console.debug("Deleting employee ...", {
@@ -167,30 +167,6 @@ export default function EmployeeTable() {
     const columnHelper = createColumnHelper<(typeof tableData)[number]>();
     const columns = useMemo(
         () => [
-            columnHelper.display({
-                id: "select",
-                header: ({ table }) => (
-                    <Form.Check
-                        checked={table.getIsAllPageRowsSelected()}
-                        onChange={(e) =>
-                            table.toggleAllPageRowsSelected(!!e.target.checked)
-                        }
-                        aria-label="Select all"
-                    />
-                ),
-                cell: ({ row }) => (
-                    <Form.Check
-                        checked={row.getIsSelected()}
-                        onChange={(e) => row.toggleSelected(!!e.target.checked)}
-                        aria-label="Select row"
-                    />
-                ),
-                enableSorting: false,
-                enableHiding: false,
-                meta: {
-                    isNarrow: true,
-                },
-            }),
             columnHelper.accessor("data.id", {
                 id: "data.id",
                 header: ({ column }) => (
@@ -271,7 +247,7 @@ export default function EmployeeTable() {
                                     });
                                 }}
                             >
-                                Upravit {isOwnAccount && "vlastní účet"}
+                                Změnit heslo {isOwnAccount && "vlastního účtu"}
                             </Button>
                         );
                     }
@@ -341,7 +317,10 @@ export default function EmployeeTable() {
         <>
             <EmployeeTableToolbar
                 table={table}
-                filterColumnId={filterColumnId}
+                filterProps={{
+                    columnId: filterColumnId,
+                    placeholder: "Filtrovat dle ID",
+                }}
             />
             <div className="my-2">
                 {isLoading ? (

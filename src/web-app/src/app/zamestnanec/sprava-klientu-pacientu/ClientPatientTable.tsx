@@ -55,7 +55,7 @@ export default function ClientPatientTable() {
             formioToken: string;
             userSubmissionId: string;
         }) => {
-            await deleteClientPacient(formioToken, userSubmissionId);
+            await deleteClientPacient(userSubmissionId, formioToken);
         },
         onError: (e: unknown, { userSubmissionId }) => {
             console.error("Failed to delete user.", {
@@ -143,7 +143,7 @@ export default function ClientPatientTable() {
                                 })
                             }
                         >
-                            Upravit
+                            Změnit heslo
                         </Button>
                         <Button
                             variant="danger"
@@ -359,7 +359,10 @@ export default function ClientPatientTable() {
         <>
             <ClientPatientTableToolbar
                 table={table}
-                filterColumnId={filterColumnId}
+                filterProps={{
+                    columnId: filterColumnId,
+                    placeholder: "Filtrovat dle ID",
+                }}
             />
             <div className="my-2">
                 {isLoading ? (
