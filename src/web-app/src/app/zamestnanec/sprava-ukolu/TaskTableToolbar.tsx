@@ -26,11 +26,16 @@ export default function TaskTableToolbar({
 }) {
     return (
         <div className="d-flex gap-2">
-            <div style={{ maxWidth: "225px" }}>
+            <div style={{ maxWidth: "500px" }}>
                 <FilterToolbarItem
                     table={table}
                     filterColumnId={columnId}
                     placeholder={placeholder}
+                    pathLabelMap={{
+                        name: "Název úkolu",
+                        description: "Popis úkolu",
+                        forUserId: "Pro uživatele",
+                    }}
                 />
             </div>
             <TaskCreationToolbarItem />

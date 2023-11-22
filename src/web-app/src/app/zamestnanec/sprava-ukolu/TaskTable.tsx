@@ -7,6 +7,7 @@ import SimplePagination from "@/components/SimplePagination";
 import TableHeader from "@/components/TableHeader";
 import TaskStateBadge from "@/components/TaskStateBadge";
 import {
+    filterColumnIdUrlParamName,
     filterUrlParamName,
     orderUrlParamAscValue,
     orderUrlParamDescValue,
@@ -30,8 +31,6 @@ import { useEffect, useMemo } from "react";
 import { Alert, Button, Form, OverlayTrigger, Tooltip } from "react-bootstrap";
 import { toast } from "react-toastify";
 import TaskTableToolbar from "./TaskTableToolbar";
-
-const filterColumnId = "name";
 
 /**
  * Table of tasks for employees (includes tasks of all users).
@@ -235,12 +234,14 @@ export default function TaskTable() {
     const pathname = usePathname();
     const searchParams = useSearchParams()!;
 
+    const filterColumnId = searchParams.get(filterColumnIdUrlParamName) ?? "";
+
     const columnFilters = useMemo(() => {
         const filterParam = searchParams.get(filterUrlParamName);
         return filterParam !== null
             ? [{ id: filterColumnId, value: filterParam }]
             : [];
-    }, [searchParams]);
+    }, [searchParams, filterColumnId]);
 
     const sorting: SortingState = useMemo(() => {
         const sortParam = searchParams.get(sortUrlParamName);
