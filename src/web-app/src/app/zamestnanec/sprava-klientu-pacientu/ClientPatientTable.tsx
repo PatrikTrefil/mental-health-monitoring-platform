@@ -55,7 +55,7 @@ export default function ClientPatientTable() {
             formioToken: string;
             userSubmissionId: string;
         }) => {
-            await deleteClientPacient(formioToken, userSubmissionId);
+            await deleteClientPacient(userSubmissionId, formioToken);
         },
         onError: (e: unknown, { userSubmissionId }) => {
             console.error("Failed to delete user.", {

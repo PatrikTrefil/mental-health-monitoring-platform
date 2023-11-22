@@ -64,7 +64,7 @@ export default function EmployeeTable() {
             formioToken: string;
             userRoleTitle: UserRoleTitle;
         }) => {
-            deleteUser(formioToken, userSubmissionId, userRoleTitle);
+            deleteUser(userSubmissionId, userRoleTitle, formioToken);
         },
         onMutate: ({ userSubmissionId }) => {
             console.debug("Deleting employee ...", {

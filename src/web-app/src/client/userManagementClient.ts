@@ -83,8 +83,8 @@ export async function loadClientsAndPatients({
 
 /**
  * Load user based on user ID.
- * @param token - JWT token for formio.
  * @param userSubmissionId - Id of the submission that represents the user.
+ * @param token - JWT token for formio.
  * @returns User or null if the user does not exist.
  * @throws {RequestError}
  * If the returned http status is not OK (and not 404).
@@ -92,8 +92,8 @@ export async function loadClientsAndPatients({
  * If the response is not valid json or when a network error is encountered or CORS is misconfigured on the server-side.
  */
 export async function loadClientPatient(
-    token: string,
-    userSubmissionId: string
+    userSubmissionId: string,
+    token: string
 ): Promise<User | null> {
     let response: Response;
     try {
@@ -116,16 +116,16 @@ export async function loadClientPatient(
 
 /**
  * Delete user from the user management system.
- * @param token - JWT token for formio.
  * @param userSubmissionId - Id of the user submission to delete.
+ * @param token - JWT token for formio.
  * @throws {RequestError}
  * If the returned http status is not OK.
  * @throws {TypeError}
  * When a network error is encountered or CORS is misconfigured on the server-side.
  */
 export async function deleteClientPacient(
-    token: string,
-    userSubmissionId: string
+    userSubmissionId: string,
+    token: string
 ): Promise<void> {
     await safeFetch(
         `${getFormioUrl()}/klientpacient/submission/${userSubmissionId}`,
@@ -314,16 +314,16 @@ export async function loadZadavatelDotazniku({
 /**
  * Delete an employee that is from the spravce dotazniku resource from
  * the user management system.
- * @param token - JWT token for formio.
  * @param userSubmissionId - Id of the user submission to delete.
+ * @param token - JWT token for formio.
  * @throws {RequestError}
  * If the returned http status is not OK.
  * @throws {TypeError}
  * When a network error is encountered or CORS is misconfigured on the server-side.
  */
 async function deleteSpravceDotazniku(
-    token: string,
-    userSubmissionId: string
+    userSubmissionId: string,
+    token: string
 ): Promise<void> {
     await safeFetch(
         `${getFormioUrl()}/zamestnanec/spravce-dotazniku/submission/${userSubmissionId}`,
@@ -338,24 +338,24 @@ async function deleteSpravceDotazniku(
 
 /**
  * Delete any user.
- * @param token - JWT token for formio.
  * @param userSubmissionId - Id of the user submission to delete.
  * @param userRoleTitle - Role of the user to delete.
+ * @param token - JWT token for formio.
  */
 export async function deleteUser(
-    token: string,
     userSubmissionId: string,
-    userRoleTitle: UserRoleTitle
+    userRoleTitle: UserRoleTitle,
+    token: string
 ): Promise<void> {
     switch (userRoleTitle) {
         case UserRoleTitles.SPRAVCE_DOTAZNIKU:
-            await deleteSpravceDotazniku(token, userSubmissionId);
+            await deleteSpravceDotazniku(userSubmissionId, token);
             break;
         case UserRoleTitles.ZADAVATEL_DOTAZNIKU:
-            await deleteZadavatelDotazniku(token, userSubmissionId);
+            await deleteZadavatelDotazniku(userSubmissionId, token);
             break;
         case UserRoleTitles.KLIENT_PACIENT:
-            await deleteClientPacient(token, userSubmissionId);
+            await deleteClientPacient(userSubmissionId, token);
             break;
         default:
             throw new Error(`Unknown user role title: ${userRoleTitle}`);
@@ -364,16 +364,16 @@ export async function deleteUser(
 
 /**
  * Delete employee that is from the zadavatel dotazniku resource from formio.
- * @param token - JWT token for formio.
  * @param userSubmissionId - Id of the user submission to delete.
+ * @param token - JWT token for formio.
  * @throws {RequestError}
  * If the returned http status is not OK.
  * @throws {TypeError}
  * When a network error is encountered or CORS is misconfigured on the server-side.
  */
 async function deleteZadavatelDotazniku(
-    token: string,
-    userSubmissionId: string
+    userSubmissionId: string,
+    token: string
 ): Promise<void> {
     await safeFetch(
         `${getFormioUrl()}/zamestnanec/zadavatel-dotazniku/submission/${userSubmissionId}`,
