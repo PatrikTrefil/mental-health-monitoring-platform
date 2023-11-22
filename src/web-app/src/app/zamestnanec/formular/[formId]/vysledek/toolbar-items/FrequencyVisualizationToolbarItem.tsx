@@ -2,8 +2,8 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { Button, Col, Form, Modal, Row } from "react-bootstrap";
+import { LabeledDataValue } from "../ResultTable";
 import DataVisualization, { ChartType, ChartTypes } from "./DataVisualization";
-import { LabeledDataValue } from "./ResultTable";
 import stringifyResult from "./stringifyResult";
 
 /**
@@ -14,7 +14,7 @@ import stringifyResult from "./stringifyResult";
  * @param root0.data - Data to visualize. May be empty while the data is loading.
  * @param root0.keyLabelMap - Map of keys in data property of the submission to labels.
  */
-export default function FrequencyVisualization({
+export default function FrequencyVisualizationToolbarItem({
     data,
     keyLabelMap: labelKeyMap,
 }: {

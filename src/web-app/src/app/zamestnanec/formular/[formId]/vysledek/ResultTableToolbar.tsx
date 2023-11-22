@@ -1,7 +1,7 @@
 import FilterToolbarItem from "@/components/FilterToolbarItem";
 import TableViewOptions from "@/components/TableViewOptionsToolbarItem";
 import { Table } from "@tanstack/react-table";
-import FrequencyVisualization from "./FrequencyVisualization";
+import FrequencyVisualizationToolbarItem from "./toolbar-items/FrequencyVisualizationToolbarItem";
 
 /**
  * Tollbar for the result table.
@@ -18,7 +18,9 @@ export default function ResultTableToolbar<TTable>({
     table,
     filterProps: { columnId: filterColumnId, pathLabelMap, placeholder },
 }: {
-    frequencyVisualizationProps: Parameters<typeof FrequencyVisualization>[0];
+    frequencyVisualizationProps: Parameters<
+        typeof FrequencyVisualizationToolbarItem
+    >[0];
     table: Table<TTable>;
     filterProps: {
         columnId: string;
@@ -36,7 +38,9 @@ export default function ResultTableToolbar<TTable>({
                     pathLabelMap={pathLabelMap}
                 />
             </div>
-            <FrequencyVisualization {...frequencyVisualizationProps} />
+            <FrequencyVisualizationToolbarItem
+                {...frequencyVisualizationProps}
+            />
             <TableViewOptions
                 style={{ marginLeft: "auto" }}
                 table={table}

@@ -35,7 +35,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo } from "react";
 import { Alert, Form } from "react-bootstrap";
 import ResultTableToolbar from "./ResultTableToolbar";
-import stringifyResult from "./stringifyResult";
+import stringifyResult from "./toolbar-items/stringifyResult";
 
 /**
  * Display table with results from form with given formId.
