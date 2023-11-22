@@ -45,7 +45,7 @@ export default function ResultTableToolbar<TTable>({
             <FrequencyVisualizationToolbarItem
                 {...frequencyVisualizationProps}
             />
-            <ExportButtonToolbarItem formId={formId} />
+            <ExportButtonToolbarItem formId={formId} table={table} />
             <TableViewOptions
                 style={{ marginLeft: "auto" }}
                 table={table}

@@ -131,6 +131,7 @@ export async function submitForm(
  * @param formioToken - JWT token for formio.
  * @param formId - Id of the form to export.
  * @param format - Format of the exported data.
+ * @param filters - List of filters to apply.
  * @returns Blob with exported data in given format.
  * @throws {RequestError} If the http request fails.
  * @throws {TypeError} When a network error is encountered or CORS is misconfigured on the server-side.
@@ -138,16 +139,30 @@ export async function submitForm(
 export async function exportFormSubmissions(
     formioToken: string,
     formId: string,
-    format: "csv" | "json"
+    format: "csv" | "json",
+    filters?: {
+        fieldPath: string;
+        operation: "contains";
+        comparedValue: string;
+    }[]
 ): Promise<Blob> {
-    const response = await safeFetch(
-        `${getFormioUrl()}/form/${formId}/export?format=${format}`,
-        {
-            headers: {
-                "x-jwt-token": formioToken,
-            },
+    const url = new URL(`${getFormioUrl()}/form/${formId}/export`);
+
+    url.searchParams.set("format", format);
+
+    if (filters !== undefined) {
+        for (const filter of filters) {
+            url.searchParams.set(
+                `${filter.fieldPath}__regex`,
+                `/${filter.comparedValue}/i`
+            );
         }
-    );
+    }
+    const response = await safeFetch(url, {
+        headers: {
+            "x-jwt-token": formioToken,
+        },
+    });
     return response.blob();
 }
 
