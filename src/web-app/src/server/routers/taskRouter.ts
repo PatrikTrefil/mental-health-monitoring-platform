@@ -280,7 +280,7 @@ const taskRouter = createTRPCRouter({
                 });
 
             const user = await loadClientsAndPatients({
-                formioToken: opts.ctx.session.user.formioToken,
+                token: opts.ctx.session.user.formioToken,
                 pagination: {
                     limit: 1,
                     offset: 0,

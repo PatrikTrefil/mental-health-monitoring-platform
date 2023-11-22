@@ -43,28 +43,24 @@ export default function ExportButton<TTable>({
                             const { columnFilters } = table.getState();
                             let blob;
                             try {
-                                blob = await exportFormSubmissions(
-                                    token!,
-                                    formId,
-                                    {
-                                        format: data.format,
-                                        filters:
-                                            data.useCurrentFilters &&
-                                            columnFilters[0] !== undefined
-                                                ? [
-                                                      {
-                                                          fieldPath:
-                                                              columnFilters[0]
-                                                                  .id,
-                                                          operation: "contains",
-                                                          comparedValue:
-                                                              columnFilters[0]
-                                                                  .value as string,
-                                                      },
-                                                  ]
-                                                : undefined,
-                                    }
-                                );
+                                blob = await exportFormSubmissions(formId, {
+                                    token: token!,
+                                    format: data.format,
+                                    filters:
+                                        data.useCurrentFilters &&
+                                        columnFilters[0] !== undefined
+                                            ? [
+                                                  {
+                                                      fieldPath:
+                                                          columnFilters[0].id,
+                                                      operation: "contains",
+                                                      comparedValue:
+                                                          columnFilters[0]
+                                                              .value as string,
+                                                  },
+                                              ]
+                                            : undefined,
+                                });
                             } catch (e) {
                                 console.error(e);
                                 toast.error("Export dat selhal");

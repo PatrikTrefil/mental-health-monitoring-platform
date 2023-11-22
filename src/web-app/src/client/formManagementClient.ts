@@ -128,22 +128,23 @@ export async function submitForm(
 
 /**
  * Export form submissions from formio.
- * @param token - JWT token for formio.
  * @param formId - Id of the form to export.
  * @param root0 - Options for exporting form submissions.
  * @param root0.format - Format to export the submissions in.
  * @param root0.filters - List of filters to apply.
+ * @param root0.token - JWT token for formio.
  * @returns Blob with exported data in given format.
  * @throws {RequestError} If the http request fails.
  * @throws {TypeError} When a network error is encountered or CORS is misconfigured on the server-side.
  */
 export async function exportFormSubmissions(
-    token: string,
     formId: string,
     {
         format,
         filters,
+        token,
     }: {
+        token: string;
         format: "csv" | "json";
         filters?: {
             fieldPath: string;
