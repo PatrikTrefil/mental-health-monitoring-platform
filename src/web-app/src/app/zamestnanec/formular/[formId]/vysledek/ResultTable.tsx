@@ -319,7 +319,7 @@ export default function ResultTable({ formId }: { formId: string }) {
         manualPagination: true,
         state: {
             sorting,
-            columnFilters
+            columnFilters,
         },
         manualSorting: true,
         onSortingChange: (updaterOrValue) => {
