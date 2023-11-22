@@ -76,20 +76,20 @@ export async function loadFormById(
 
 /**
  * Submit form to formio.
- * @param formioToken - JWT token for formio.
+ * @param token - JWT token for formio.
  * @param formSchema - Schema of the form to submit.
  * @returns Created form.
  * @throws {RequestError} If the http request fails.
  * @throws {TypeError} If the response is not valid json or when a network error is encountered or CORS is misconfigured on the server-side.
  */
 export async function createForm(
-    formioToken: string,
+    token: string,
     formSchema: FormSchema
 ): Promise<Form> {
     const response = await safeFetch(`${getFormioUrl()}/form`, {
         headers: {
             "Content-Type": "application/json",
-            "x-jwt-token": formioToken,
+            "x-jwt-token": token,
         },
         body: JSON.stringify(formSchema),
         method: "POST",
@@ -101,7 +101,7 @@ export async function createForm(
 
 /**
  * Make a submission to a formio form.
- * @param formioToken - JWT token for formio.
+ * @param token - JWT token for formio.
  * @param formPath - Path of the form to submit to (including leading slash).
  * @param submissionData - Form data to submit.
  * @returns Created submission.
@@ -109,14 +109,14 @@ export async function createForm(
  * @throws {TypeError} If the response is not valid json or when a network error is encountered or CORS is misconfigured on the server-side.
  */
 export async function submitForm(
-    formioToken: string,
+    token: string,
     formPath: string,
     submissionData: unknown
 ): Promise<Submission> {
     const response = await safeFetch(`${getFormioUrl()}${formPath}`, {
         headers: {
             "Content-Type": "application/json",
-            "x-jwt-token": formioToken,
+            "x-jwt-token": token,
         },
         body: JSON.stringify(submissionData),
         method: "POST",
@@ -128,7 +128,7 @@ export async function submitForm(
 
 /**
  * Export form submissions from formio.
- * @param formioToken - JWT token for formio.
+ * @param token - JWT token for formio.
  * @param formId - Id of the form to export.
  * @param format - Format of the exported data.
  * @param filters - List of filters to apply.
@@ -137,7 +137,7 @@ export async function submitForm(
  * @throws {TypeError} When a network error is encountered or CORS is misconfigured on the server-side.
  */
 export async function exportFormSubmissions(
-    formioToken: string,
+    token: string,
     formId: string,
     format: "csv" | "json",
     filters?: {
@@ -160,7 +160,7 @@ export async function exportFormSubmissions(
     }
     const response = await safeFetch(url, {
         headers: {
-            "x-jwt-token": formioToken,
+            "x-jwt-token": token,
         },
     });
     return response.blob();
@@ -168,18 +168,18 @@ export async function exportFormSubmissions(
 
 /**
  * Delete form from the form management system.
- * @param formioToken - JWT token for formio.
+ * @param token - JWT token for formio.
  * @param formPath - Path of the form to delete.
  * @throws {RequestError} If the http request fails.
  * @throws {TypeError} When a network error is encountered or CORS is misconfigured on the server-side.
  */
 export async function deleteForm(
-    formioToken: string,
+    token: string,
     formPath: string
 ): Promise<void> {
     await safeFetch(`${getFormioUrl()}${formPath}`, {
         headers: {
-            "x-jwt-token": formioToken,
+            "x-jwt-token": token,
         },
         method: "DELETE",
     });
@@ -187,18 +187,18 @@ export async function deleteForm(
 
 /**
  * Delete form from the form management system.
- * @param formioToken - JWT token for formio.
+ * @param token - JWT token for formio.
  * @param formId - Id of the form to delete.
  * @throws {RequestError} If the http request fails.
  * @throws {TypeError} When a network error is encountered or CORS is misconfigured on the server-side.
  */
 export async function deleteFormById(
-    formioToken: string,
+    token: string,
     formId: string
 ): Promise<void> {
     await safeFetch(`${getFormioUrl()}/form/${formId}`, {
         headers: {
-            "x-jwt-token": formioToken,
+            "x-jwt-token": token,
         },
         method: "DELETE",
     });
@@ -207,7 +207,7 @@ export async function deleteFormById(
 /**
  * Load forms from the form management system.
  * @param root0 - Options for loading forms.
- * @param root0.formioToken - JWT token for formio.
+ * @param root0.token - JWT token for formio.
  * @param root0.pagination - Pagination settings.
  * @param root0.pagination.limit - Maximum number of forms to load.
  * @param root0.pagination.offset - Offset of the first form to load.
@@ -221,13 +221,13 @@ export async function deleteFormById(
  * @throws {Error} If the Content-Range header in the response is invalid or the total count is unknown.
  */
 export async function loadForms({
-    formioToken,
+    token,
     pagination,
     sort,
     tags,
     filters,
 }: {
-    formioToken: string;
+    token: string;
     pagination: {
         limit: number;
         offset: number;
@@ -271,7 +271,7 @@ export async function loadForms({
 
     const response = await safeFetch(url.toString(), {
         headers: {
-            "x-jwt-token": formioToken,
+            "x-jwt-token": token,
         },
     });
     const totalCount = Number(
@@ -288,21 +288,21 @@ export async function loadForms({
 /**
  * Update form in the form management system.
  * @param formSchema - Form schema to save to server.
- * @param formioToken - JWT token for formio.
+ * @param token - JWT token for formio.
  * @returns Updated form.
  * @throws {RequestError} If the http request fails.
  * @throws {TypeError} If the response is not valid json or when a network error is encountered or CORS is misconfigured on the server-side.
  */
 export async function updateForm(
     formSchema: Form,
-    formioToken: string
+    token: string
 ): Promise<Form> {
     const response = await safeFetch(
         `${getFormioUrl()}/form/${formSchema._id}`,
         {
             headers: {
                 "Content-Type": "application/json",
-                "x-jwt-token": formioToken,
+                "x-jwt-token": token,
             },
             method: "PUT",
             body: JSON.stringify(formSchema),
@@ -315,21 +315,21 @@ export async function updateForm(
  * Create action attached to a form in formio.
  * @param formId - Id of the form to create action for.
  * @param action - Definition of the action to create.
- * @param formioToken - JWT token for formio.
+ * @param token - JWT token for formio.
  * @throws {RequestError} If the http request fails.
  * @throws {TypeError} If the response is not valid json or when a network error is encountered or CORS is misconfigured on the server-side.
  */
 export async function createAction<TSettings>(
     formId: string,
     action: Action<TSettings>,
-    formioToken: string
+    token: string
 ): Promise<Action<TSettings>> {
     const response = await safeFetch(
         `${getFormioUrl()}/form/${formId}/action`,
         {
             headers: {
                 "Content-Type": "application/json",
-                "x-jwt-token": formioToken,
+                "x-jwt-token": token,
             },
             body: JSON.stringify(action),
             method: "POST",
@@ -342,7 +342,7 @@ export async function createAction<TSettings>(
  * Load submissions from formio.
  * @param formPath - Path of the form to load submissions from.
  * @param submissionId - Id of the submission to load.
- * @param formioToken - JWT token for formio.
+ * @param token - JWT token for formio.
  * @returns Submission or null if the returned status is 404.
  * @throws {RequestError} If the http request fails.
  * @throws {TypeError} If the response is not valid json or when a network error is encountered or CORS is misconfigured on the server-side.
@@ -350,7 +350,7 @@ export async function createAction<TSettings>(
 export async function loadSubmission(
     formPath: string,
     submissionId: string,
-    formioToken: string
+    token: string
 ): Promise<Submission | null> {
     let response: Response;
     try {
@@ -358,7 +358,7 @@ export async function loadSubmission(
             `${getFormioUrl()}/${formPath}/submission/${submissionId}`,
             {
                 headers: {
-                    "x-jwt-token": formioToken,
+                    "x-jwt-token": token,
                     "Content-Type": "application/json",
                 },
             }
@@ -379,7 +379,7 @@ export async function loadSubmission(
  * Get submissions of a form.
  * @param formId - Id of the form to load submissions from.
  * @param root0 - Options for loading submissions.
- * @param root0.formioToken - JWT token for formio.
+ * @param root0.token - JWT token for formio.
  * @param root0.pagination - Pagination settings.
  * @param root0.pagination.limit - Maximum number of submissions to load.
  * @param root0.pagination.offset - Offset of the first submission to load.
@@ -395,12 +395,12 @@ export async function loadSubmission(
 export async function loadSubmissions(
     formId: string,
     {
-        formioToken,
+        token,
         pagination,
         sort,
         filters,
     }: {
-        formioToken: string;
+        token: string;
         pagination: {
             limit: number;
             offset: number;
@@ -438,7 +438,7 @@ export async function loadSubmissions(
     });
     const response = await safeFetch(url, {
         headers: {
-            "x-jwt-token": formioToken,
+            "x-jwt-token": token,
         },
     });
     console.debug("Submissions of form fetched.", {
@@ -456,7 +456,7 @@ export async function loadSubmissions(
  * Update submission in the form management system.
  * @param formPath - Path of the form of which to update the submission.
  * @param updatedSubmission - Updated submission (used to replace submission with the same _id).
- * @param formioToken - JWT token for formio.
+ * @param token - JWT token for formio.
  * @returns Updated submission.
  * @throws {RequestError}
  * If the http request fails.
@@ -466,13 +466,13 @@ export async function loadSubmissions(
 export async function updateSubmission(
     formPath: string,
     updatedSubmission: Partial<Submission> & Pick<Submission, "data" | "_id">,
-    formioToken: string
+    token: string
 ): Promise<Submission> {
     const response = await safeFetch(
         `${getFormioUrl()}${formPath}/submission/${updatedSubmission._id}`,
         {
             headers: {
-                "x-jwt-token": formioToken,
+                "x-jwt-token": token,
                 "Content-Type": "application/json",
             },
             body: JSON.stringify(updatedSubmission),
