@@ -145,9 +145,9 @@ export default function FillOutForm({ formId }: { formId: string }) {
                             startLoadingToast();
                             try {
                                 await submitForm(
-                                    data.user.formioToken,
                                     formPath,
-                                    submission
+                                    submission,
+                                    data.user.formioToken
                                 );
                             } catch (e) {
                                 finishLoadingToastWithFailure();
