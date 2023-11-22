@@ -1,6 +1,5 @@
 #!/bin/bash
-# This script is used to initalize the Mental health monitoring platform.
-# The script is used to register a new user in the Form.io instance
+# The script is used to register a new user with the role of form manager in a Form.io instance.
 
 function print_usage {
   echo "Non-interactive usage:"

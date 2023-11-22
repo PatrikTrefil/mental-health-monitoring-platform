@@ -10,22 +10,27 @@ import DeleteFormToolbarItem from "./toolbar-items/DeleteFormToolbarItem";
  * Toolbar for the form table.
  * @param root0 - Props for this component.
  * @param root0.table - Table for which this toolbar is rendered.
- * @param root0.filterColumnId - Id of the column by which the table is filtered.
+ * @param root0.filterProps - Props for the filter toolbar item.
+ * @param root0.filterProps.placeholder - Placeholder for the filter input.
+ * @param root0.filterProps.columnId - Id of the column by which the table is filtered.
  */
 export default function FormTableToolbar({
     table,
-    filterColumnId,
+    filterProps: { columnId, placeholder },
 }: {
     table: Table<FormDefinition>;
-    filterColumnId: string;
+    filterProps: {
+        columnId: string;
+        placeholder: string;
+    };
 }) {
     return (
         <div className="d-flex gap-2">
-            <div style={{ maxWidth: "200px" }}>
+            <div style={{ maxWidth: "225px" }}>
                 <FilterToolbarItem
                     table={table}
-                    filterColumnId={filterColumnId}
-                    placeholder="Filtrovat formuláře"
+                    filterColumnId={columnId}
+                    placeholder={placeholder}
                 />
             </div>
             <CreateFormToolbarItem />

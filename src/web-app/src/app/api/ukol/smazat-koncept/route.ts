@@ -37,7 +37,7 @@ export async function POST(req: Request) {
     const formioToken = req.headers.get("x-jwt-token");
     if (formioToken === null) return new Response(undefined, { status: 401 });
 
-    const user = await loadClientPatient(formioToken, body.data.request.owner);
+    const user = await loadClientPatient(body.data.request.owner, formioToken);
     if (!user)
         return new Response(JSON.stringify({ error: "User not found" }), {
             status: 404,

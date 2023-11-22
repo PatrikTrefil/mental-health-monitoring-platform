@@ -121,8 +121,8 @@ export default function CreateForm() {
                         try {
                             console.debug("Creating form...");
                             createdForm = await createForm(
-                                session.data!.user.formioToken,
-                                formSchema
+                                formSchema,
+                                session.data!.user.formioToken
                             );
                         } catch (e) {
                             if (e instanceof Error) {

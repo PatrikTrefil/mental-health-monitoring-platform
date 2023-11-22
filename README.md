@@ -62,13 +62,7 @@ $ docker compose up
 
 Aplikace je dostupná na `http://localhost`.
 
-Pokud se jedná o **první spuštění aplikace**, je potřeba vytvořit prvního uživatele (správce dotazníků).
-Uživatele lze vytvořit pomocí shell skriptu `./init.sh` (vyžaduje `curl`). Skript lze spustit
-v interaktivním módu, pokud uživatel neposkytne všechny parametry programu. Parametry
-programu lze take předat pomocí argumentů programu (viz `./init.sh --help`). Alternativně
-lze vytvořit uživatele pomocí webového rozhraní Formio aplikace `http://localhost/formio/`,
-kde je potřeba vyplnit formulář `Správce dotazníků registrace` (uživatele _nevytvářejte_ skrze modul
-Resources).
+Pokud se jedná o **první spuštění aplikace**, vykonejte kroky v sekci [Inicializace](#Inicializace).
 
 ### Spuštění aplikace v vývojovém módu
 
@@ -79,7 +73,21 @@ $ docker compose --file ./docker-compose.yml --file ./docker-compose.dev.yml up
 Aplikace je dostupná na `http://localhost:8080`, kde se přistupuje skrze reverse proxy.
 Na všechny komponenty se lze připojit i přímo (mapování portů je definováno v `docker-compose.dev.yml`).
 
+Pokud se jedná o **první spuštění aplikace**, vykonejte kroky v sekci [Inicializace](#Inicializace).
+
 ## Užívání softwaru
+
+### Inicializace
+
+Potřebujeme vytvořit prvního uživatele (správce dotazníků).
+Uživatele (s rolí správce dotazníků) lze vytvořit pomocí shell skriptu `./create_form_manager.sh` (vyžaduje `curl`). Skript lze spustit
+v interaktivním módu, pokud uživatel neposkytne všechny parametry programu. Parametry
+programu lze take předat pomocí argumentů programu (viz `./create_form_manager.sh --help`). Alternativně
+lze vytvořit uživatele pomocí webového rozhraní Formio aplikace `http://localhost/formio/`,
+kde je potřeba vyplnit formulář `Správce dotazníků registrace` (uživatele _nevytvářejte_ skrze modul
+Resources).
+
+###
 
 -   `/` - hlavní stránka webového rozhraní
 -   `/nginx_status` - status reverse proxy

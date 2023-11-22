@@ -1,6 +1,5 @@
 "use client";
 
-import ExportButton from "@/app/zamestnanec/sprava-formularu/ExportButton";
 import { deleteFormById } from "@/client/formManagementClient";
 import { formsQuery } from "@/client/queries/formManagement";
 import AppTable from "@/components/AppTable";
@@ -49,7 +48,7 @@ export default function FormDefinitionsTable() {
             formId: string;
             formioToken: string;
         }) => {
-            await deleteFormById(formioToken, formId);
+            await deleteFormById(formId, formioToken);
         },
         onMutate: ({ formId }) => {
             console.debug("Deleting form...", { formPath: formId });
@@ -149,7 +148,6 @@ export default function FormDefinitionsTable() {
                         >
                             Smazat
                         </Button>
-                        <ExportButton formId={props.row.original._id} />
                         <Button
                             as="a"
                             href={`/zamestnanec/formular/${props.row.original._id}/vysledek`}
@@ -361,7 +359,13 @@ export default function FormDefinitionsTable() {
 
     return (
         <>
-            <FormTableToolbar table={table} filterColumnId={filterColumnId} />
+            <FormTableToolbar
+                table={table}
+                filterProps={{
+                    columnId: filterColumnId,
+                    placeholder: "Filtrovat dle názvu",
+                }}
+            />
             <div className="my-2">
                 {isLoading ? (
                     <PlaceholderAppTable table={table} rowCount={limit} />

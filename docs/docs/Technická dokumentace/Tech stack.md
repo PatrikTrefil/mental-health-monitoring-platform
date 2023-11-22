@@ -12,9 +12,9 @@ programátory, kteří budou aplikaci v budoucnu rozšiřovat.
 -   **CSS Framework Bootstrap**
     -   Jednoduchý způsob jak pracovat s CSS. Knihovna je velmi populární, takže
         je pravděpodobně, že ji ostatní prográmátoři znají
-    -   Zajistí základní webovou přístupnost
 -   **[react-boostrap](https://react-bootstrap.github.io/)**
     -   Z vlastní zkušenosti velmi zjednodušuje použití Boostrap knihovny.
+    -   Zajistí základní webovou přístupnost
 -   **JavaScript**
     -   Jediná rozumná volba pro programování logiky pro frontend. Využijeme
         toho, že programátor, který bude v budoucnu aplikaci rozšiřovat, musí

@@ -35,7 +35,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo } from "react";
 import { Alert, Form } from "react-bootstrap";
 import ResultTableToolbar from "./ResultTableToolbar";
-import stringifyResult from "./stringifyResult";
+import stringifyResult from "./toolbar-items/stringifyResult";
 
 /**
  * Display table with results from form with given formId.
@@ -319,6 +319,7 @@ export default function ResultTable({ formId }: { formId: string }) {
         manualPagination: true,
         state: {
             sorting,
+            columnFilters,
         },
         manualSorting: true,
         onSortingChange: (updaterOrValue) => {
@@ -385,13 +386,15 @@ export default function ResultTable({ formId }: { formId: string }) {
         <>
             <h1>Výsledky formuláře - {form?.title ?? "Načítání..."}</h1>
             <ResultTableToolbar
+                formId={formId}
                 frequencyVisualizationProps={{
                     data: labeledSubmissions.map((s) => s.data),
                     keyLabelMap: dataVisualizationKeyLabelMap,
                 }}
                 table={table}
                 filterProps={{
-                    filterColumnId: filterColumnId,
+                    placeholder: "",
+                    columnId: filterColumnId,
                     pathLabelMap: filterPathLabelMap,
                 }}
             />
