@@ -15,7 +15,7 @@ export default function TaskStateBadge({
 }) {
     const badgeFontSize = "0.9em";
     switch (taskState) {
-        case TaskState.READY:
+        case TaskState.UNCOMPLETED:
             return (
                 <Badge bg="info" style={{ fontSize: badgeFontSize }}>
                     Nedokončeno

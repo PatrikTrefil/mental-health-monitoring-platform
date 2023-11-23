@@ -18,7 +18,7 @@ model Task {
     /// Description of the task
     description         String?
     /// Current state of the task
-    state               TaskState @default(READY)
+    state               TaskState @default(UNCOMPLETED)
     /// Date and time when the task was created
     createdAt           DateTime  @default(now())
     /// Date and time when the task was last updated
@@ -51,7 +51,7 @@ model Deadline {
 }
 
 enum TaskState {
-    READY
+    UNCOMPLETED
     PARTIALLY_COMPLETED
     COMPLETED
 }

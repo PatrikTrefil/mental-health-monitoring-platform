@@ -1,5 +1,5 @@
 import { loadFormById } from "@/client/formManagementClient";
-import { loadClientsAndPatients } from "@/client/userManagementClient";
+import { loadAssignees } from "@/client/userManagementClient";
 import UserRoleTitles from "@/constants/userRoleTitles";
 import { Prisma, type Deadline, type Task } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
@@ -40,8 +40,8 @@ const taskFieldSchema = ObjectValuesEnum(Prisma.TaskScalarFieldEnum).or(
 
 const taskRouter = createTRPCRouter({
     /**
-     * Get list of all tasks. If user is {@link UserRoleTitles.ZADAVATEL_DOTAZNIKU}, return all tasks.
-     * If user is {@link UserRoleTitles.KLIENT_PACIENT}, return only tasks for them.
+     * Get list of all tasks. If user is {@link UserRoleTitles.ASSIGNER}, return all tasks.
+     * If user is {@link UserRoleTitles.ASSIGNEE}, return only tasks for them.
      */
     listTasks: protectedProcedure
         .input(
@@ -130,9 +130,7 @@ const taskRouter = createTRPCRouter({
                         ] = opts.input.sort.order;
                 }
 
-                if (
-                    userRoleTitles.includes(UserRoleTitles.ZADAVATEL_DOTAZNIKU)
-                ) {
+                if (userRoleTitles.includes(UserRoleTitles.ASSIGNER)) {
                     const [data, count] = await opts.ctx.prisma.$transaction([
                         opts.ctx.prisma.task.findMany({
                             where: {
@@ -148,9 +146,7 @@ const taskRouter = createTRPCRouter({
                         opts.ctx.prisma.task.count(),
                     ]);
                     return { data, count };
-                } else if (
-                    userRoleTitles.includes(UserRoleTitles.KLIENT_PACIENT)
-                ) {
+                } else if (userRoleTitles.includes(UserRoleTitles.ASSIGNEE)) {
                     const [data, count] = await opts.ctx.prisma.$transaction([
                         opts.ctx.prisma.task.findMany({
                             where: {
@@ -178,9 +174,9 @@ const taskRouter = createTRPCRouter({
      * Get task by id.
      * @returns The task with given id.
      * @throws {TRPCError}
-     * FORBIDDEN if the user is not a {@link UserRoleTitles.ZADAVATEL_DOTAZNIKU} or {@link UserRoleTitles.KLIENT_PACIENT}.
+     * FORBIDDEN if the user is not a {@link UserRoleTitles.ASSIGNER} or {@link UserRoleTitles.ASSIGNEE}.
      * @throws {TRPCError}
-     * FORBIDDEN if the user is not an {@link UserRoleTitles.ZADAVATEL_DOTAZNIKU} and the task is not assigned to them.
+     * FORBIDDEN if the user is not an {@link UserRoleTitles.ASSIGNER} and the task is not assigned to them.
      * @throws {TRPCError}
      * NOT_FOUND if the task does not exist.
      */
@@ -194,8 +190,8 @@ const taskRouter = createTRPCRouter({
             const userRoleTitles = opts.ctx.session.user.roleTitles;
 
             if (
-                !userRoleTitles.includes(UserRoleTitles.ZADAVATEL_DOTAZNIKU) &&
-                !userRoleTitles.includes(UserRoleTitles.KLIENT_PACIENT)
+                !userRoleTitles.includes(UserRoleTitles.ASSIGNER) &&
+                !userRoleTitles.includes(UserRoleTitles.ASSIGNEE)
             )
                 throw new TRPCError({ code: "FORBIDDEN" });
 
@@ -211,7 +207,7 @@ const taskRouter = createTRPCRouter({
 
             if (
                 result.forUserId !== opts.ctx.session.user.data.id &&
-                !userRoleTitles.includes(UserRoleTitles.ZADAVATEL_DOTAZNIKU)
+                !userRoleTitles.includes(UserRoleTitles.ASSIGNER)
             ) {
                 throw new TRPCError({ code: "FORBIDDEN" });
             }
@@ -221,7 +217,7 @@ const taskRouter = createTRPCRouter({
      * Create new task.
      * @returns The created task.
      * @throws {TRPCError}
-     * FORBIDDEN if the user is not an {@link UserRoleTitles.ZADAVATEL_DOTAZNIKU}.
+     * FORBIDDEN if the user is not an {@link UserRoleTitles.ASSIGNER}.
      * @throws {TRPCError}
      * CONFLICT if the form with given formId does not exist.
      * @throws {TRPCError}
@@ -252,7 +248,7 @@ const taskRouter = createTRPCRouter({
         .mutation(async (opts): Promise<TaskWithDeadline> => {
             if (
                 !opts.ctx.session.user.roleTitles.includes(
-                    UserRoleTitles.ZADAVATEL_DOTAZNIKU
+                    UserRoleTitles.ASSIGNER
                 )
             )
                 throw new TRPCError({ code: "FORBIDDEN" });
@@ -279,7 +275,7 @@ const taskRouter = createTRPCRouter({
                     message: "Form with given formId does not exist",
                 });
 
-            const user = await loadClientsAndPatients({
+            const user = await loadAssignees({
                 token: opts.ctx.session.user.formioToken,
                 pagination: {
                     limit: 1,
@@ -316,7 +312,7 @@ const taskRouter = createTRPCRouter({
     /**
      * Delete task by id.
      * @throws {TRPCError}
-     * FORBIDDEN if the user is not an {@link UserRoleTitles.ZADAVATEL_DOTAZNIKU}.
+     * FORBIDDEN if the user is not an {@link UserRoleTitles.ASSIGNER}.
      * @throws {TRPCError}
      * NOT_FOUND if the task with given id does not exist.
      */
@@ -329,7 +325,7 @@ const taskRouter = createTRPCRouter({
         .mutation(async (opts): Promise<void> => {
             if (
                 !opts.ctx.session.user.roleTitles.includes(
-                    UserRoleTitles.ZADAVATEL_DOTAZNIKU
+                    UserRoleTitles.ASSIGNER
                 )
             )
                 throw new TRPCError({ code: "FORBIDDEN" });

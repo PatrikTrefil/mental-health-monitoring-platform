@@ -82,7 +82,7 @@ export async function POST(req: Request) {
  * If the operation fails because of a database error.
  * @throws {Error}
  * If trying to partially complete a task after a deadline which cannot
- * be completed after deadline or if the task is not in a {@link TaskState.READY} state.
+ * be completed after deadline or if the task is not in a {@link TaskState.UNCOMPLETED} state.
  */
 async function partiallyCompleteTask(
     id: string,
@@ -96,7 +96,7 @@ async function partiallyCompleteTask(
             AND: [
                 {
                     id,
-                    state: TaskState.READY,
+                    state: TaskState.UNCOMPLETED,
                     submissionId: null,
                     formId,
                 },

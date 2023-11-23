@@ -9,17 +9,17 @@ import { RequestError } from "./requestError";
 import safeFetch from "./safeFetch";
 
 /**
- * Load all users from the user management system.
+ * Load users from the user management system with the role {@link UserRoleTitles.ASSIGNEE}.
  * @param root0 - Options.
  * @param root0.filters - Filters to apply.
  * @param root0.token - JWT token for formio.
  * @param root0.pagination - Pagination settings.
- * @param root0.pagination.limit - Maximum number of clients/patients to load.
- * @param root0.pagination.offset - Number of clients/patients that should be skipped.
+ * @param root0.pagination.limit - Maximum number of assignees to load.
+ * @param root0.pagination.offset - Number of assignees that should be skipped.
  * @param root0.sort - Sorting configuration.
  * @param root0.sort.field - Field to sort by.
  * @param root0.sort.order - Ordering of the results (ascending or descending).
- * @returns List of all users.
+ * @returns List of all assignees.
  * @throws {RequestError}
  * If the returned http status is not OK.
  * @throws {TypeError}
@@ -27,7 +27,7 @@ import safeFetch from "./safeFetch";
  * @throws {Error}
  * If the Content-Range header is invalid or unknown.
  */
-export async function loadClientsAndPatients({
+export async function loadAssignees({
     token,
     pagination,
     sort,
@@ -82,7 +82,7 @@ export async function loadClientsAndPatients({
 }
 
 /**
- * Load user based on user ID.
+ * Load user with the role {@link UserRoleTitles.ASSIGNEE} based on user ID.
  * @param userSubmissionId - Id of the submission that represents the user.
  * @param token - JWT token for formio.
  * @returns User or null if the user does not exist.
@@ -91,7 +91,7 @@ export async function loadClientsAndPatients({
  * @throws {TypeError}
  * If the response is not valid json or when a network error is encountered or CORS is misconfigured on the server-side.
  */
-export async function loadClientPatient(
+export async function loadAssignee(
     userSubmissionId: string,
     token: string
 ): Promise<User | null> {
@@ -115,7 +115,7 @@ export async function loadClientPatient(
 }
 
 /**
- * Delete user from the user management system.
+ * Delete user with the role {@link UserRoleTitles.ASSIGNEE} from the user management system.
  * @param userSubmissionId - Id of the user submission to delete.
  * @param token - JWT token for formio.
  * @throws {RequestError}
@@ -123,7 +123,7 @@ export async function loadClientPatient(
  * @throws {TypeError}
  * When a network error is encountered or CORS is misconfigured on the server-side.
  */
-export async function deleteClientPacient(
+export async function deleteAssignee(
     userSubmissionId: string,
     token: string
 ): Promise<void> {
@@ -154,19 +154,19 @@ export async function loadRoles(token: string): Promise<Role[]> {
 }
 
 /**
- * Load employees with role {@link UserRoleTitles.SPRAVCE_DOTAZNIKU}.
+ * Load employees with role {@link UserRoleTitles.FORM_MANAGER}.
  * @param root0 - Options.
  * @param root0.token - JWT token for formio.
  * @param root0.pagination - Pagination settings.
- * @param root0.pagination.limit - Maximum number of clients/patients to load.
- * @param root0.pagination.offset - Number of clients/patients that should be skipped.
+ * @param root0.pagination.limit - Maximum number of users to load.
+ * @param root0.pagination.offset - Number of users that should be skipped.
  * @param root0.sort - Sorting configuration.
  * @param root0.sort.field - Field to sort by.
  * @param root0.sort.order - Ordering of the results (ascending or descending).
  * @param root0.filters - Filters to apply.
  * @throws {Error} If the Content-Range header is invalid or unknown.
  */
-export async function loadSpravceDotazniku({
+export async function loadFormManager({
     token,
     pagination,
     sort,
@@ -227,25 +227,25 @@ export async function loadSpravceDotazniku({
     return {
         data: data.map((u) => ({
             ...u,
-            mainUserRoleTitle: UserRoleTitles.SPRAVCE_DOTAZNIKU,
+            mainUserRoleTitle: UserRoleTitles.FORM_MANAGER,
         })),
         totalCount,
     };
 }
 
 /**
- * Load employees with role {@link UserRoleTitles.ZADAVATEL_DOTAZNIKU}.
+ * Load employees with role {@link UserRoleTitles.ASSIGNER}.
  * @param root0 - Options.
  * @param root0.token - JWT token for formio.
  * @param root0.pagination - Pagination settings.
- * @param root0.pagination.limit - Maximum number of clients/patients to load.
- * @param root0.pagination.offset - Number of clients/patients that should be skipped.
+ * @param root0.pagination.limit - Maximum number of users to load.
+ * @param root0.pagination.offset - Number of users that should be skipped.
  * @param root0.sort - Sorting configuration.
  * @param root0.sort.field - Field to sort by.
  * @param root0.sort.order - Ordering of the results (ascending or descending).
  * @param root0.filters - Filters to apply.
  */
-export async function loadZadavatelDotazniku({
+export async function loadAssigners({
     token,
     pagination,
     sort,
@@ -305,14 +305,14 @@ export async function loadZadavatelDotazniku({
     return {
         data: data.map((u) => ({
             ...u,
-            mainUserRoleTitle: UserRoleTitles.ZADAVATEL_DOTAZNIKU,
+            mainUserRoleTitle: UserRoleTitles.ASSIGNER,
         })),
         totalCount,
     };
 }
 
 /**
- * Delete an employee that is from the spravce dotazniku resource from
+ * Delete an employee that has the role {@link UserRoleTitles.FORM_MANAGER} from
  * the user management system.
  * @param userSubmissionId - Id of the user submission to delete.
  * @param token - JWT token for formio.
@@ -321,7 +321,7 @@ export async function loadZadavatelDotazniku({
  * @throws {TypeError}
  * When a network error is encountered or CORS is misconfigured on the server-side.
  */
-async function deleteSpravceDotazniku(
+async function deleteFormManager(
     userSubmissionId: string,
     token: string
 ): Promise<void> {
@@ -348,14 +348,14 @@ export async function deleteUser(
     token: string
 ): Promise<void> {
     switch (userRoleTitle) {
-        case UserRoleTitles.SPRAVCE_DOTAZNIKU:
-            await deleteSpravceDotazniku(userSubmissionId, token);
+        case UserRoleTitles.FORM_MANAGER:
+            await deleteFormManager(userSubmissionId, token);
             break;
-        case UserRoleTitles.ZADAVATEL_DOTAZNIKU:
-            await deleteZadavatelDotazniku(userSubmissionId, token);
+        case UserRoleTitles.ASSIGNER:
+            await deleteAssigner(userSubmissionId, token);
             break;
-        case UserRoleTitles.KLIENT_PACIENT:
-            await deleteClientPacient(userSubmissionId, token);
+        case UserRoleTitles.ASSIGNEE:
+            await deleteAssignee(userSubmissionId, token);
             break;
         default:
             throw new Error(`Unknown user role title: ${userRoleTitle}`);
@@ -363,7 +363,7 @@ export async function deleteUser(
 }
 
 /**
- * Delete employee that is from the zadavatel dotazniku resource from formio.
+ * Delete employee that has the role {@link UserRoleTitles.ASSIGNER} from the user management system.
  * @param userSubmissionId - Id of the user submission to delete.
  * @param token - JWT token for formio.
  * @throws {RequestError}
@@ -371,7 +371,7 @@ export async function deleteUser(
  * @throws {TypeError}
  * When a network error is encountered or CORS is misconfigured on the server-side.
  */
-async function deleteZadavatelDotazniku(
+async function deleteAssigner(
     userSubmissionId: string,
     token: string
 ): Promise<void> {
@@ -510,14 +510,14 @@ export async function updateUser(
     token: string
 ) {
     switch (roleTitle) {
-        case UserRoleTitles.KLIENT_PACIENT:
-            await updateKlientPacient(submissionId, data, token);
+        case UserRoleTitles.ASSIGNEE:
+            await updateAssignee(submissionId, data, token);
             break;
-        case UserRoleTitles.SPRAVCE_DOTAZNIKU:
-            await updateSpravceDotazniku(submissionId, data, token);
+        case UserRoleTitles.FORM_MANAGER:
+            await updateFormManager(submissionId, data, token);
             break;
-        case UserRoleTitles.ZADAVATEL_DOTAZNIKU:
-            await updateZadavatelDotazniku(submissionId, data, token);
+        case UserRoleTitles.ASSIGNER:
+            await updateAssigner(submissionId, data, token);
             break;
         default:
             throw new Error("Unknown user role title.");
@@ -525,19 +525,19 @@ export async function updateUser(
 }
 
 /**
- * Update user's account (submission).
- * @param submisionId - Id of the submission to update.
- * @param data - New data to update the submission with.
+ * Update account of user with role {@link UserRoleTitles.ASSIGNEE}.
+ * @param submisionId - Id of the submission that represents the user to update.
+ * @param data - New data to update the user with.
  * @param data.id - Id of the user.
  * @param data.password - New password of the user.
  * @param token - JWT token for formio.
- * @returns Updated submission.
+ * @returns Updated submission representing the user.
  * @throws {RequestError}
  * If the returned http status is not OK.
  * @throws {TypeError}
  * If the response is not valid json or when a network error is encountered or CORS is misconfigured on the server-side.
  */
-async function updateKlientPacient(
+async function updateAssignee(
     submisionId: string,
     data: { id: string; password: string },
     token: string
@@ -550,8 +550,8 @@ async function updateKlientPacient(
 }
 
 /**
- * Update form manager's account (submission).
- * @param submisionId - Id of the submission to update.
+ * Update account of user with role {@link UserRoleTitles.FORM_MANAGER}.
+ * @param submisionId - Id of the submission that represents the user to update.
  * @param data - New data to update the submission with.
  * @param data.id - Id of the user to update.
  * @param data.password - New password of the user.
@@ -560,7 +560,7 @@ async function updateKlientPacient(
  * @throws {RequestError} If the returned http status is not OK.
  * @throws {TypeError} If the response is not valid json or when a network error is encountered or CORS is misconfigured on the server-side.
  */
-function updateSpravceDotazniku(
+function updateFormManager(
     submisionId: string,
     data: { id: string; password: string },
     token: string
@@ -573,8 +573,8 @@ function updateSpravceDotazniku(
 }
 
 /**
- * Update form assigner's account (submission).
- * @param submisionId - Id of the submission to update.
+ * Update account of user with role {@link UserRoleTitles.ASSIGNER}.
+ * @param submisionId - Id of the submission that represents the user to update.
  * @param data - New data to update the submission with.
  * @param data.id - Id of the user to update.
  * @param data.password - New password of the user.
@@ -583,7 +583,7 @@ function updateSpravceDotazniku(
  * @throws {RequestError} If the returned http status is not OK.
  * @throws {TypeError} If the response is not valid json or when a network error is encountered or CORS is misconfigured on the server-side.
  */
-async function updateZadavatelDotazniku(
+async function updateAssigner(
     submisionId: string,
     data: { id: string; password: string },
     token: string
@@ -628,26 +628,26 @@ export async function createUser(
     token: string
 ): Promise<Submission> {
     switch (roleTitle) {
-        case UserRoleTitles.KLIENT_PACIENT:
-            return createKlientPacient(data, token);
-        case UserRoleTitles.SPRAVCE_DOTAZNIKU:
-            return createSpravceDotazniku(data, token);
-        case UserRoleTitles.ZADAVATEL_DOTAZNIKU:
-            return createZadavatelDotazniku(data, token);
+        case UserRoleTitles.ASSIGNEE:
+            return createAssignee(data, token);
+        case UserRoleTitles.FORM_MANAGER:
+            return createFormManager(data, token);
+        case UserRoleTitles.ASSIGNER:
+            return createAssigner(data, token);
         default:
             throw new Error("Unknown user role title.");
     }
 }
 
 /**
- * Create client/patient.
+ * Create account with the role {@link UserRoleTitles.ASSIGNEE}.
  * @param data - User's login data.
  * @param data.id - Id of the new user.
  * @param data.password - Password of the new user.
  * @param token - JWT token for formio.
  * @returns Representing the user.
  */
-async function createKlientPacient(
+async function createAssignee(
     data: { id: string; password: string },
     token: string
 ): Promise<Submission> {
@@ -670,14 +670,14 @@ async function createKlientPacient(
 }
 
 /**
- * Create form manager.
+ * Create account with the role {@link UserRoleTitles.FORM_MANAGER}.
  * @param data - User's login data.
  * @param data.id - Id of the new user.
  * @param data.password - Password of the new user.
  * @param token - JWT token for formio.
  * @returns Representing the user.
  */
-async function createSpravceDotazniku(
+async function createFormManager(
     data: { id: string; password: string },
     token: string
 ): Promise<Submission> {
@@ -700,14 +700,14 @@ async function createSpravceDotazniku(
 }
 
 /**
- * Create form assigner.
+ * Create an account with the role {@link UserRoleTitles.ASSIGNER}.
  * @param data - User's login data.
  * @param data.id - Id of the new user.
  * @param data.password - Password of the new user.
  * @param token - JWT token for formio.
  * @returns Representing the user.
  */
-async function createZadavatelDotazniku(
+async function createAssigner(
     data: { id: string; password: string },
     token: string
 ): Promise<Submission> {

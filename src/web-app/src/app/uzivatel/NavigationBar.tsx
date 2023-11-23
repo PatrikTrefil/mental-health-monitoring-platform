@@ -18,9 +18,9 @@ import {
 } from "react-bootstrap";
 
 /**
- * Navigation bar for pages accessible to clients and patients.
+ * Navigation bar for pages accessible to assignees.
  */
-export default function NavigationBarClientPatient() {
+export default function NavigationBarAssignee() {
     const { data } = useSession();
     const [isAccountDetailShowing, setIsAccountDetailShowing] = useState(false);
 
@@ -49,9 +49,7 @@ export default function NavigationBarClientPatient() {
                             <Accordion.Header>Změna hesla</Accordion.Header>
                             <Accordion.Body>
                                 <ChangePasswordUser
-                                    userRoleTitle={
-                                        UserRoleTitles.KLIENT_PACIENT
-                                    }
+                                    userRoleTitle={UserRoleTitles.ASSIGNEE}
                                     submissionId={data?.user._id!}
                                     userId={data?.user.data.id!}
                                     isIDFieldShowing={false}

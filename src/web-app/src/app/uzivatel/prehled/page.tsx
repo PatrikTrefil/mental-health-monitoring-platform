@@ -6,9 +6,9 @@ export const metadata: Metadata = {
 };
 
 /**
- * Dashboard page for clients/patients.
+ * Dashboard page for users.
  */
-export default function PrehledPage() {
+export default function DashboardPage() {
     return (
         <main>
             <h1>Přehled</h1>
