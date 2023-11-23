@@ -77,6 +77,15 @@ export default function TaskTable() {
                     isNarrow: true,
                 },
             }),
+            columnHelper.accessor("id", {
+                id: "id",
+                meta: {
+                    viewOptionsLabel: "ID",
+                },
+                header: ({ column }) => (
+                    <TableHeader text="ID" column={column} />
+                ),
+            }),
             columnHelper.accessor("name", {
                 id: "name",
                 meta: {
@@ -406,6 +415,7 @@ export default function TaskTable() {
         initialState: {
             columnVisibility: {
                 updatedAt: false,
+                id: false,
             },
         },
         manualPagination: true,
