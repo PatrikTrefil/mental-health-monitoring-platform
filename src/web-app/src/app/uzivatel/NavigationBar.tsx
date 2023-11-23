@@ -72,7 +72,9 @@ export default function NavigationBarAssignee() {
                                 activeKey={pathname ?? ""}
                                 className="align-items-center gap-3"
                             >
-                                <Nav.Link href="/uzivatel/">Přehled</Nav.Link>
+                                <Nav.Link href="/uzivatel/prehled">
+                                    Přehled
+                                </Nav.Link>
                             </Nav>
                             <Nav
                                 variant="underline"
