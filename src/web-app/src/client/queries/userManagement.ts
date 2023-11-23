@@ -1,6 +1,7 @@
 import { createQueryKeys } from "@lukemorales/query-key-factory";
 import { SortingState } from "@tanstack/react-table";
 import {
+    loadAssignee,
     loadAssignees,
     loadAssigners,
     loadFormManager,
@@ -38,7 +39,7 @@ export const usersQuery = createQueryKeys("users", {
         // We don't include the token in the query key, because the result does not depend on it
         // eslint-disable-next-line @tanstack/query/exhaustive-deps
         queryKey: [userSubmissionId],
-        queryFn: () => loadAssignees(userSubmissionId, formioToken),
+        queryFn: () => loadAssignee(userSubmissionId, formioToken),
     }),
 });
 
