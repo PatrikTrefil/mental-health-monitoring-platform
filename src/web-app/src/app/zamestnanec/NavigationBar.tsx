@@ -68,15 +68,6 @@ export default function NavigationBarEmployee() {
             </Modal>
             <Navbar bg="primary" variant="dark" collapseOnSelect expand="xxl">
                 <Container>
-                    <Navbar.Brand
-                        href="/zamestnanec/"
-                        style={{
-                            fontSize: "2rem",
-                            fontWeight: 600,
-                        }}
-                    >
-                        NUDZ
-                    </Navbar.Brand>
                     <Navbar.Toggle
                         data-bs-target="#navbar-scroll"
                         data-bs-toggle="collapse"

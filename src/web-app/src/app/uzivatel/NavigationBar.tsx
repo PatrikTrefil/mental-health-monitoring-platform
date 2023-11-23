@@ -61,15 +61,6 @@ export default function NavigationBarAssignee() {
             </Modal>
             <Navbar bg="primary" variant="dark" collapseOnSelect expand="xxl">
                 <Container>
-                    <Navbar.Brand
-                        href="/uzivatel/"
-                        style={{
-                            fontSize: "2rem",
-                            fontWeight: 600,
-                        }}
-                    >
-                        NUDZ
-                    </Navbar.Brand>
                     <Navbar.Toggle
                         data-bs-target="#navbar-scroll"
                         data-bs-toggle="collapse"
