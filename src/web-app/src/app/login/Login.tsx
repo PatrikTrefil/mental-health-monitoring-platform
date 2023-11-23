@@ -26,7 +26,7 @@ export default function Login() {
     const searchParams = useSearchParams();
 
     const searchParamsCallbackUrl = searchParams?.get("callbackUrl");
-    const clientPatientDefaultCallback = "/uzivatel/";
+    const userDefaultCallback = "/uzivatel/";
     const employeeDefaultCallback = "/zamestnanec/";
 
     useEffect(
@@ -36,19 +36,19 @@ export default function Login() {
                     router.push(searchParamsCallbackUrl);
                 else if (
                     session.data.user.roleTitles.includes(
-                        UserRoleTitles.SPRAVCE_DOTAZNIKU
+                        UserRoleTitles.FORM_MANAGER
                     ) ||
                     session.data.user.roleTitles.includes(
-                        UserRoleTitles.ZADAVATEL_DOTAZNIKU
+                        UserRoleTitles.ASSIGNER
                     )
                 ) {
                     router.push(employeeDefaultCallback);
                 } else if (
                     session.data.user.roleTitles.includes(
-                        UserRoleTitles.KLIENT_PACIENT
+                        UserRoleTitles.ASSIGNEE
                     )
                 ) {
-                    router.push(clientPatientDefaultCallback);
+                    router.push(userDefaultCallback);
                 } else {
                     toast.error("Nemáte ani jednu z vyžadovaných rolí.");
                 }

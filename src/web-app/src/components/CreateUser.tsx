@@ -92,7 +92,7 @@ export default function CreateUser({
                 console.debug("Created user.", { userId });
                 toast.success("Uživatel vytvořen");
                 switch (userRoleTitle) {
-                    case UserRoleTitles.ZADAVATEL_DOTAZNIKU:
+                    case UserRoleTitles.ASSIGNER:
                         queryClient.invalidateQueries(
                             zadavatelDotaznikuQuery.list._def
                         );
@@ -100,7 +100,7 @@ export default function CreateUser({
                             employeesInfiniteQuery.list._def
                         );
                         break;
-                    case UserRoleTitles.SPRAVCE_DOTAZNIKU:
+                    case UserRoleTitles.FORM_MANAGER:
                         queryClient.invalidateQueries(
                             spravceDotaznikuQuery.list._def
                         );
@@ -108,7 +108,7 @@ export default function CreateUser({
                             employeesInfiniteQuery.list._def
                         );
                         break;
-                    case UserRoleTitles.KLIENT_PACIENT:
+                    case UserRoleTitles.ASSIGNEE:
                         queryClient.invalidateQueries(usersQuery.list._def);
                         break;
                 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { usersQuery } from "@/client/queries/userManagement";
-import { deleteClientPacient } from "@/client/userManagementClient";
+import { deleteAssignee } from "@/client/userManagementClient";
 import AppTable from "@/components/AppTable";
 import ChangePasswordUser from "@/components/ChangePasswordUser";
 import PlaceholderAppTable from "@/components/PlaceholderAppTable";
@@ -31,14 +31,14 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { Alert, Button, Form, Modal } from "react-bootstrap";
 import { toast } from "react-toastify";
-import ClientPatientTableToolbar from "./ClientPatientTableToolbar";
+import AssigneeTableToolbar from "./AssigneeTableToolbar";
 
 const filterColumnId = "data.id";
 
 /**
- * Page for managing users.
+ * Page for managing assignees' accounts.
  */
-export default function ClientPatientTable() {
+export default function AssigneeTable() {
     const queryClient = useQueryClient();
     const session = useSession();
 
@@ -55,7 +55,7 @@ export default function ClientPatientTable() {
             formioToken: string;
             userSubmissionId: string;
         }) => {
-            await deleteClientPacient(userSubmissionId, formioToken);
+            await deleteAssignee(userSubmissionId, formioToken);
         },
         onError: (e: unknown, { userSubmissionId }) => {
             console.error("Failed to delete user.", {
@@ -357,7 +357,7 @@ export default function ClientPatientTable() {
 
     return (
         <>
-            <ClientPatientTableToolbar
+            <AssigneeTableToolbar
                 table={table}
                 filterProps={{
                     columnId: filterColumnId,
@@ -399,7 +399,7 @@ export default function ClientPatientTable() {
                             submissionId={userToEdit.submissionId}
                             userId={userToEdit.id}
                             onChangeDone={() => setUserToEdit(undefined)}
-                            userRoleTitle={UserRoleTitles.KLIENT_PACIENT}
+                            userRoleTitle={UserRoleTitles.ASSIGNEE}
                         />
                     )}
                 </Modal.Body>

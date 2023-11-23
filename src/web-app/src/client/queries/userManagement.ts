@@ -1,11 +1,10 @@
 import { createQueryKeys } from "@lukemorales/query-key-factory";
 import { SortingState } from "@tanstack/react-table";
 import {
-    loadClientPatient,
-    loadClientsAndPatients,
+    loadAssignees,
+    loadAssigners,
+    loadFormManager,
     loadRoles,
-    loadSpravceDotazniku,
-    loadZadavatelDotazniku,
 } from "../userManagementClient";
 
 export const usersQuery = createQueryKeys("users", {
@@ -28,7 +27,7 @@ export const usersQuery = createQueryKeys("users", {
         // eslint-disable-next-line @tanstack/query/exhaustive-deps
         queryKey: ["usersList", pagination, sort, filters],
         queryFn: () =>
-            loadClientsAndPatients({
+            loadAssignees({
                 token: formioToken,
                 pagination,
                 sort,
@@ -39,7 +38,7 @@ export const usersQuery = createQueryKeys("users", {
         // We don't include the token in the query key, because the result does not depend on it
         // eslint-disable-next-line @tanstack/query/exhaustive-deps
         queryKey: [userSubmissionId],
-        queryFn: () => loadClientPatient(userSubmissionId, formioToken),
+        queryFn: () => loadAssignees(userSubmissionId, formioToken),
     }),
 });
 
@@ -56,8 +55,7 @@ export const zadavatelDotaznikuQuery = createQueryKeys("zadavatelDotazniku", {
         // We don't include the token in the query key, because the result does not depend on it
         // eslint-disable-next-line @tanstack/query/exhaustive-deps
         queryKey: ["zadavatelDotaznikuList", pagination, sort],
-        queryFn: () =>
-            loadZadavatelDotazniku({ token: formioToken, pagination, sort }),
+        queryFn: () => loadAssigners({ token: formioToken, pagination, sort }),
     }),
 });
 
@@ -75,7 +73,7 @@ export const spravceDotaznikuQuery = createQueryKeys("spravceDotazniku", {
         // eslint-disable-next-line @tanstack/query/exhaustive-deps
         queryKey: ["spravceDotaznikuList", pagination, sort],
         queryFn: () =>
-            loadSpravceDotazniku({ token: formioToken, pagination, sort }),
+            loadFormManager({ token: formioToken, pagination, sort }),
     }),
 });
 
@@ -125,7 +123,7 @@ export const employeesInfiniteQuery = createQueryKeys("employees", {
             }
             const spravciPromise =
                 offsetSpravce !== undefined
-                    ? loadSpravceDotazniku({
+                    ? loadFormManager({
                           token: formioToken,
                           pagination: {
                               limit: pageSize,
@@ -143,7 +141,7 @@ export const employeesInfiniteQuery = createQueryKeys("employees", {
                     : new Promise<undefined>((resolve) => resolve(undefined));
             const zadavatelePromise =
                 offsetZadavatel !== undefined
-                    ? loadZadavatelDotazniku({
+                    ? loadAssigners({
                           token: formioToken,
                           pagination: {
                               limit: pageSize,

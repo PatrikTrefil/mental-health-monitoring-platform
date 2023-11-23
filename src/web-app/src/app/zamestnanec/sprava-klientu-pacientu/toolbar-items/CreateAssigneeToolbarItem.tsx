@@ -4,15 +4,13 @@ import { usersQuery } from "@/client/queries/userManagement";
 import CreateUser from "@/components/CreateUser";
 import UserRoleTitles from "@/constants/userRoleTitles";
 import { useQueryClient } from "@tanstack/react-query";
-import { useSession } from "next-auth/react";
 import { useState } from "react";
 import { Button, Modal } from "react-bootstrap";
 
 /**
- * Toolbar item for creating a new client/patient. Renders a button that opens a modal for creating a new user.
+ * Toolbar item for creating a new assignee. Renders a button that opens a modal for creating a new user.
  */
-export default function CreateClientPatientToolbarItem() {
-    const session = useSession();
+export default function CreateAssigneeToolbarItem() {
     const queryClient = useQueryClient();
 
     const [showCreateUserModal, setShowCreateUserModal] = useState(false);
@@ -38,7 +36,7 @@ export default function CreateClientPatientToolbarItem() {
                 </Modal.Header>
                 <Modal.Body>
                     <CreateUser
-                        userRoleTitle={UserRoleTitles.KLIENT_PACIENT}
+                        userRoleTitle={UserRoleTitles.ASSIGNEE}
                         onChangeDone={() => {
                             setShowCreateUserModal(false);
                             queryClient.invalidateQueries({

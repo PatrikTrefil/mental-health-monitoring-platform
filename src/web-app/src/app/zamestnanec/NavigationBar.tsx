@@ -27,10 +27,10 @@ export default function NavigationBarEmployee() {
     const pathname = usePathname();
 
     const mainRoleTitle = data?.user.roleTitles.includes(
-        UserRoleTitles.SPRAVCE_DOTAZNIKU
+        UserRoleTitles.FORM_MANAGER
     )
-        ? UserRoleTitles.SPRAVCE_DOTAZNIKU
-        : UserRoleTitles.ZADAVATEL_DOTAZNIKU;
+        ? UserRoleTitles.FORM_MANAGER
+        : UserRoleTitles.ASSIGNER;
 
     return (
         <>

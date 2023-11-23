@@ -76,12 +76,12 @@ function hasEnoughPrivilegesForWebpage(
 ): boolean {
     if (webpagePathname.startsWith("/zamestnanec/"))
         return (
-            roleTitles.includes(UserRoleTitles.SPRAVCE_DOTAZNIKU) ||
-            roleTitles.includes(UserRoleTitles.ZADAVATEL_DOTAZNIKU)
+            roleTitles.includes(UserRoleTitles.FORM_MANAGER) ||
+            roleTitles.includes(UserRoleTitles.ASSIGNER)
         );
 
     if (webpagePathname.startsWith("/uzivatel/"))
-        return roleTitles.includes(UserRoleTitles.KLIENT_PACIENT);
+        return roleTitles.includes(UserRoleTitles.ASSIGNEE);
 
     return true;
 }
@@ -124,7 +124,7 @@ async function apiMiddleware(req: NextRequest) {
         }
 
         const clientPatientRoleId = roleList.find(
-            (r) => r.title === UserRoleTitles.KLIENT_PACIENT
+            (r) => r.title === UserRoleTitles.ASSIGNEE
         )?._id;
 
         if (!clientPatientRoleId)

@@ -34,7 +34,7 @@ import FormTableToolbar from "./FormTableToolbar";
 const filterColumnId = "name";
 
 /**
- * Table of form definitions available to clients/patients.
+ * Table of form definitions available to assignees.
  */
 export default function FormDefinitionsTable() {
     const queryClient = useQueryClient();

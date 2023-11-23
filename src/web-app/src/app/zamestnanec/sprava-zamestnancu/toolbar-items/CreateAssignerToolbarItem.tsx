@@ -6,17 +6,15 @@ import { useState } from "react";
 import { Button, Modal } from "react-bootstrap";
 
 /**
- * Renders a toolbar item for creating a new user with the role of {@link UserRoleTitles.ZADAVATEL_DOTAZNIKU}.
+ * Renders a toolbar item for creating a new user with the role of {@link UserRoleTitles.ASSIGNER}.
  */
-export default function CreateZadavatelDotaznikuToolbarItem() {
-    const [
-        showCreateZadavatelDotaznikuModal,
-        setShowCreateZadavatelDotaznikuModal,
-    ] = useState(false);
+export default function CreateAssignerToolbarItem() {
+    const [showCreateAssignerModal, setShowCreateAssignerModal] =
+        useState(false);
 
     return (
         <>
-            <Button onClick={() => setShowCreateZadavatelDotaznikuModal(true)}>
+            <Button onClick={() => setShowCreateAssignerModal(true)}>
                 <i
                     className="bi bi-plus-lg"
                     style={{
@@ -27,8 +25,8 @@ export default function CreateZadavatelDotaznikuToolbarItem() {
             </Button>
 
             <Modal
-                show={showCreateZadavatelDotaznikuModal}
-                onHide={() => setShowCreateZadavatelDotaznikuModal(false)}
+                show={showCreateAssignerModal}
+                onHide={() => setShowCreateAssignerModal(false)}
             >
                 <Modal.Header closeButton>
                     <Modal.Title>
@@ -37,10 +35,8 @@ export default function CreateZadavatelDotaznikuToolbarItem() {
                 </Modal.Header>
                 <Modal.Body>
                     <CreateUser
-                        userRoleTitle={UserRoleTitles.ZADAVATEL_DOTAZNIKU}
-                        onChangeDone={() =>
-                            setShowCreateZadavatelDotaznikuModal(false)
-                        }
+                        userRoleTitle={UserRoleTitles.ASSIGNER}
+                        onChangeDone={() => setShowCreateAssignerModal(false)}
                     />
                 </Modal.Body>
             </Modal>

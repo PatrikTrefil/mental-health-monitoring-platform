@@ -86,11 +86,11 @@ export default function EmployeeTable() {
             queryClient.invalidateQueries({
                 queryKey: employeesInfiniteQuery.list._def,
             });
-            if (userRoleTitle === UserRoleTitles.SPRAVCE_DOTAZNIKU)
+            if (userRoleTitle === UserRoleTitles.FORM_MANAGER)
                 queryClient.invalidateQueries({
                     queryKey: spravceDotaznikuQuery.list._def,
                 });
-            else if (userRoleTitle === UserRoleTitles.ZADAVATEL_DOTAZNIKU)
+            else if (userRoleTitle === UserRoleTitles.ASSIGNER)
                 queryClient.invalidateQueries({
                     queryKey: zadavatelDotaznikuQuery.list._def,
                 });
@@ -204,13 +204,13 @@ export default function EmployeeTable() {
                     const roleTitlesCurrentUser = session.data?.user.roleTitles;
                     if (
                         roleTitlesCurrentUser?.includes(
-                            UserRoleTitles.SPRAVCE_DOTAZNIKU
+                            UserRoleTitles.FORM_MANAGER
                         ) ||
                         (roleTitlesCurrentUser?.includes(
-                            UserRoleTitles.ZADAVATEL_DOTAZNIKU
+                            UserRoleTitles.ASSIGNER
                         ) &&
                             props.row.original.mainUserRoleTitle ===
-                                UserRoleTitles.ZADAVATEL_DOTAZNIKU)
+                                UserRoleTitles.ASSIGNER)
                     ) {
                         actionNodes.push(
                             <Button
