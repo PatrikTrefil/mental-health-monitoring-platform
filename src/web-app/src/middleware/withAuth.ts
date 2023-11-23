@@ -123,14 +123,14 @@ async function apiMiddleware(req: NextRequest) {
             return new NextResponse("Internal server error", { status: 500 });
         }
 
-        const clientPatientRoleId = roleList.find(
+        const assigneeRoleId = roleList.find(
             (r) => r.title === UserRoleTitles.ASSIGNEE
         )?._id;
 
-        if (!clientPatientRoleId)
+        if (!assigneeRoleId)
             return new NextResponse("Internal server error", { status: 500 });
 
-        if (!user.roles.includes(clientPatientRoleId))
+        if (!user.roles.includes(assigneeRoleId))
             return new NextResponse("Unauthorized", { status: 401 });
     }
 }
