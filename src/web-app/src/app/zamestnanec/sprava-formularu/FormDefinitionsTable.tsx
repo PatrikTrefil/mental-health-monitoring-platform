@@ -32,7 +32,7 @@ import { Alert, Button, Form } from "react-bootstrap";
 import { toast } from "react-toastify";
 import FormTableToolbar from "./FormTableToolbar";
 
-const filterColumnId = "name";
+const filterColumnId = "title";
 
 /**
  * Table of form definitions available to assignees.
@@ -103,8 +103,8 @@ export default function FormDefinitionsTable() {
                     isNarrow: true,
                 },
             }),
-            columnHelper.accessor("name", {
-                id: "name",
+            columnHelper.accessor("title", {
+                id: "title",
                 header: ({ column }) => (
                     <TableHeader text="Název" column={column} />
                 ),
