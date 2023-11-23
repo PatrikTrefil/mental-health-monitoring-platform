@@ -265,7 +265,7 @@ export default function TaskCreationForm() {
     });
 
     const formSelectOptions = useMemo(
-        () => forms?.data.map((f) => ({ value: f._id, label: f.name })),
+        () => forms?.data.map((f) => ({ value: f._id, label: f.title })),
         [forms]
     );
 
