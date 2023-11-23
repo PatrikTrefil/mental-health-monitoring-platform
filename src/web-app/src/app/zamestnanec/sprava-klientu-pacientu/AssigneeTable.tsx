@@ -1,6 +1,6 @@
 "use client";
 
-import { usersQuery } from "@/client/queries/userManagement";
+import { assigneeQuery } from "@/client/queries/userManagement";
 import { deleteAssignee } from "@/client/userManagementClient";
 import AppTable from "@/components/AppTable";
 import ChangePasswordUser from "@/components/ChangePasswordUser";
@@ -70,10 +70,10 @@ export default function AssigneeTable() {
                 userSubmissionId,
             });
             queryClient.invalidateQueries({
-                queryKey: usersQuery.list._def,
+                queryKey: assigneeQuery.list._def,
             });
             queryClient.invalidateQueries({
-                queryKey: usersQuery.detail(
+                queryKey: assigneeQuery.detail(
                     session.data!.user.formioToken,
                     userSubmissionId
                 ).queryKey,
@@ -198,7 +198,7 @@ export default function AssigneeTable() {
     }, [searchParams]);
 
     const { isLoading, isError, error, data } = useQuery({
-        ...usersQuery.list({
+        ...assigneeQuery.list({
             formioToken: session.data?.user.formioToken!,
             pagination: {
                 limit,
@@ -280,7 +280,7 @@ export default function AssigneeTable() {
             const nextPageIndex = pageIndex + 1;
             if (nextPageIndex < totalPages)
                 queryClient.prefetchQuery(
-                    usersQuery.list({
+                    assigneeQuery.list({
                         formioToken: session.data?.user.formioToken!,
                         pagination: {
                             limit,
@@ -310,7 +310,7 @@ export default function AssigneeTable() {
             const prevPageIndex = pageIndex - 1;
             if (prevPageIndex >= 0)
                 queryClient.prefetchQuery(
-                    usersQuery.list({
+                    assigneeQuery.list({
                         formioToken: session.data?.user.formioToken!,
                         pagination: {
                             limit,

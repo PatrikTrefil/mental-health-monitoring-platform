@@ -1,7 +1,7 @@
 "use client";
 
 import { formsQuery } from "@/client/queries/formManagement";
-import { usersQuery } from "@/client/queries/userManagement";
+import { assigneeQuery } from "@/client/queries/userManagement";
 import { trpc } from "@/client/trpcClient";
 import assigneeFormTag from "@/constants/assigneeFormTag";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -214,7 +214,7 @@ export default function TaskCreationForm() {
         data: users,
         refetch: refetchUsers,
     } = useQuery({
-        ...usersQuery.list({
+        ...assigneeQuery.list({
             formioToken: session.data?.user.formioToken!,
             pagination: { limit: 10, offset: 0 },
             filters:

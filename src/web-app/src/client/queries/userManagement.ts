@@ -8,7 +8,7 @@ import {
     loadRoles,
 } from "../userManagementClient";
 
-export const usersQuery = createQueryKeys("users", {
+export const assigneeQuery = createQueryKeys("assignee", {
     list: ({
         formioToken,
         pagination,
@@ -26,7 +26,7 @@ export const usersQuery = createQueryKeys("users", {
     }) => ({
         // We don't include the token in the query key, because the result does not depend on it
         // eslint-disable-next-line @tanstack/query/exhaustive-deps
-        queryKey: ["usersList", pagination, sort, filters],
+        queryKey: ["list", pagination, sort, filters],
         queryFn: () =>
             loadAssignees({
                 token: formioToken,
@@ -43,7 +43,7 @@ export const usersQuery = createQueryKeys("users", {
     }),
 });
 
-export const zadavatelDotaznikuQuery = createQueryKeys("zadavatelDotazniku", {
+export const assignerQuery = createQueryKeys("assigner", {
     list: ({
         formioToken,
         pagination,
@@ -55,12 +55,12 @@ export const zadavatelDotaznikuQuery = createQueryKeys("zadavatelDotazniku", {
     }) => ({
         // We don't include the token in the query key, because the result does not depend on it
         // eslint-disable-next-line @tanstack/query/exhaustive-deps
-        queryKey: ["zadavatelDotaznikuList", pagination, sort],
+        queryKey: ["list", pagination, sort],
         queryFn: () => loadAssigners({ token: formioToken, pagination, sort }),
     }),
 });
 
-export const spravceDotaznikuQuery = createQueryKeys("spravceDotazniku", {
+export const formManagerQuery = createQueryKeys("formManager", {
     list: ({
         formioToken,
         pagination,
@@ -72,7 +72,7 @@ export const spravceDotaznikuQuery = createQueryKeys("spravceDotazniku", {
     }) => ({
         // We don't include the token in the query key, because the result does not depend on it
         // eslint-disable-next-line @tanstack/query/exhaustive-deps
-        queryKey: ["spravceDotaznikuList", pagination, sort],
+        queryKey: ["list", pagination, sort],
         queryFn: () =>
             loadFormManager({ token: formioToken, pagination, sort }),
     }),
@@ -87,8 +87,8 @@ export const rolesQuery = createQueryKeys("roles", {
     }),
 });
 
-export const employeesInfiniteQuery = createQueryKeys("employees", {
-    list: ({
+export const employeeQuery = createQueryKeys("employee", {
+    infiniteList: ({
         formioToken,
         pageSize,
         sorting,
@@ -107,28 +107,28 @@ export const employeesInfiniteQuery = createQueryKeys("employees", {
             /**
              * If the offset is undefined, there are no more pages to load.
              */
-            let offsetSpravce: number | undefined;
+            let offsetFormManager: number | undefined;
             /**
              * If the offset is undefined, there are no more pages to load.
              */
-            let offsetZadavatel: number | undefined;
+            let offsetAssigner: number | undefined;
 
             // When the first query is made, the param is not present
             const isFirstPage = pageParam === undefined;
             if (isFirstPage) {
-                offsetSpravce = 0;
-                offsetZadavatel = 0;
+                offsetFormManager = 0;
+                offsetAssigner = 0;
             } else {
-                offsetSpravce = pageParam.nextPageSpravceOffset;
-                offsetZadavatel = pageParam.nextPageZadavatelOffset;
+                offsetFormManager = pageParam.nextPageFormManagerOffset;
+                offsetAssigner = pageParam.nextPageAssignerOffset;
             }
-            const spravciPromise =
-                offsetSpravce !== undefined
+            const formManagersPromise =
+                offsetFormManager !== undefined
                     ? loadFormManager({
                           token: formioToken,
                           pagination: {
                               limit: pageSize,
-                              offset: offsetSpravce,
+                              offset: offsetFormManager,
                           },
                           sort:
                               sorting[0] !== undefined
@@ -140,13 +140,13 @@ export const employeesInfiniteQuery = createQueryKeys("employees", {
                           filters,
                       })
                     : new Promise<undefined>((resolve) => resolve(undefined));
-            const zadavatelePromise =
-                offsetZadavatel !== undefined
+            const assignersPromise =
+                offsetAssigner !== undefined
                     ? loadAssigners({
                           token: formioToken,
                           pagination: {
                               limit: pageSize,
-                              offset: offsetZadavatel,
+                              offset: offsetAssigner,
                           },
                           sort:
                               sorting[0] !== undefined
@@ -159,34 +159,32 @@ export const employeesInfiniteQuery = createQueryKeys("employees", {
                       })
                     : new Promise<undefined>((resolve) => resolve(undefined));
 
-            const [dataSpravceDotazniku, dataZadavatelDotazniku] =
-                await Promise.all([spravciPromise, zadavatelePromise]);
+            const [dataFormManagers, dataAssigners] = await Promise.all([
+                formManagersPromise,
+                assignersPromise,
+            ]);
 
             const {
                 resData,
-                nextPageOffsetA: nextPageSpravceOffset,
-                nextPageOffsetB: nextPageZadavatelOffset,
-            } = mergeSortedPaginatedData(
-                dataSpravceDotazniku,
-                dataZadavatelDotazniku,
-                {
-                    pageSize,
-                    sorting,
-                    offsetA: offsetSpravce,
-                    offsetB: offsetZadavatel,
-                }
-            );
+                nextPageOffsetA: nextPageFormManagerOffset,
+                nextPageOffsetB: nextPageAssignerOffset,
+            } = mergeSortedPaginatedData(dataFormManagers, dataAssigners, {
+                pageSize,
+                sorting,
+                offsetA: offsetFormManager,
+                offsetB: offsetAssigner,
+            });
 
             return {
                 data: resData,
                 nextPageParam: {
-                    nextPageSpravceOffset,
-                    nextPageZadavatelOffset,
+                    nextPageFormManagerOffset,
+                    nextPageAssignerOffset,
                 },
             };
         },
         // eslint-disable-next-line @tanstack/query/exhaustive-deps
-        queryKey: ["employees", sorting, filters, pageSize],
+        queryKey: ["infiniteList", sorting, filters, pageSize],
     }),
 });
 
@@ -220,8 +218,8 @@ function mergeSortedPaginatedData<TData>(
     nextPageOffsetB: number | undefined;
 } {
     console.debug("Merging data...", {
-        dataSpravceDotazniku: dataA,
-        dataZadavatelDotazniku: dataB,
+        dataFormManagers: dataA,
+        dataAssigners: dataB,
         sorting,
         pageSize,
     });
@@ -308,8 +306,8 @@ function mergeSortedPaginatedData<TData>(
     console.debug("Merged data", {
         data: resData,
         nextPageParam: {
-            nextPageSpravceOffset: nextPageOffsetA,
-            nextPageZadavatelOffset: nextPageOffsetB,
+            nextPageFormManagerOffset: nextPageOffsetA,
+            nextPageAssignerOffset: nextPageOffsetB,
         },
     });
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { formsQuery } from "@/client/queries/formManagement";
-import { usersQuery } from "@/client/queries/userManagement";
+import { assigneeQuery } from "@/client/queries/userManagement";
 import AppTable from "@/components/AppTable";
 import PlaceholderAppTable from "@/components/PlaceholderAppTable";
 import SimplePagination from "@/components/SimplePagination";
@@ -140,7 +140,7 @@ export default function ResultTable({ formId }: { formId: string }) {
     // We need to load users to display their names in table
     const users = useQueries({
         queries: userIdsToLoad.map((userId) => ({
-            ...usersQuery.detail(data?.user.formioToken!, userId),
+            ...assigneeQuery.detail(data?.user.formioToken!, userId),
             enabled: !!data?.user.formioToken,
         })),
     });

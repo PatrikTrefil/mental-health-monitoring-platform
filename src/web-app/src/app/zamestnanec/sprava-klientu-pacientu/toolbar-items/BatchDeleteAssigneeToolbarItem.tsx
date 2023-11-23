@@ -1,6 +1,6 @@
 "use client";
 
-import { usersQuery } from "@/client/queries/userManagement";
+import { assigneeQuery } from "@/client/queries/userManagement";
 import { deleteAssignee } from "@/client/userManagementClient";
 import { User } from "@/types/userManagement/user";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -70,11 +70,11 @@ export default function BatchDeleteAssigneeToolbarItem({
             });
             toast.success(`Účty (${users.length}) byly smazány.`);
             queryClient.invalidateQueries({
-                queryKey: usersQuery.list._def,
+                queryKey: assigneeQuery.list._def,
             });
             for (const { submissionId } of users)
                 queryClient.invalidateQueries({
-                    queryKey: usersQuery.detail(
+                    queryKey: assigneeQuery.detail(
                         session.data!.user.formioToken,
                         submissionId
                     ).queryKey,

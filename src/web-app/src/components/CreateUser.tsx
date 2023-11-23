@@ -1,10 +1,10 @@
 "use client";
 
 import {
-    employeesInfiniteQuery,
-    spravceDotaznikuQuery,
-    usersQuery,
-    zadavatelDotaznikuQuery,
+    assigneeQuery,
+    assignerQuery,
+    employeeQuery,
+    formManagerQuery,
 } from "@/client/queries/userManagement";
 import { createUser } from "@/client/userManagementClient";
 import UserRoleTitles from "@/constants/userRoleTitles";
@@ -93,23 +93,21 @@ export default function CreateUser({
                 toast.success("Uživatel vytvořen");
                 switch (userRoleTitle) {
                     case UserRoleTitles.ASSIGNER:
+                        queryClient.invalidateQueries(assignerQuery.list._def);
                         queryClient.invalidateQueries(
-                            zadavatelDotaznikuQuery.list._def
-                        );
-                        queryClient.invalidateQueries(
-                            employeesInfiniteQuery.list._def
+                            employeeQuery.infiniteList._def
                         );
                         break;
                     case UserRoleTitles.FORM_MANAGER:
                         queryClient.invalidateQueries(
-                            spravceDotaznikuQuery.list._def
+                            formManagerQuery.list._def
                         );
                         queryClient.invalidateQueries(
-                            employeesInfiniteQuery.list._def
+                            employeeQuery.infiniteList._def
                         );
                         break;
                     case UserRoleTitles.ASSIGNEE:
-                        queryClient.invalidateQueries(usersQuery.list._def);
+                        queryClient.invalidateQueries(assigneeQuery.list._def);
                         break;
                 }
                 onChangeDone?.();

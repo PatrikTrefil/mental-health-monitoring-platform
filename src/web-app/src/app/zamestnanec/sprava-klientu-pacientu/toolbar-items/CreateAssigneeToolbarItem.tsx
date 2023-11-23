@@ -1,6 +1,6 @@
 "use client";
 
-import { usersQuery } from "@/client/queries/userManagement";
+import { assigneeQuery } from "@/client/queries/userManagement";
 import CreateUser from "@/components/CreateUser";
 import UserRoleTitles from "@/constants/userRoleTitles";
 import { useQueryClient } from "@tanstack/react-query";
@@ -40,7 +40,7 @@ export default function CreateAssigneeToolbarItem() {
                         onChangeDone={() => {
                             setShowCreateUserModal(false);
                             queryClient.invalidateQueries({
-                                queryKey: usersQuery.list._def,
+                                queryKey: assigneeQuery.list._def,
                             });
                         }}
                     />

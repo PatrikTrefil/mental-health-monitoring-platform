@@ -1,9 +1,9 @@
 "use client";
 
 import {
-    employeesInfiniteQuery,
-    spravceDotaznikuQuery,
-    zadavatelDotaznikuQuery,
+    assignerQuery,
+    employeeQuery,
+    formManagerQuery,
 } from "@/client/queries/userManagement";
 import { deleteUser } from "@/client/userManagementClient";
 import AppTable from "@/components/AppTable";
@@ -84,15 +84,15 @@ export default function EmployeeTable() {
                 userSubmissionId,
             });
             queryClient.invalidateQueries({
-                queryKey: employeesInfiniteQuery.list._def,
+                queryKey: employeeQuery.infiniteList._def,
             });
             if (userRoleTitle === UserRoleTitles.FORM_MANAGER)
                 queryClient.invalidateQueries({
-                    queryKey: spravceDotaznikuQuery.list._def,
+                    queryKey: formManagerQuery.list._def,
                 });
             else if (userRoleTitle === UserRoleTitles.ASSIGNER)
                 queryClient.invalidateQueries({
-                    queryKey: zadavatelDotaznikuQuery.list._def,
+                    queryKey: assignerQuery.list._def,
                 });
             else
                 throw new Error(`Unexpected user role title: ${userRoleTitle}`);
@@ -134,7 +134,7 @@ export default function EmployeeTable() {
         hasNextPage,
         fetchNextPage,
     } = useInfiniteQuery({
-        ...employeesInfiniteQuery.list({
+        ...employeeQuery.infiniteList({
             formioToken: session.data?.user.formioToken!,
             sorting,
             pageSize,
@@ -151,8 +151,8 @@ export default function EmployeeTable() {
         }),
         enabled: !!session.data?.user.formioToken,
         getNextPageParam: (lastPage) =>
-            lastPage.nextPageParam.nextPageSpravceOffset !== undefined ||
-            lastPage.nextPageParam.nextPageZadavatelOffset !== undefined
+            lastPage.nextPageParam.nextPageFormManagerOffset !== undefined ||
+            lastPage.nextPageParam.nextPageAssignerOffset !== undefined
                 ? lastPage.nextPageParam
                 : undefined,
     });
