@@ -31,6 +31,10 @@ export default function ExportButton<TTable>({
     return (
         <>
             <Button onClick={() => setShowModal(true)} disabled={!token}>
+                <i
+                    className="bi bi-download"
+                    style={{ marginRight: "5px" }}
+                ></i>
                 Export dat
             </Button>
             <Modal show={showModal} onHide={() => setShowModal(false)}>
