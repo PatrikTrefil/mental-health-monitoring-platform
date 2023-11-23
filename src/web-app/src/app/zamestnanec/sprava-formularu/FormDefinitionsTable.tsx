@@ -6,6 +6,7 @@ import AppTable from "@/components/AppTable";
 import PlaceholderAppTable from "@/components/PlaceholderAppTable";
 import SimplePagination from "@/components/SimplePagination";
 import TableHeader from "@/components/TableHeader";
+import assigneeFormTag from "@/constants/assigneeFormTag";
 import {
     filterUrlParamName,
     orderUrlParamAscValue,
@@ -219,7 +220,7 @@ export default function FormDefinitionsTable() {
                           },
                       ]
                     : undefined,
-            tags: ["klientPacient"],
+            tags: [assigneeFormTag],
         }),
         enabled: !!session.data?.user.formioToken,
     });
@@ -303,7 +304,7 @@ export default function FormDefinitionsTable() {
                                       },
                                   ]
                                 : undefined,
-                        tags: ["klientPacient"],
+                        tags: [assigneeFormTag],
                     })
                 );
             // Prefetch previous page
@@ -335,7 +336,7 @@ export default function FormDefinitionsTable() {
                                       },
                                   ]
                                 : undefined,
-                        tags: ["klientPacient"],
+                        tags: [assigneeFormTag],
                     })
                 );
         },

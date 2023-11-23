@@ -3,6 +3,7 @@
 import { createAction, createForm } from "@/client/formManagementClient";
 import { loadRoles } from "@/client/userManagementClient";
 import DynamicFormEdit from "@/components/formio/DynamicFormEdit";
+import assigneeFormTag from "@/constants/assigneeFormTag";
 import UserRoleTitles from "@/constants/userRoleTitles";
 import { useSmartFetch } from "@/hooks/useSmartFetch";
 import { WebhookAction } from "@/types/formManagement/action";
@@ -99,7 +100,7 @@ export default function CreateForm() {
                     roles: [assignerRoleId],
                 },
             ],
-            tags: ["klientPacient"],
+            tags: [assigneeFormTag],
         };
 
         return (
