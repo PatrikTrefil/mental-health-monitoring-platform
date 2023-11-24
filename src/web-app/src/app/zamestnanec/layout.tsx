@@ -1,4 +1,4 @@
-import { Container } from "@/components/client-react-bootstrap";
+import { Container } from "@/components/ClientReactBootstrap";
 import NavigationBarEmployee from "./NavigationBar";
 
 /**

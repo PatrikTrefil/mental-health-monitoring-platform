@@ -1,4 +1,4 @@
-import { Container } from "@/components/client-react-bootstrap";
+import { Container } from "@/components/ClientReactBootstrap";
 import NavigationBarAssignee from "./NavigationBar";
 
 /**

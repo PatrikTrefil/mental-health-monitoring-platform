@@ -1,4 +1,4 @@
-import { Button } from "@/components/client-react-bootstrap";
+import { Button } from "@/components/ClientReactBootstrap";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
