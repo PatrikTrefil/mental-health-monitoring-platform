@@ -14,13 +14,18 @@ import {
     ModalTitle,
     Nav,
     Navbar,
-    Spinner,
 } from "react-bootstrap";
 
 /**
  * Navigation bar for pages accessible to employees.
+ * @param root0 - Props.
+ * @param root0.children - Display ID of the user. Passed as prop so that it can be server rendered.
  */
-export default function NavigationBarEmployee() {
+export default function NavigationBarEmployee({
+    children,
+}: {
+    children: React.ReactNode;
+}) {
     const { data } = useSession();
     const [isAccountDetailShowing, setIsAccountDetailShowing] = useState(false);
 
@@ -107,17 +112,7 @@ export default function NavigationBarEmployee() {
                                         className="bi bi-person"
                                         style={{ paddingRight: "5px" }}
                                     ></i>
-                                    {data?.user.data.id ?? (
-                                        <Spinner
-                                            animation="border"
-                                            role="status"
-                                            size="sm"
-                                        >
-                                            <span className="visually-hidden">
-                                                Načítání...
-                                            </span>
-                                        </Spinner>
-                                    )}
+                                    {children}
                                 </Nav.Link>
                                 <Nav.Item>
                                     <SignOutButton

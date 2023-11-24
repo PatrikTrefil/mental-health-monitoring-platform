@@ -1,4 +1,6 @@
 import { Container } from "@/components/ClientReactBootstrap";
+import { authOptions } from "@/server/auth";
+import { getServerSession } from "next-auth";
 import NavigationBarAssignee from "./NavigationBar";
 
 /**
@@ -6,14 +8,17 @@ import NavigationBarAssignee from "./NavigationBar";
  * @param root0 - Props.
  * @param root0.children - Child components.
  */
-export default function AssigneeLayout({
+export default async function AssigneeLayout({
     children,
 }: {
     children: React.ReactNode;
 }) {
+    const session = await getServerSession(authOptions);
     return (
         <>
-            <NavigationBarAssignee />
+            <NavigationBarAssignee>
+                {session?.user.data.id}
+            </NavigationBarAssignee>
             <Container className="mt-3">
                 <main>{children}</main>
             </Container>
