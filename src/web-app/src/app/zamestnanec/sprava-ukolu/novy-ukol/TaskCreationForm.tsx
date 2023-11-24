@@ -567,9 +567,7 @@ export default function TaskCreationForm() {
                 backdrop="static"
             >
                 <Modal.Header>
-                    <Modal.Title>
-                        Deadline
-                    </Modal.Title>
+                    <Modal.Title>Deadline</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     <Form.Group controlId="task-due-date">
