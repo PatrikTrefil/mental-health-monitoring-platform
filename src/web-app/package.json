@@ -37,7 +37,7 @@
     "next": "^13.5.4",
     "next-auth": "^4.24.5",
     "react": "^18.2.0",
-    "react-bootstrap": "^2.7.4",
+    "react-bootstrap": "^2.9.1",
     "react-cookie-consent": "^8.0.1",
     "react-dom": "^18.2.0",
     "react-hook-form": "^7.45.2",
