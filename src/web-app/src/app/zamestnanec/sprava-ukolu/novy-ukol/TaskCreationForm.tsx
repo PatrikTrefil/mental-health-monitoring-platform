@@ -568,7 +568,7 @@ export default function TaskCreationForm() {
             >
                 <Modal.Header>
                     <Modal.Title>
-                        Deadline <i>(nepovinné)</i>
+                        Deadline
                     </Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
