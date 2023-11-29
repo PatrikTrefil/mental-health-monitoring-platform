@@ -143,7 +143,11 @@ const taskRouter = createTRPCRouter({
                             take: opts.input.pagination.limit,
                             orderBy,
                         }),
-                        opts.ctx.prisma.task.count(),
+                        opts.ctx.prisma.task.count({
+                            where: {
+                                AND: filters,
+                            },
+                        }),
                     ]);
                     return { data, count };
                 } else if (userRoleTitles.includes(UserRoleTitles.ASSIGNEE)) {
@@ -163,6 +167,7 @@ const taskRouter = createTRPCRouter({
                         opts.ctx.prisma.task.count({
                             where: {
                                 forUserId: opts.ctx.session.user.data.id,
+                                AND: filters,
                             },
                         }),
                     ]);
