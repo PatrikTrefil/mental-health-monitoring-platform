@@ -1,7 +1,7 @@
 "use client";
 
 import { formsQuery } from "@/client/queries/formManagement";
-import { assigneeQuery } from "@/client/queries/userManagement";
+import { trpc } from "@/client/trpcClient";
 import AppTable from "@/components/AppTable";
 import PlaceholderAppTable from "@/components/PlaceholderAppTable";
 import SimplePagination from "@/components/SimplePagination";
@@ -16,13 +16,14 @@ import {
 } from "@/constants/urlParamNames";
 import { useURLLimit } from "@/hooks/useURLLimit";
 import { useURLPageIndex } from "@/hooks/useURLPageIndex";
+import { TaskWithDeadline } from "@/server/routers/taskRouter";
 import { Form as FormFormio } from "@/types/formManagement/forms";
 import {
     DataValue,
     SelectBoxDataValue,
     Submission,
 } from "@/types/formManagement/submission";
-import { useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import {
     ColumnFiltersState,
     SortingState,
@@ -32,7 +33,7 @@ import {
 } from "@tanstack/react-table";
 import { useSession } from "next-auth/react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useMemo } from "react";
+import { useMemo } from "react";
 import { Alert, Form } from "react-bootstrap";
 import ResultTableToolbar from "./ResultTableToolbar";
 import stringifyResult from "./toolbar-items/stringifyResult";
@@ -90,75 +91,57 @@ export default function ResultTable({ formId }: { formId: string }) {
     }, [searchParams]);
 
     const {
-        data: submissionsQueryData,
-        isError: isErrorSubmissions,
-        error: errorSubmissions,
-        isLoading: isLoadingSubmissions,
-    } = useQuery({
-        ...formsQuery.submissions(formId, {
-            formioToken: data?.user.formioToken!,
-            pagination: { limit: limit, offset: limit * pageIndex },
-            sort:
-                sorting[0] !== undefined
-                    ? {
-                          field: sorting[0].id,
-                          order: sorting[0].desc ? "desc" : "asc",
-                      }
-                    : undefined,
-            filters:
-                columnFilters[0] !== undefined
-                    ? [
-                          {
-                              fieldPath: columnFilters[0].id,
-                              operation: "contains",
-                              comparedValue: columnFilters[0].value as string,
-                          },
-                      ]
-                    : undefined,
-        }),
-        enabled: !!data && !!form,
+        data: resultData,
+        isError: isErrorResultData,
+        error: errorResultData,
+        isLoading: isLoadingResultData,
+    } = trpc.formResults.getFormResults.useQuery({
+        formId,
+        sort:
+            sorting[0] !== undefined
+                ? {
+                      field: sorting[0].id,
+                      order: sorting[0].desc ? "desc" : "asc",
+                  }
+                : undefined,
+        filter:
+            columnFilters[0] !== undefined
+                ? {
+                      fieldPath: columnFilters[0].id,
+                      operation: "contains",
+                      comparedValue: columnFilters[0].value as string,
+                  }
+                : undefined,
     });
-    const rawSubmissions = submissionsQueryData?.data;
 
-    const labeledSubmissions = useMemo(
+    const nonEmptyResultData = useMemo(
         () =>
-            rawSubmissions !== undefined && form !== undefined && form !== null
-                ? addHumanReadableLabelsToSubmissionData(rawSubmissions, form)
+            resultData !== undefined
+                ? resultData.data.filter(
+                      (
+                          item
+                      ): item is {
+                          submission: Submission;
+                          task: TaskWithDeadline;
+                      } => item.submission !== null
+                  )
                 : [],
-        [rawSubmissions, form]
+        [resultData]
     );
 
-    const userIdsToLoad = useMemo(() => {
-        if (rawSubmissions === undefined) return [];
-        return Array.from(
-            new Set<string>(
-                rawSubmissions.map((submission) => submission.owner)
-            )
-        );
-    }, [rawSubmissions]);
+    const resultDataWithLabeledSubmission = useMemo(() => {
+        return form !== undefined && form !== null
+            ? nonEmptyResultData.map((item) => ({
+                  task: item.task,
+                  submission: addHumanReadableLabelToSubmission(
+                      item.submission,
+                      form
+                  ),
+              }))
+            : [];
+    }, [nonEmptyResultData, form]);
 
-    // We need to load users to display their names in table
-    const users = useQueries({
-        queries: userIdsToLoad.map((userId) => ({
-            ...assigneeQuery.detail(data?.user.formioToken!, userId),
-            enabled: !!data?.user.formioToken,
-        })),
-    });
-
-    const userIdUserDisplayNameMap = useMemo(() => {
-        if (users === undefined) return new Map<string, string>();
-        return new Map(
-            users.map((user) => [user.data?._id, user.data?.data.id])
-        );
-    }, [users]);
-
-    const tableData = useMemo(() => {
-        return labeledSubmissions?.map((submission) => ({
-            ...submission,
-            ownerDisplayId:
-                userIdUserDisplayNameMap.get(submission.owner) ?? "Neznámý",
-        }));
-    }, [labeledSubmissions, userIdUserDisplayNameMap]);
+    const tableData = resultDataWithLabeledSubmission;
 
     const dataVisualizationKeyLabelMap = useMemo(
         () =>
@@ -170,146 +153,84 @@ export default function ResultTable({ formId }: { formId: string }) {
         [form]
     );
 
-    const filterPathLabelMap = useMemo(
-        () =>
-            Object.fromEntries(
-                form?.components
-                    ?.filter((c) => c.type !== "button")
-                    .map((c) => [`data.${c.key}`, c.label]) ?? []
-            ),
-        [form]
-    );
-
-    const totalPages = Math.ceil(
-        (submissionsQueryData?.totalCount ?? 0) / limit
-    );
-
-    const queryClient = useQueryClient();
-    useEffect(
-        function prefetch() {
-            // Prefetch next page
-            const nextPageIndex = pageIndex + 1;
-            if (nextPageIndex < totalPages)
-                queryClient.prefetchQuery(
-                    formsQuery.submissions(formId, {
-                        formioToken: data?.user.formioToken!,
-                        pagination: {
-                            limit: limit,
-                            offset: limit * nextPageIndex,
-                        },
-                        sort:
-                            sorting[0] !== undefined
-                                ? {
-                                      field: sorting[0].id,
-                                      order: sorting[0].desc ? "desc" : "asc",
-                                  }
-                                : undefined,
-                        filters:
-                            columnFilters[0] !== undefined
-                                ? [
-                                      {
-                                          fieldPath: columnFilters[0].id,
-                                          operation: "contains",
-                                          comparedValue: columnFilters[0]
-                                              .value as string,
-                                      },
-                                  ]
-                                : undefined,
-                    })
-                );
-            // Prefetch previous page
-            const prevPageIndex = pageIndex - 1;
-            if (prevPageIndex >= 0)
-                queryClient.prefetchQuery(
-                    formsQuery.submissions(formId, {
-                        formioToken: data?.user.formioToken!,
-                        pagination: {
-                            limit: limit,
-                            offset: limit * prevPageIndex,
-                        },
-                        sort:
-                            sorting[0] !== undefined
-                                ? {
-                                      field: sorting[0].id,
-                                      order: sorting[0].desc ? "desc" : "asc",
-                                  }
-                                : undefined,
-                        filters:
-                            columnFilters[0] !== undefined
-                                ? [
-                                      {
-                                          fieldPath: columnFilters[0].id,
-                                          operation: "contains",
-                                          comparedValue: columnFilters[0]
-                                              .value as string,
-                                      },
-                                  ]
-                                : undefined,
-                    })
-                );
-        },
-        [
-            limit,
-            pageIndex,
-            sorting,
-            columnFilters,
-            totalPages,
-            queryClient,
-            formId,
-            data?.user.formioToken,
-        ]
-    );
+    const totalPages = Math.ceil((resultData?.totalCount ?? 0) / limit);
 
     const columnHelper =
         createColumnHelper<Exclude<typeof tableData, undefined>[number]>();
     const columns = useMemo(() => {
         const cols = [
-            columnHelper.accessor("owner", {
-                id: "owner",
-                meta: { viewOptionsLabel: "Autor" },
+            columnHelper.accessor("task.forUserId", {
+                id: "task.forUserId",
+                meta: { viewOptionsLabel: "Autor", filterLabel: "Autor" },
                 header: ({ column }) => (
                     <TableHeader text="Autor" column={column} />
                 ),
-                cell: (props) => props.row.original.ownerDisplayId,
             }),
-            columnHelper.accessor("created", {
-                id: "created",
-                meta: { viewOptionsLabel: "Vytvořeno dne" },
+            columnHelper.accessor("task.name", {
+                id: "task.name",
+                meta: {
+                    viewOptionsLabel: "Název úkolu",
+                    filterLabel: "Název úkolu",
+                },
+                header: ({ column }) => (
+                    <TableHeader text="Název úkolu" column={column} />
+                ),
+            }),
+            columnHelper.accessor("task.deadline", {
+                id: "task.deadline",
+                meta: { viewOptionsLabel: "Deadline", filterLabel: "Deadline" },
+                header: ({ column }) => (
+                    <TableHeader text="Deadline" column={column} />
+                ),
+                cell: (props) =>
+                    props.row.original.task.deadline === null
+                        ? "-"
+                        : new Date(
+                              props.row.original.task.deadline.dueDateTime
+                          ).toLocaleString(),
+            }),
+            columnHelper.accessor("submission.created", {
+                id: "submission.created",
+                meta: {
+                    viewOptionsLabel: "Vytvořeno dne",
+                    filterLabel: "Vytvořeno dne",
+                },
                 header: ({ column }) => (
                     <TableHeader text="Vytvořeno dne" column={column} />
                 ),
                 cell: (props) =>
-                    new Date(props.row.original.created).toLocaleString(),
+                    new Date(
+                        props.row.original.submission.created
+                    ).toLocaleString(),
             }),
         ];
+        const componentColumns = [];
         if (form?.components)
             for (const comp of form.components) {
                 // ignore submit button
                 if (comp.type === "button") continue;
 
-                cols.push(
-                    columnHelper.accessor(
-                        `data.${comp.key}` as keyof Submission,
-                        {
-                            id: `data.${comp.key}`,
-                            meta: { viewOptionsLabel: comp.label },
-                            header: ({ column }) => (
-                                <TableHeader
-                                    text={comp.label}
-                                    column={column}
-                                />
-                            ),
-                            cell: (props) => {
-                                const value =
-                                    props.row.original.data[comp.key]?.value ??
-                                    "Chybějící hodnota";
-                                return stringifyResult(value);
-                            },
-                        }
-                    )
+                componentColumns.push(
+                    columnHelper.accessor(`submission.data.${comp.key}`, {
+                        id: `submission.data.${comp.key}`,
+                        meta: {
+                            viewOptionsLabel: comp.label,
+                            filterLabel: comp.label,
+                        },
+                        header: ({ column }) => (
+                            <TableHeader text={comp.label} column={column} />
+                        ),
+                        cell: (props) => {
+                            const value =
+                                props.row.original.submission.data[comp.key]
+                                    ?.value ?? "Chybějící hodnota";
+                            return stringifyResult(value);
+                        },
+                    })
                 );
             }
-        return cols;
+
+        return [...cols, ...componentColumns];
     }, [columnHelper, form?.components]);
 
     const table = useReactTable({
@@ -372,8 +293,8 @@ export default function ResultTable({ formId }: { formId: string }) {
         return <Alert variant="danger">Formulář neexistuje.</Alert>;
     }
 
-    if (isErrorSubmissions) {
-        if (isErrorSubmissions) console.error(errorSubmissions);
+    if (isErrorResultData) {
+        if (isErrorResultData) console.error(errorResultData);
 
         return (
             <Alert variant="danger">
@@ -388,18 +309,20 @@ export default function ResultTable({ formId }: { formId: string }) {
             <ResultTableToolbar
                 formId={formId}
                 frequencyVisualizationProps={{
-                    data: labeledSubmissions.map((s) => s.data),
+                    data: resultDataWithLabeledSubmission.map(
+                        (s) => s.submission.data
+                    ),
                     keyLabelMap: dataVisualizationKeyLabelMap,
                 }}
                 table={table}
                 filterProps={{
                     placeholder: "",
                     columnId: filterColumnId,
-                    pathLabelMap: filterPathLabelMap,
+                    multiColumn: true,
                 }}
             />
             <div className="my-2">
-                {isLoadingSubmissions || isLoadingForm ? (
+                {isLoadingResultData || isLoadingForm ? (
                     <PlaceholderAppTable table={table} rowCount={limit} />
                 ) : (
                     <AppTable table={table} />
@@ -438,59 +361,51 @@ export type LabeledDataValue = {
 };
 
 /**
- * Adds human readable labels to every data entry of every submission.
+ * Adds human readable labels to every data entry of a given submission.
  * The value is replaced by an object containing the value and the label.
- * @param submissions - Submissions to which the labels are added to.
+ * @param submission - Submission to add labels to.
  * @param form - Form to get the labels from.
- * @returns Submissions where every data entry has a label.
  */
-function addHumanReadableLabelsToSubmissionData(
-    submissions: Submission[],
+function addHumanReadableLabelToSubmission(
+    submission: Submission,
     form: FormFormio
-): (Omit<Submission, "data"> & {
+): Omit<Submission, "data"> & {
     data: { [key: string]: LabeledDataValue };
-})[] {
-    return submissions.map((submission) => {
-        const labeledData = form!.components.map<[string, LabeledDataValue]>(
-            (c) => {
-                let dataValue: LabeledDataValue;
-                // assign label to the whole selectbox and
-                // assign labels to every value of selectbox
-                if (c.type === "selectboxes") {
-                    dataValue = {
-                        value: c.values.map((v) => {
-                            if (submission.data[c.key])
-                                return {
-                                    value: (
-                                        submission.data[
-                                            c.key
-                                        ] as SelectBoxDataValue
-                                    )[v.value]!,
-                                    label: v.label,
-                                };
-                            else
-                                return {
-                                    value: null,
-                                    label: v.label,
-                                };
-                        }),
-                        label: c.label,
-                    };
-                } else {
-                    dataValue = {
-                        value: submission.data[c.key] as Exclude<
-                            DataValue,
-                            SelectBoxDataValue
-                        >,
-                        label: c.label,
-                    };
-                }
-                return [c.key, dataValue];
+} {
+    const labeledData = form!.components.map<[string, LabeledDataValue]>(
+        (c) => {
+            let dataValue: LabeledDataValue;
+            // assign label to the whole selectbox and
+            // assign labels to every value of selectbox
+            if (c.type === "selectboxes") {
+                dataValue = {
+                    value: c.values.map((v) => {
+                        if (submission.data[c.key])
+                            return {
+                                value: (
+                                    submission.data[c.key] as SelectBoxDataValue
+                                )[v.value]!,
+                                label: v.label,
+                            };
+                        else
+                            return {
+                                value: null,
+                                label: v.label,
+                            };
+                    }),
+                    label: c.label,
+                };
+            } else {
+                dataValue = {
+                    value: submission.data[c.key] as Exclude<
+                        DataValue,
+                        SelectBoxDataValue
+                    >,
+                    label: c.label,
+                };
             }
-        );
-        return {
-            ...submission,
-            data: Object.fromEntries(labeledData),
-        };
-    });
+            return [c.key, dataValue];
+        }
+    );
+    return { ...submission, data: Object.fromEntries(labeledData) };
 }
