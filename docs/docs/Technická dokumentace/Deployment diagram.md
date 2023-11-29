@@ -32,6 +32,7 @@ Deployment_Node(server, "Server", "Ubuntu, CPU: 2 jádra, RAM: 4 GB") {
             Deployment_Node(nextjs, "Next.js") {
                 Container(spravaUkolu, "Správa úkolů", "TypeScript")
                 Container(spravaNedokoncenychVyplneni, "Správa nedokončených vyplnění", "TypeScript")
+                Container(export, "Export dat", "TypeScript")
             }
         }
         Deployment_Node(postgres_docker, "Docker container", "Docker Engine") {
@@ -41,14 +42,18 @@ Deployment_Node(server, "Server", "Ubuntu, CPU: 2 jádra, RAM: 4 GB") {
             }
         }
         Deployment_Node(formio_docker, "Docker container", "Docker Engine") {
-            Deployment_Node(formio, "Formio") {
+            Deployment_Node(formio, "Form.io") {
                 Container(manazerUzivatelu, "Manažer uživatelů a autentifikace", "JavaScript")
                 Container(spravaFormularu, "Správa formulářů", "JavaScript")
             }
         }
     }
 }
+Lay_D(spravaNedokoncenychVyplneni, export)
 
+Rel(webApp, export, "Používá")
+Rel(export, spravaFormularu, "Získává data")
+Rel(export, spravaUkolu, "Získává data")
 Rel(spravaUkolu, ukolyDb, "Ukládá data", "PrismaORM")
 Rel(webApp, spravaFormularu, "Používá", "HTTPS")
 Rel(webApp, spravaUkolu, "Používá", "tRPC, HTTPS")
@@ -62,7 +67,6 @@ Rel(spravaFormularu, spravaNedokoncenychVyplneni, "Informuje o vyplnění", "HTT
 Rel(spravaNedokoncenychVyplneni, manazerUzivatelu, "Autorizuje akce", "HTTPS")
 Rel(spravaNedokoncenychVyplneni, spravaNedokoncenychVyplneniDb, "Ukládá data", "PrismaORM")
 Rel(manazerUzivatelu, uzivateleDb, "Ukládá data")
-
 Rel(monitoringWeb, monitoringServer, "Čte data")
 
 Rel(monitoringServer, spravaFormularu, "Monitoruje")
