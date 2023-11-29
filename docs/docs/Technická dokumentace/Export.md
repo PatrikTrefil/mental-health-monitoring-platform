@@ -1,7 +1,7 @@
 Pro export sesbíraných dat z aplikace potřebujeme získat data o úkolech a
 odevzdání formulářů. Každý úkol spojíme s odevzdáním, které bylo vytvořeno v
 rámci splnění tohoto úkolu. Data o úkolech a odevzdání však vlastní dvě různé
-služby. Spojení dat můžeme provézt na klientovi a nebo na serveru. Obě varianty
+služby. Spojení dat můžeme provést na klientovi a nebo na serveru. Obě varianty
 jsou možné. Umístění procesu spojení na server zajistí lepší interoperabilitu
 našeho systému s ostatními systémy a umožní programově řídit export dat z
 aplikace.
@@ -17,7 +17,7 @@ spojením uvnitř operační paměti. Implementace tohoto vzoru je velmi jednodu
 ale spojení dat může být neefektivní. Druhou možností je použití návrhového
 vzoru [Command query responsibility segregation][cqrs]. Tento vzor využívá
 repliky dat z obou datových zdrojů. Tato možnost je efektivnější, ale složitější
-na impelemntaci.
+na implementaci.
 
 Z vlastností obou možností je vidět, že API composition je vhodnější řešení
 našeho problému. Finální implementace byla realizována vytvoření tRPC routeru v
