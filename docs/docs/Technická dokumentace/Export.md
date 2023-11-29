@@ -8,7 +8,7 @@ aplikace.
 
 Pro tyto účely byl vytvořen speciální kontejner jehož úkolem je získat data z
 ostatních služeb a spojit je. Jelikož export dat nebude probíhat příliš často a
-sesbíraná data budou poměrně malá (očekáváme řádově maximálne stovky záznamů),
+sesbíraná data budou poměrně malá (očekáváme řádově maximálně stovky záznamů),
 není nutné dbát na vysokou výkonnost této služby.
 
 Máme několik možností implementace této služby. První možností je použití
@@ -17,7 +17,7 @@ spojením uvnitř operační paměti. Implementace tohoto vzoru je velmi jednodu
 ale spojení dat může být neefektivní. Druhou možností je použití návrhového
 vzoru [Command query responsibility segregation][cqrs]. Tento vzor využívá
 repliky dat z obou datových zdrojů. Tato možnost je efektivnější, ale složitější
-na impelemntaci
+na impelemntaci.
 
 Z vlastností obou možností je vidět, že API composition je vhodnější řešení
 našeho problému. Finální implementace byla realizována vytvoření tRPC routeru v
