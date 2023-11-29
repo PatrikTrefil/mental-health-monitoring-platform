@@ -34,7 +34,7 @@ Deployment_Node(server, "Server", "Ubuntu, CPU: 2 jádra, RAM: 4 GB") {
                 Container(spravaNedokoncenychVyplneni, "Správa nedokončených vyplnění", "TypeScript")
             }
         }
-        Deployment_Node(postres_docker, "Docker container", "Docker Engine") {
+        Deployment_Node(postgres_docker, "Docker container", "Docker Engine") {
             Deployment_Node(postgres_node, "PostgreSQL") {
                 ContainerDb(ukolyDb, "Databáze úkolů")
                 ContainerDb(spravaNedokoncenychVyplneniDb, "Databáze nedokončených vyplnění")
