@@ -28,8 +28,8 @@ Deployment_Node(server, "Server", "Ubuntu, CPU: 2 jádra, RAM: 4 GB") {
                 ContainerDb(uzivateleDb, "Databáze uživatelů")
             }
         }
-        Deployment_Node(spravceUkolu_docker, "Docker container", "Docker Engine") {
-            Deployment_Node(express, "Next.js") {
+        Deployment_Node(nexjs_docker, "Docker container", "Docker Engine") {
+            Deployment_Node(nextjs, "Next.js") {
                 Container(spravaUkolu, "Správa úkolů", "TypeScript")
                 Container(spravaNedokoncenychVyplneni, "Správa nedokončených vyplnění", "TypeScript")
             }
