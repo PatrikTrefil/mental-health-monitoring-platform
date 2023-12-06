@@ -553,6 +553,10 @@ const formEditCsTranslation = {
     "Enable Row Drafts": "Povolit koncepty řádků",
     "Allow save rows even if their data is invalid. Errors will occur when try to submit with invalid rows.":
         "Povolit uložení řádků, i když jsou jejich data neplatná. Při pokusu o odeslání s neplatnými řádky dojde k chybám.",
+    Edit: "Upravit",
+    Move: "Přesunout",
+    "Edit JSON": "Upravit JSON",
+    Copy: "Kopírovat",
 };
 
 export { formCsTranslation, formEditCsTranslation };
