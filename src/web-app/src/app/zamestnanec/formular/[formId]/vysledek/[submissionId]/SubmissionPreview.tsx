@@ -137,8 +137,14 @@ export default function SubmissionPreview(props: {
             <DynamicFormWithAuth
                 relativeFormPath={`/form/${props.formId}`}
                 modifyFormBeforeRender={(form) => {
-                    for (const component of form.components)
+                    for (const component of form.components) {
                         component.disabled = true;
+                        if (component.type === "hidden") {
+                            // @ts-expect-error
+                            component.type = "textfield";
+                            component.label += " (skryté)";
+                        }
+                    }
                 }}
                 defaultValues={submission.data}
             />
