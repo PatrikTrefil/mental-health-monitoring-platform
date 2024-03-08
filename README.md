@@ -94,4 +94,4 @@ Resources).
 -   `/health` - vratí 200 pokud je reverse proxy dostupná
 -   `/monitoring/` - monitoring aplikace
     -   `/monitoring/api` - monitoring API ([oficiální dokumentace](https://github.com/google/cadvisor/blob/master/docs/api.md))
--   `/formio/` - webové rozhraní/API pro správu formulářů ([oficiální dokumentace](https://apidocs.form.io/))
+-   `/formio/` - webové rozhraní/API pro správu formulářů ([oficiální dokumentace webového rozhraní](https://help.form.io/), [oficiální dokumentace k API](https://apidocs.form.io/))
