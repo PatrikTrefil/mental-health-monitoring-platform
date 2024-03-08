@@ -33,6 +33,7 @@ git submodule update
 ## Spouštění aplikace
 
 Před spuštěním aplikace je potřeba dodat `.env` soubor pro konfiguraci kontejneru.
+Syntax konfiguračního souboru je popsána [zde](https://docs.docker.com/compose/environment-variables/env-file/).
 Ukázkovou konfiguraci najdete v `.env.example`.
 
 -   konfigurace mongo
