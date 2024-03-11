@@ -53,13 +53,13 @@ Ukázkovou konfiguraci najdete v `.env.example`.
 Také je potřeba nainstalovat závislosti pro Formio aplikaci:
 
 ```sh
-$ cd src/formio && npm install
+cd src/formio && npm install
 ```
 
 ### Spuštění aplikace v produkčním módu
 
 ```sh
-$ docker compose up
+docker compose up
 ```
 
 Aplikace je dostupná na `http://localhost`.
@@ -69,7 +69,7 @@ Pokud se jedná o **první spuštění aplikace**, vykonejte kroky v sekci [Inic
 ### Spuštění aplikace v vývojovém módu
 
 ```sh
-$ docker compose --file ./docker-compose.yml --file ./docker-compose.dev.yml up
+docker compose --file ./docker-compose.yml --file ./docker-compose.dev.yml up
 ```
 
 Aplikace je dostupná na `http://localhost:8080`, kde se přistupuje skrze reverse proxy.
