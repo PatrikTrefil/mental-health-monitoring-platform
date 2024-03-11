@@ -1,6 +1,6 @@
 "use client";
 
-import { employeesInfiniteQuery } from "@/client/queries/userManagement";
+import { employeeQuery } from "@/client/queries/userManagement";
 import { deleteUser } from "@/client/userManagementClient";
 import { UserRoleTitle } from "@/types/userManagement/UserRoleTitle";
 import { User } from "@/types/userManagement/user";
@@ -79,7 +79,7 @@ export default function DeleteEmployeeToolbarItem({
             toast.success(`Zaměstnanecké účty (${employees.length}) smazány.`);
 
             queryClient.invalidateQueries({
-                queryKey: employeesInfiniteQuery.list._def,
+                queryKey: employeeQuery.infiniteList._def,
             });
         },
     });

@@ -1,18 +1,18 @@
 import { Metadata } from "next";
-import ClientPatientTable from "./ClientPatientTable";
+import AssigneeTable from "./AssigneeTable";
 
 export const metadata: Metadata = {
     title: "Správa klientů a pacientů",
 };
 
 /**
- * Client/patient management page.
+ * Page for managing accounts of assignees.
  */
-export default function SpravaKlientuPacientuPage() {
+export default function AssigneeManagementPage() {
     return (
         <>
             <h1>Správa klientů/pacientů</h1>
-            <ClientPatientTable />
+            <AssigneeTable />
         </>
     );
 }

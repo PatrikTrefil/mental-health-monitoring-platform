@@ -16,6 +16,11 @@ const config = {
             {
                 entryPoints: [`${webAppRoot}/src`],
                 tsconfig: `${webAppRoot}/tsconfig.json`,
+                externalPattern: [
+                    "**/node_modules/**",
+                    "**/ClientReactBootstrap.tsx",
+                ],
+                excludeExternals: true,
                 entryPointStrategy: "expand",
                 out: "Webová aplikace/Reference",
                 watch: process.env.TYPEDOC_WATCH,

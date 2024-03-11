@@ -109,7 +109,7 @@ export default function TaskTable() {
                     const start = props.row.original.start;
                     let tooltip: OverlayChildren;
                     switch (state) {
-                        case TaskState.READY:
+                        case TaskState.UNCOMPLETED:
                             if (
                                 deadline !== null &&
                                 deadline.canBeCompletedAfterDeadline == false &&
@@ -134,7 +134,7 @@ export default function TaskTable() {
                             break;
                     }
                     const canTaskBeCompleted =
-                        state === TaskState.READY &&
+                        state === TaskState.UNCOMPLETED &&
                         (deadline === null ||
                             deadline.canBeCompletedAfterDeadline ||
                             deadline.dueDateTime >= new Date()) &&

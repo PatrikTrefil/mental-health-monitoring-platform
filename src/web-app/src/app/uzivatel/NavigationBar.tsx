@@ -5,7 +5,7 @@ import SignOutButton from "@/components/SignOutButton";
 import UserRoleTitles from "@/constants/userRoleTitles";
 import { useSession } from "next-auth/react";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import React, { useState } from "react";
 import {
     Accordion,
     Container,
@@ -14,13 +14,18 @@ import {
     ModalTitle,
     Nav,
     Navbar,
-    Spinner,
 } from "react-bootstrap";
 
 /**
- * Navigation bar for pages accessible to clients and patients.
+ * Navigation bar for pages accessible to assignees.
+ * @param root0 - Props.
+ * @param root0.children - Display ID of the user. Passed as prop so that it can be server rendered.
  */
-export default function NavigationBarClientPatient() {
+export default function NavigationBarAssignee({
+    children,
+}: {
+    children: React.ReactNode;
+}) {
     const { data } = useSession();
     const [isAccountDetailShowing, setIsAccountDetailShowing] = useState(false);
 
@@ -49,9 +54,7 @@ export default function NavigationBarClientPatient() {
                             <Accordion.Header>Změna hesla</Accordion.Header>
                             <Accordion.Body>
                                 <ChangePasswordUser
-                                    userRoleTitle={
-                                        UserRoleTitles.KLIENT_PACIENT
-                                    }
+                                    userRoleTitle={UserRoleTitles.ASSIGNEE}
                                     submissionId={data?.user._id!}
                                     userId={data?.user.data.id!}
                                     isIDFieldShowing={false}
@@ -63,15 +66,6 @@ export default function NavigationBarClientPatient() {
             </Modal>
             <Navbar bg="primary" variant="dark" collapseOnSelect expand="xxl">
                 <Container>
-                    <Navbar.Brand
-                        href="/uzivatel/"
-                        style={{
-                            fontSize: "2rem",
-                            fontWeight: 600,
-                        }}
-                    >
-                        NUDZ
-                    </Navbar.Brand>
                     <Navbar.Toggle
                         data-bs-target="#navbar-scroll"
                         data-bs-toggle="collapse"
@@ -83,7 +77,9 @@ export default function NavigationBarClientPatient() {
                                 activeKey={pathname ?? ""}
                                 className="align-items-center gap-3"
                             >
-                                <Nav.Link href="/uzivatel/">Přehled</Nav.Link>
+                                <Nav.Link href="/uzivatel/prehled">
+                                    Přehled
+                                </Nav.Link>
                             </Nav>
                             <Nav
                                 variant="underline"
@@ -100,17 +96,7 @@ export default function NavigationBarClientPatient() {
                                         className="bi bi-person"
                                         style={{ paddingRight: "5px" }}
                                     ></i>
-                                    {data?.user.data.id ?? (
-                                        <Spinner
-                                            animation="border"
-                                            role="status"
-                                            size="sm"
-                                        >
-                                            <span className="visually-hidden">
-                                                Načítání...
-                                            </span>
-                                        </Spinner>
-                                    )}
+                                    {children}
                                 </Nav.Link>
                                 <Nav.Item>
                                     <SignOutButton

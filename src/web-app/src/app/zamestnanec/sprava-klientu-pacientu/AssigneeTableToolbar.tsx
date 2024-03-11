@@ -1,18 +1,18 @@
 import { User } from "@/types/userManagement/user";
 import { Table } from "@tanstack/react-table";
 import FilterToolbarItem from "../../../components/FilterToolbarItem";
-import CreateClientPatientToolbarItem from "./toolbar-items/CreateClientPatientToolbarItem";
-import DeleteClientPatientToolbarItem from "./toolbar-items/DeleteClientPatientToolbarItem";
+import BatchDeleteAssigneeToolbarItem from "./toolbar-items/BatchDeleteAssigneeToolbarItem";
+import CreateAssigneeToolbarItem from "./toolbar-items/CreateAssigneeToolbarItem";
 
 /**
- * Toolbar for the table of clients and patients.
+ * Toolbar for the table of assignees.
  * @param root0 - Props for the component.
  * @param root0.table - Table for which to render the toolbar.
  * @param root0.filterProps - Props for the filter toolbar item.
  * @param root0.filterProps.placeholder - Placeholder for the filter input (passed down to a filter toolbar item).
  * @param root0.filterProps.columnId - ID of the column to filter by (passed down to a filter toolbar item).
  */
-export default function ClientPatientTableToolbar({
+export default function AssigneeTableToolbar({
     table,
     filterProps: { columnId, placeholder },
 }: {
@@ -31,8 +31,8 @@ export default function ClientPatientTableToolbar({
                     placeholder={placeholder}
                 />
             </div>
-            <CreateClientPatientToolbarItem />
-            <DeleteClientPatientToolbarItem table={table} />
+            <CreateAssigneeToolbarItem />
+            <BatchDeleteAssigneeToolbarItem table={table} />
         </div>
     );
 }

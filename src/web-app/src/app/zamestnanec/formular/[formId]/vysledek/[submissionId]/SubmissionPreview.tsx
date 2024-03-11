@@ -2,7 +2,7 @@
 
 import { loadSubmission } from "@/client/formManagementClient";
 import { formsQuery } from "@/client/queries/formManagement";
-import { usersQuery } from "@/client/queries/userManagement";
+import { assigneeQuery } from "@/client/queries/userManagement";
 import DynamicFormWithAuth from "@/components/formio/DynamicFormWithAuth";
 import { useSmartFetch } from "@/hooks/useSmartFetch";
 import { useQuery } from "@tanstack/react-query";
@@ -61,7 +61,7 @@ export default function SubmissionPreview(props: {
         error: errorUser,
         refetch: refetchUser,
     } = useQuery({
-        ...usersQuery.detail(
+        ...assigneeQuery.detail(
             session.data?.user.formioToken!,
             submission?.owner!
         ),
@@ -137,8 +137,14 @@ export default function SubmissionPreview(props: {
             <DynamicFormWithAuth
                 relativeFormPath={`/form/${props.formId}`}
                 modifyFormBeforeRender={(form) => {
-                    for (const component of form.components)
+                    for (const component of form.components) {
                         component.disabled = true;
+                        if (component.type === "hidden") {
+                            // @ts-expect-error
+                            component.type = "textfield";
+                            component.label += " (skryté)";
+                        }
+                    }
                 }}
                 defaultValues={submission.data}
             />

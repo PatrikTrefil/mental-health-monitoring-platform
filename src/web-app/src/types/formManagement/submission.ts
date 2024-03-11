@@ -36,7 +36,7 @@ export type SelectBoxDataValue = {
     [key: string]: boolean | undefined;
 };
 
-export interface ClientPatientSubmission extends Submission {
+export interface AssigneeSubmission extends Submission {
     data: {
         taskId: string;
     } & Submission["data"];

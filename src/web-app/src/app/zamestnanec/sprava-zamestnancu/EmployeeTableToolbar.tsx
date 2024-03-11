@@ -4,8 +4,8 @@ import { UserRoleTitle } from "@/types/userManagement/UserRoleTitle";
 import { User } from "@/types/userManagement/user";
 import { Table } from "@tanstack/react-table";
 import { useSession } from "next-auth/react";
-import CreateSpravceDotaznikuToolbarItem from "./toolbar-items/CreateSpravceDotaznikuToolbarItem";
-import CreateZadavatelDotaznikuToolbarItem from "./toolbar-items/CreateZadavatelDotaznikuToolbarItem";
+import CreateAssignerToolbarItem from "./toolbar-items/CreateAssignerToolbarItem";
+import CreateFormManagerToolbarItem from "./toolbar-items/CreateFormManagerToolbarItem";
 import DeleteEmployeeToolbarItem from "./toolbar-items/DeleteEmployeeToolbarItem";
 
 /**
@@ -35,9 +35,9 @@ export default function EmployeeTableToolbar({
                 />
             </div>
             {session?.data?.user.roleTitles.includes(
-                UserRoleTitles.SPRAVCE_DOTAZNIKU
-            ) && <CreateSpravceDotaznikuToolbarItem />}
-            <CreateZadavatelDotaznikuToolbarItem />
+                UserRoleTitles.FORM_MANAGER
+            ) && <CreateFormManagerToolbarItem />}
+            <CreateAssignerToolbarItem />
             <DeleteEmployeeToolbarItem table={table} />
         </div>
     );

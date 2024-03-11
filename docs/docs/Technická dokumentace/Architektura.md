@@ -40,6 +40,7 @@ System_Boundary(systemBoundary, "Platforma pro monitorování mentálního zdrav
     Container(spravaFormularu, "Správa formulářů")
     Container(spravaNedokoncenychVyplneni, "Správa nedokončených vyplnění")
     Container(spravaUkolu, "Správa úkolů")
+    Container(export, "Export dat")
     ContainerDb(spravaNedokoncenychVyplneniDb, "Databáze nedokončených vyplnění")
     ContainerDb(formulareDb, "Databáze správce formulářů")
     ContainerDb(ukolyDb, "Databáze úkolů")
@@ -59,6 +60,9 @@ Rel_D(admin, monitoringWeb, "Používá")
 Rel_D(zadavatelUkolu, webApp, "Používá")
 Rel_D(spravceUkolu, webApp, "Používá")
 
+Rel(webApp, export, "Používá")
+Rel(export, spravaFormularu, "Získává data")
+Rel(export, spravaUkolu, "Získává data")
 Rel(webApp, spravaNedokoncenychVyplneni, "Používá")
 Rel(spravaFormularu, spravaNedokoncenychVyplneni, "Informuje o vyplnění")
 Rel(spravaNedokoncenychVyplneni, manazerUzivatelu, "Autorizuje akce", "gateway")
@@ -114,6 +118,8 @@ System_Boundary(systemBoundary, "Platforma pro monitorování mentálního zdrav
     }
     Container(spravaFormularu, "Správa formulářů")
     Container(spravaUkolu, "Správa úkolů")
+    Container(export, "Export dat")
+    Container(manazerUzivatelu, "Manažer uživatelů a autentifikace")
 }
 
 Lay_D(pacient, webAppBoundary)
@@ -122,12 +128,14 @@ Lay_D(admin, webAppBoundary)
 Lay_D(spravceUkolu, webAppBoundary)
 Lay_D(zadavatelUkolu, webAppBoundary)
 
-Rel(pacient, userSection, "Používá")
 Rel(klient, userSection, "Používá")
 Rel(admin, managementSection, "Používá")
 Rel(spravceUkolu, managementSection, "Používá")
 Rel(zadavatelUkolu, managementSection, "Používá")
 
+Rel(managementSection, export, "Používá")
+Rel(webAppBoundary, manazerUzivatelu, "Používá")
+Rel(pacient, userSection, "Používá")
 Rel(userSection, spravaFormularu, "Používá")
 Rel(managementSection, spravaFormularu, "Používá")
 Rel(userSection, spravaUkolu, "Používá")

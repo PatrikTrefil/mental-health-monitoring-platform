@@ -6,17 +6,15 @@ import { useState } from "react";
 import { Button, Modal } from "react-bootstrap";
 
 /**
- * Renders a toolbar item for creating a new user with the role of {@link UserRoleTitles.SPRAVCE_DOTAZNIKU}.
+ * Renders a toolbar item for creating a new user with the role of {@link UserRoleTitles.FORM_MANAGER}.
  */
-export default function CreateSpravceDotaznikuToolbarItem() {
-    const [
-        showCreateSpravceDotaznikuModal,
-        setShowCreateSpravceDotaznikuModal,
-    ] = useState(false);
+export default function CreateFormManagerToolbarItem() {
+    const [showCreateFormManagerModal, setShowCreateFormManagerModal] =
+        useState(false);
 
     return (
         <>
-            <Button onClick={() => setShowCreateSpravceDotaznikuModal(true)}>
+            <Button onClick={() => setShowCreateFormManagerModal(true)}>
                 <i
                     className="bi bi-plus-lg"
                     style={{
@@ -26,8 +24,8 @@ export default function CreateSpravceDotaznikuToolbarItem() {
                 Založit účet nového správce dotazníků
             </Button>
             <Modal
-                show={showCreateSpravceDotaznikuModal}
-                onHide={() => setShowCreateSpravceDotaznikuModal(false)}
+                show={showCreateFormManagerModal}
+                onHide={() => setShowCreateFormManagerModal(false)}
             >
                 <Modal.Header closeButton>
                     <Modal.Title>
@@ -36,9 +34,9 @@ export default function CreateSpravceDotaznikuToolbarItem() {
                 </Modal.Header>
                 <Modal.Body>
                     <CreateUser
-                        userRoleTitle={UserRoleTitles.SPRAVCE_DOTAZNIKU}
+                        userRoleTitle={UserRoleTitles.FORM_MANAGER}
                         onChangeDone={() =>
-                            setShowCreateSpravceDotaznikuModal(false)
+                            setShowCreateFormManagerModal(false)
                         }
                     />
                 </Modal.Body>

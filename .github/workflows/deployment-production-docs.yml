@@ -27,6 +27,8 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 18
+          cache: npm
+          cache-dependency-path: ./docs/package-lock.json
 
       - name: Generate next-env.d.ts in web app
         uses: ./.github/actions/build-web-app

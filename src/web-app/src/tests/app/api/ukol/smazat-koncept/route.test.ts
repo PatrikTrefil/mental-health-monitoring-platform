@@ -18,7 +18,7 @@ const mockValidAdminToken = faker.string.alpha(10);
 
 vi.mock("@/client/userManagementClient", () => ({
     loginAdmin: vi.fn(() => mockValidAdminToken),
-    loadClientsAndPatients: vi.fn(() => [
+    loadAssignees: vi.fn(() => [
         {
             _id: userSubmissionId,
             data: {
@@ -26,7 +26,7 @@ vi.mock("@/client/userManagementClient", () => ({
             },
         },
     ]),
-    loadClientPatient: vi.fn(() => ({
+    loadAssignee: vi.fn(() => ({
         _id: userSubmissionId,
         data: {
             id: userId,

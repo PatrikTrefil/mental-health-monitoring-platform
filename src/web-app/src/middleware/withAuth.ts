@@ -76,12 +76,12 @@ function hasEnoughPrivilegesForWebpage(
 ): boolean {
     if (webpagePathname.startsWith("/zamestnanec/"))
         return (
-            roleTitles.includes(UserRoleTitles.SPRAVCE_DOTAZNIKU) ||
-            roleTitles.includes(UserRoleTitles.ZADAVATEL_DOTAZNIKU)
+            roleTitles.includes(UserRoleTitles.FORM_MANAGER) ||
+            roleTitles.includes(UserRoleTitles.ASSIGNER)
         );
 
     if (webpagePathname.startsWith("/uzivatel/"))
-        return roleTitles.includes(UserRoleTitles.KLIENT_PACIENT);
+        return roleTitles.includes(UserRoleTitles.ASSIGNEE);
 
     return true;
 }
@@ -123,14 +123,14 @@ async function apiMiddleware(req: NextRequest) {
             return new NextResponse("Internal server error", { status: 500 });
         }
 
-        const clientPatientRoleId = roleList.find(
-            (r) => r.title === UserRoleTitles.KLIENT_PACIENT
+        const assigneeRoleId = roleList.find(
+            (r) => r.title === UserRoleTitles.ASSIGNEE
         )?._id;
 
-        if (!clientPatientRoleId)
+        if (!assigneeRoleId)
             return new NextResponse("Internal server error", { status: 500 });
 
-        if (!user.roles.includes(clientPatientRoleId))
+        if (!user.roles.includes(assigneeRoleId))
             return new NextResponse("Unauthorized", { status: 401 });
     }
 }

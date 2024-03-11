@@ -13,16 +13,19 @@ import TaskCreationToolbarItem from "./toolbar-items/TaskCreationToolbarItem";
  * @param root0.filterProps - Props for the filter toolbar item.
  * @param root0.filterProps.columnId - ID of the column that is used for filtering.
  * @param root0.filterProps.placeholder - Placeholder for the filter input.
+ * @param root0.multiColumn - Whether to allow filtering by multiple columns.
  */
 export default function TaskTableToolbar({
     table,
     filterProps: { columnId, placeholder },
+    multiColumn,
 }: {
     table: Table<inferProcedureOutput<AppRouter["task"]["createTask"]>>;
     filterProps: {
         columnId: string;
         placeholder: string;
     };
+    multiColumn?: boolean;
 }) {
     return (
         <div className="d-flex gap-2">
@@ -31,11 +34,7 @@ export default function TaskTableToolbar({
                     table={table}
                     filterColumnId={columnId}
                     placeholder={placeholder}
-                    pathLabelMap={{
-                        name: "Název úkolu",
-                        description: "Popis úkolu",
-                        forUserId: "Pro uživatele",
-                    }}
+                    multiColumn={multiColumn}
                 />
             </div>
             <TaskCreationToolbarItem />

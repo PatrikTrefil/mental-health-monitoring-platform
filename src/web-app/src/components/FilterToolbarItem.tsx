@@ -7,7 +7,7 @@ import {
 import useDebounce from "@/hooks/useDebounce";
 import { Table } from "@tanstack/react-table";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Form, InputGroup } from "react-bootstrap";
 
 /**
@@ -16,22 +16,35 @@ import { Form, InputGroup } from "react-bootstrap";
  * @param root0.table - Table for which to render the toolbar item.
  * @param root0.filterColumnId - ID of the column to filter by.
  * @param root0.placeholder - Placeholder text for the filter input.
- * @param root0.pathLabelMap - Map of paths in the submission object to their labels (display names).
+ * @param root0.multiColumn - Whether to allow filtering by multiple columns.
+ * Every column which should be filterable must have a `filterLabel` property in its meta.
+ * (a select element with column names will be shown).
  */
 export default function FilterToolbarItem<T>({
     table,
     filterColumnId,
     placeholder,
-    pathLabelMap,
+    multiColumn,
 }: {
     table: Table<T>;
     filterColumnId: string;
     placeholder: string;
-    pathLabelMap?: { [key: string]: string };
+    multiColumn?: boolean;
 }) {
     const router = useRouter();
     const pathname = usePathname();
     const searchParams = useSearchParams()!;
+
+    const columns = table.getAllColumns();
+    const pathLabelMap = useMemo(
+        () =>
+            Object.fromEntries(
+                columns
+                    .filter((c) => (c.columnDef.meta as any)?.filterLabel) // Ignore columns without filterLabel
+                    .map((c) => [c.id, (c.columnDef.meta as any).filterLabel])
+            ),
+        [columns]
+    );
 
     const [filterValue, setFilterValue] = useState(
         () => searchParams.get(filterUrlParamName) ?? ""
@@ -58,7 +71,7 @@ export default function FilterToolbarItem<T>({
                     value={filterValue}
                     onChange={(e) => setFilterValue(e.target.value)}
                 />
-                {pathLabelMap !== undefined && (
+                {multiColumn && (
                     <>
                         <InputGroup.Text>Pro sloupec:</InputGroup.Text>
                         <Form.Select

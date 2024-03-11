@@ -11,9 +11,7 @@ export default function CreateFormToolbarItem() {
     const { data } = useSession();
     return (
         <>
-            {data?.user.roleTitles.includes(
-                UserRoleTitles.SPRAVCE_DOTAZNIKU
-            ) && (
+            {data?.user.roleTitles.includes(UserRoleTitles.FORM_MANAGER) && (
                 <Button as="a" href="/zamestnanec/formular/vytvorit">
                     <i
                         className="bi bi-plus-lg"

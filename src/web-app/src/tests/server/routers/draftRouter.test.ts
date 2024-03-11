@@ -14,7 +14,7 @@ vi.mock("@/server/db");
 
 describe.each(
     Object.values(UserRoleTitles)
-        .filter((r) => r !== UserRoleTitles.KLIENT_PACIENT)
+        .filter((r) => r !== UserRoleTitles.ASSIGNEE)
         .map((r) => ({
             roleTitle: r,
         }))
@@ -52,10 +52,8 @@ describe.each(
     });
 });
 
-describe(`as a ${UserRoleTitles.KLIENT_PACIENT} it`, () => {
-    const ctx = createInnerTRPCContextMockSession([
-        UserRoleTitles.KLIENT_PACIENT,
-    ]);
+describe(`as a ${UserRoleTitles.ASSIGNEE} it`, () => {
+    const ctx = createInnerTRPCContextMockSession([UserRoleTitles.ASSIGNEE]);
     const caller = appRouter.createCaller(ctx);
     const nonexistentFormId = "nonexistent-form-id";
 
