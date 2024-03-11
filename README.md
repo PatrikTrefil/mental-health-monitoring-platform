@@ -24,6 +24,7 @@ Případně také:
 
 ```sh
 git clone https://github.com/PatrikTrefil/mental-health-monitoring-platform.git
+cd mental-health-monitoring-platform
 git submodule init
 git submodule update
 ```
