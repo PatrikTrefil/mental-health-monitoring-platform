@@ -71,7 +71,6 @@ const formCsTranslation = {
 };
 
 const formEditCsTranslation = {
-    // TODO: Some of the first translations don't work (see issue https://github.com/formio/react/issues/522)
     Title: "Titulek",
     Name: "Jméno",
     "Display as": "Zobrazit jako",
