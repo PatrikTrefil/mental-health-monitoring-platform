@@ -1,7 +1,7 @@
 "use client";
 
-import { usersQuery } from "@/client/queries/userManagement";
-import { deleteClientPacient } from "@/client/userManagementClient";
+import { assigneeQuery } from "@/client/queries/userManagement";
+import { deleteAssignee } from "@/client/userManagementClient";
 import { User } from "@/types/userManagement/user";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Table } from "@tanstack/react-table";
@@ -14,7 +14,7 @@ import { toast } from "react-toastify";
  * @param root0 - Props for the component.
  * @param root0.table - Reference to the table for which the toolbar is rendered.
  */
-export default function DeleteClientPatientToolbarItem({
+export default function BatchDeleteAssigneeToolbarItem({
     table,
 }: {
     table: Table<User>;
@@ -29,14 +29,14 @@ export default function DeleteClientPatientToolbarItem({
         }: {
             formioToken: string;
             user: { submissionId: string; displayName: string };
-        }) => deleteClientPacient(submissionId, formioToken),
+        }) => deleteAssignee(submissionId, formioToken),
         onMutate: ({ user }) => {
-            console.debug("Deleting client/patient ...", { user });
+            console.debug("Deleting assignee ...", { user });
         },
         onError: (_, { user }) =>
             toast.error(`Smazání účtu "${user.displayName}" selhalo.`),
         onSuccess: (_, { user }) => {
-            console.debug("Deleted client/patient ...", {
+            console.debug("Deleted assignee ...", {
                 user,
             });
         },
@@ -70,11 +70,11 @@ export default function DeleteClientPatientToolbarItem({
             });
             toast.success(`Účty (${users.length}) byly smazány.`);
             queryClient.invalidateQueries({
-                queryKey: usersQuery.list._def,
+                queryKey: assigneeQuery.list._def,
             });
             for (const { submissionId } of users)
                 queryClient.invalidateQueries({
-                    queryKey: usersQuery.detail(
+                    queryKey: assigneeQuery.detail(
                         session.data!.user.formioToken,
                         submissionId
                     ).queryKey,

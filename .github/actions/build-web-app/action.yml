@@ -11,6 +11,8 @@ runs:
       uses: actions/setup-node@v3
       with:
         node-version: 18
+        cache: npm
+        cache-dependency-path: ./src/web-app/package-lock.json
 
     - name: Install Node.js dependencies
       shell: bash

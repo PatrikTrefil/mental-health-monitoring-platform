@@ -14,23 +14,28 @@ import {
     ModalTitle,
     Nav,
     Navbar,
-    Spinner,
 } from "react-bootstrap";
 
 /**
  * Navigation bar for pages accessible to employees.
+ * @param root0 - Props.
+ * @param root0.children - Display ID of the user. Passed as prop so that it can be server rendered.
  */
-export default function NavigationBarEmployee() {
+export default function NavigationBarEmployee({
+    children,
+}: {
+    children: React.ReactNode;
+}) {
     const { data } = useSession();
     const [isAccountDetailShowing, setIsAccountDetailShowing] = useState(false);
 
     const pathname = usePathname();
 
     const mainRoleTitle = data?.user.roleTitles.includes(
-        UserRoleTitles.SPRAVCE_DOTAZNIKU
+        UserRoleTitles.FORM_MANAGER
     )
-        ? UserRoleTitles.SPRAVCE_DOTAZNIKU
-        : UserRoleTitles.ZADAVATEL_DOTAZNIKU;
+        ? UserRoleTitles.FORM_MANAGER
+        : UserRoleTitles.ASSIGNER;
 
     return (
         <>
@@ -68,15 +73,6 @@ export default function NavigationBarEmployee() {
             </Modal>
             <Navbar bg="primary" variant="dark" collapseOnSelect expand="xxl">
                 <Container>
-                    <Navbar.Brand
-                        href="/zamestnanec/"
-                        style={{
-                            fontSize: "2rem",
-                            fontWeight: 600,
-                        }}
-                    >
-                        NUDZ
-                    </Navbar.Brand>
                     <Navbar.Toggle
                         data-bs-target="#navbar-scroll"
                         data-bs-toggle="collapse"
@@ -116,17 +112,7 @@ export default function NavigationBarEmployee() {
                                         className="bi bi-person"
                                         style={{ paddingRight: "5px" }}
                                     ></i>
-                                    {data?.user.data.id ?? (
-                                        <Spinner
-                                            animation="border"
-                                            role="status"
-                                            size="sm"
-                                        >
-                                            <span className="visually-hidden">
-                                                Načítání...
-                                            </span>
-                                        </Spinner>
-                                    )}
+                                    {children}
                                 </Nav.Link>
                                 <Nav.Item>
                                     <SignOutButton

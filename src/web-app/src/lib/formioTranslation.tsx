@@ -71,7 +71,6 @@ const formCsTranslation = {
 };
 
 const formEditCsTranslation = {
-    // TODO: Some of the first translations don't work (see issue https://github.com/formio/react/issues/522)
     Title: "Titulek",
     Name: "Jméno",
     "Display as": "Zobrazit jako",
@@ -553,6 +552,10 @@ const formEditCsTranslation = {
     "Enable Row Drafts": "Povolit koncepty řádků",
     "Allow save rows even if their data is invalid. Errors will occur when try to submit with invalid rows.":
         "Povolit uložení řádků, i když jsou jejich data neplatná. Při pokusu o odeslání s neplatnými řádky dojde k chybám.",
+    Edit: "Upravit",
+    Move: "Přesunout",
+    "Edit JSON": "Upravit JSON",
+    Copy: "Kopírovat",
 };
 
 export { formCsTranslation, formEditCsTranslation };

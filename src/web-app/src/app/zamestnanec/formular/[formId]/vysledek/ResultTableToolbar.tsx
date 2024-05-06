@@ -10,16 +10,17 @@ import FrequencyVisualizationToolbarItem from "./toolbar-items/FrequencyVisualiz
  * @param root0.frequencyVisualizationProps - Props for the frequency visualization.
  * @param root0.table - Table for which to render the toolbar.
  * @param root0.filterProps - Props for the filter toolbar item.
- * @param root0.filterProps.pathLabelMap - Map of paths in the submission object to their labels (display names).
  * @param root0.filterProps.placeholder - Placeholder for the filter input.
  * @param root0.filterProps.columnId - ID of the column to filter by.
  * @param root0.formId - ID of the form for which the results are being displayed.
+ * @param root0.filterProps.multiColumn - Whether to filter by multiple columns (a select element with column names will be shown).
+ * Every column which should be filterable must have a `filterLabel` property in its meta.
  */
 export default function ResultTableToolbar<TTable>({
     formId,
     frequencyVisualizationProps,
     table,
-    filterProps: { columnId: filterColumnId, pathLabelMap, placeholder },
+    filterProps: { columnId: filterColumnId, placeholder, multiColumn },
 }: {
     formId: string;
     frequencyVisualizationProps: Parameters<
@@ -28,7 +29,7 @@ export default function ResultTableToolbar<TTable>({
     table: Table<TTable>;
     filterProps: {
         columnId: string;
-        pathLabelMap: { [key: string]: string };
+        multiColumn?: boolean;
         placeholder: string;
     };
 }) {
@@ -39,7 +40,7 @@ export default function ResultTableToolbar<TTable>({
                     table={table}
                     filterColumnId={filterColumnId}
                     placeholder={placeholder}
-                    pathLabelMap={pathLabelMap}
+                    multiColumn={multiColumn}
                 />
             </div>
             <FrequencyVisualizationToolbarItem

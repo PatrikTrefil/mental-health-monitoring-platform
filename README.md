@@ -24,6 +24,7 @@ Případně také:
 
 ```sh
 git clone https://github.com/PatrikTrefil/mental-health-monitoring-platform.git
+cd mental-health-monitoring-platform
 git submodule init
 git submodule update
 ```
@@ -33,6 +34,7 @@ git submodule update
 ## Spouštění aplikace
 
 Před spuštěním aplikace je potřeba dodat `.env` soubor pro konfiguraci kontejneru.
+Syntax konfiguračního souboru je popsána [zde](https://docs.docker.com/compose/environment-variables/env-file/).
 Ukázkovou konfiguraci najdete v `.env.example`.
 
 -   konfigurace mongo
@@ -51,13 +53,13 @@ Ukázkovou konfiguraci najdete v `.env.example`.
 Také je potřeba nainstalovat závislosti pro Formio aplikaci:
 
 ```sh
-$ cd src/formio && npm install
+cd src/formio && npm install
 ```
 
 ### Spuštění aplikace v produkčním módu
 
 ```sh
-$ docker compose up
+docker compose up
 ```
 
 Aplikace je dostupná na `http://localhost`.
@@ -67,7 +69,7 @@ Pokud se jedná o **první spuštění aplikace**, vykonejte kroky v sekci [Inic
 ### Spuštění aplikace v vývojovém módu
 
 ```sh
-$ docker compose --file ./docker-compose.yml --file ./docker-compose.dev.yml up
+docker compose --file ./docker-compose.yml --file ./docker-compose.dev.yml up
 ```
 
 Aplikace je dostupná na `http://localhost:8080`, kde se přistupuje skrze reverse proxy.
@@ -94,4 +96,4 @@ Resources).
 -   `/health` - vratí 200 pokud je reverse proxy dostupná
 -   `/monitoring/` - monitoring aplikace
     -   `/monitoring/api` - monitoring API ([oficiální dokumentace](https://github.com/google/cadvisor/blob/master/docs/api.md))
--   `/formio/` - webové rozhraní/API pro správu formulářů ([oficiální dokumentace](https://apidocs.form.io/))
+-   `/formio/` - webové rozhraní/API pro správu formulářů ([oficiální dokumentace webového rozhraní](https://help.form.io/), [oficiální dokumentace k API](https://apidocs.form.io/))

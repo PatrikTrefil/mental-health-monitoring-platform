@@ -6,6 +6,7 @@ import AppTable from "@/components/AppTable";
 import PlaceholderAppTable from "@/components/PlaceholderAppTable";
 import SimplePagination from "@/components/SimplePagination";
 import TableHeader from "@/components/TableHeader";
+import assigneeFormTag from "@/constants/assigneeFormTag";
 import {
     filterUrlParamName,
     orderUrlParamAscValue,
@@ -31,10 +32,10 @@ import { Alert, Button, Form } from "react-bootstrap";
 import { toast } from "react-toastify";
 import FormTableToolbar from "./FormTableToolbar";
 
-const filterColumnId = "name";
+const filterColumnId = "title";
 
 /**
- * Table of form definitions available to clients/patients.
+ * Table of form definitions available to assignees.
  */
 export default function FormDefinitionsTable() {
     const queryClient = useQueryClient();
@@ -102,8 +103,8 @@ export default function FormDefinitionsTable() {
                     isNarrow: true,
                 },
             }),
-            columnHelper.accessor("name", {
-                id: "name",
+            columnHelper.accessor("title", {
+                id: "title",
                 header: ({ column }) => (
                     <TableHeader text="Název" column={column} />
                 ),
@@ -219,7 +220,7 @@ export default function FormDefinitionsTable() {
                           },
                       ]
                     : undefined,
-            tags: ["klientPacient"],
+            tags: [assigneeFormTag],
         }),
         enabled: !!session.data?.user.formioToken,
     });
@@ -303,7 +304,7 @@ export default function FormDefinitionsTable() {
                                       },
                                   ]
                                 : undefined,
-                        tags: ["klientPacient"],
+                        tags: [assigneeFormTag],
                     })
                 );
             // Prefetch previous page
@@ -335,7 +336,7 @@ export default function FormDefinitionsTable() {
                                       },
                                   ]
                                 : undefined,
-                        tags: ["klientPacient"],
+                        tags: [assigneeFormTag],
                     })
                 );
         },

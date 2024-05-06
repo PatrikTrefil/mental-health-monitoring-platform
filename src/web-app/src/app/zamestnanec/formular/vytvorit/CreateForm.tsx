@@ -3,6 +3,7 @@
 import { createAction, createForm } from "@/client/formManagementClient";
 import { loadRoles } from "@/client/userManagementClient";
 import DynamicFormEdit from "@/components/formio/DynamicFormEdit";
+import assigneeFormTag from "@/constants/assigneeFormTag";
 import UserRoleTitles from "@/constants/userRoleTitles";
 import { useSmartFetch } from "@/hooks/useSmartFetch";
 import { WebhookAction } from "@/types/formManagement/action";
@@ -41,18 +42,20 @@ export default function CreateForm() {
         console.error(error);
         return errorResult;
     } else {
-        const klientPacientRoleId = data?.find(
-            (role) => role.title === UserRoleTitles.KLIENT_PACIENT
+        const assigneeRoleId = data?.find(
+            (role) => role.title === UserRoleTitles.ASSIGNEE
         )?._id;
-        const spravceDotaznikuRoleId = data?.find(
-            (role) => role.title === UserRoleTitles.SPRAVCE_DOTAZNIKU
+        const formManagerRoleId = data?.find(
+            (role) => role.title === UserRoleTitles.FORM_MANAGER
         )?._id;
-        const zadavatelDotaznikuRoleId = data?.find(
-            (role) => role.title === UserRoleTitles.ZADAVATEL_DOTAZNIKU
+        const assignerRoleId = data?.find(
+            (role) => role.title === UserRoleTitles.ASSIGNER
         )?._id;
 
-        if (!klientPacientRoleId || !spravceDotaznikuRoleId) {
-            console.error("Roles of client/patient or employee not found.");
+        if (!assigneeRoleId || !formManagerRoleId || !assignerRoleId) {
+            console.error(
+                "Roles id of assignee, assigner or form manager not found."
+            );
             return errorResult;
         }
 
@@ -82,24 +85,22 @@ export default function CreateForm() {
             access: [
                 {
                     type: "read_all",
-                    roles: [
-                        spravceDotaznikuRoleId,
-                        klientPacientRoleId,
-                        zadavatelDotaznikuRoleId,
-                    ],
+                    roles: [formManagerRoleId, assigneeRoleId, assignerRoleId],
                 },
             ],
+            // Make assignees able to fill out the form
+            // and make the employees able to see their submissions
             submissionAccess: [
                 {
                     type: "create_own",
-                    roles: [klientPacientRoleId],
+                    roles: [assigneeRoleId],
                 },
                 {
                     type: "read_all",
-                    roles: [zadavatelDotaznikuRoleId],
+                    roles: [assignerRoleId],
                 },
             ],
-            tags: ["klientPacient"],
+            tags: [assigneeFormTag],
         };
 
         return (
@@ -221,8 +222,6 @@ export default function CreateForm() {
                         toast.success("Formulář byl úspěšně vytvořen.");
                         router.push("/zamestnanec/");
                     }}
-                    // Make clients/patients able to fill out the form
-                    // and make the employees able to see their submissions
                     form={startingFormSchema}
                 />
             </>

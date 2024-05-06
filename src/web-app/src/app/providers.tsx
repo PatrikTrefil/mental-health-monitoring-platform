@@ -1,7 +1,7 @@
 "use client";
 
 import { ClientProvider as TrpcAndReactQueryClientProvider } from "@/client/trpcClient";
-import { SSRProvider } from "@/components/client-react-bootstrap";
+import { SSRProvider } from "@/components/ClientReactBootstrap";
 import { SessionProvider } from "next-auth/react";
 import { ToastContainer } from "react-toastify";
 

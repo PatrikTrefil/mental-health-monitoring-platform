@@ -15,7 +15,7 @@ const draftRouter = createTRPCRouter({
      * @param unknown - Input.data the draft data.
      * @returns The updated/inserted draft.
      * @throws {TRPCError}
-     * FORBIDDEN if the user is not a {@link UserRoleTitles.KLIENT_PACIENT}.
+     * FORBIDDEN if the user is not a {@link UserRoleTitles.ASSIGNEE}.
      * @throws {TRPCError}
      * INTERNAL_SERVER_ERROR if the database operation fails.
      * @throws {TRPCError}
@@ -41,7 +41,7 @@ const draftRouter = createTRPCRouter({
         .mutation(async (opts): Promise<Draft> => {
             if (
                 !opts.ctx.session.user.roleTitles.includes(
-                    UserRoleTitles.KLIENT_PACIENT
+                    UserRoleTitles.ASSIGNEE
                 )
             )
                 throw new TRPCError({ code: "FORBIDDEN" });
@@ -73,7 +73,7 @@ const draftRouter = createTRPCRouter({
      * @param string - Input.formId the id of the form to get the draft for.
      * @returns The requested draft.
      * @throws {TRPCError}
-     * FORBIDDEN if the user is not a {@link UserRoleTitles.KLIENT_PACIENT}.
+     * FORBIDDEN if the user is not a {@link UserRoleTitles.ASSIGNEE}.
      * @throws {TRPCError}
      * INTERNAL_SERVER_ERROR if the database operation fails.
      * @throws {TRPCError}
@@ -89,7 +89,7 @@ const draftRouter = createTRPCRouter({
         }> => {
             if (
                 !opts.ctx.session.user.roleTitles.includes(
-                    UserRoleTitles.KLIENT_PACIENT
+                    UserRoleTitles.ASSIGNEE
                 )
             )
                 throw new TRPCError({ code: "FORBIDDEN" });
@@ -123,7 +123,7 @@ const draftRouter = createTRPCRouter({
      * Delete a draft by form id.
      * @param string - Input.formId the id of the form to delete the draft for.
      * @throws {TRPCError}
-     * FORBIDDEN if the user is not a {@link UserRoleTitles.KLIENT_PACIENT}.
+     * FORBIDDEN if the user is not a {@link UserRoleTitles.ASSIGNEE}.
      * @throws {TRPCError}
      * INTERNAL_SERVER_ERROR if the database operation fails.
      * @throws {TRPCError}
@@ -134,7 +134,7 @@ const draftRouter = createTRPCRouter({
         .mutation(async (opts): Promise<Draft> => {
             if (
                 !opts.ctx.session.user.roleTitles.includes(
-                    UserRoleTitles.KLIENT_PACIENT
+                    UserRoleTitles.ASSIGNEE
                 )
             )
                 throw new TRPCError({ code: "FORBIDDEN" });

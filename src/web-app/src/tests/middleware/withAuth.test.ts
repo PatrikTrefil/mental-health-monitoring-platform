@@ -54,15 +54,15 @@ type TestInput = {
 
 describe.each<TestInput>([
     {
-        roleTitleToTest: UserRoleTitles.KLIENT_PACIENT,
+        roleTitleToTest: UserRoleTitles.ASSIGNEE,
         pathToTest: "http://localhost/uzivatel/prehled",
     },
     {
-        roleTitleToTest: UserRoleTitles.SPRAVCE_DOTAZNIKU,
+        roleTitleToTest: UserRoleTitles.FORM_MANAGER,
         pathToTest: "http://localhost/zamestnanec/sprava-formularu",
     },
     {
-        roleTitleToTest: UserRoleTitles.ZADAVATEL_DOTAZNIKU,
+        roleTitleToTest: UserRoleTitles.ASSIGNER,
         pathToTest: "http://localhost/zamestnanec/sprava-formularu",
     },
 ])(
@@ -162,7 +162,7 @@ describe("accessing /api/ukol/*", () => {
             const mockRoleList: Awaited<ReturnType<typeof loadRoles>> = [
                 {
                     _id: mockUserRoleId,
-                    title: UserRoleTitles.KLIENT_PACIENT,
+                    title: UserRoleTitles.ASSIGNEE,
                 },
             ];
             return mockRoleList;

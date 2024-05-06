@@ -77,10 +77,20 @@ export default function TaskTable() {
                     isNarrow: true,
                 },
             }),
+            columnHelper.accessor("id", {
+                id: "id",
+                meta: {
+                    viewOptionsLabel: "ID",
+                },
+                header: ({ column }) => (
+                    <TableHeader text="ID" column={column} />
+                ),
+            }),
             columnHelper.accessor("name", {
                 id: "name",
                 meta: {
                     viewOptionsLabel: "Název",
+                    filterLabel: "Název",
                 },
                 header: ({ column }) => (
                     <TableHeader text="Název" column={column} />
@@ -90,6 +100,7 @@ export default function TaskTable() {
                 id: "description",
                 meta: {
                     viewOptionsLabel: "Popis",
+                    filterLabel: "Popis",
                 },
                 header: ({ column }) => (
                     <TableHeader text="Popis" column={column} />
@@ -99,6 +110,7 @@ export default function TaskTable() {
                 id: "forUserId",
                 meta: {
                     viewOptionsLabel: "Pro uživatele",
+                    filterLabel: "Pro uživatele",
                 },
                 header: ({ column }) => (
                     <TableHeader text="Pro uživatele" column={column} />
@@ -406,6 +418,7 @@ export default function TaskTable() {
         initialState: {
             columnVisibility: {
                 updatedAt: false,
+                id: false,
             },
         },
         manualPagination: true,
@@ -427,6 +440,7 @@ export default function TaskTable() {
                     columnId: filterColumnId,
                     placeholder: "Filtrovat dle názvu",
                 }}
+                multiColumn={true}
             />
             <div className="my-2">
                 {isLoading ? (
