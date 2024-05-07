@@ -120,14 +120,15 @@ skrze modul Resources.
 ### Tvorba účtu pomocí shell skriptu
 
 Pokud máte k dispozici příkaz `curl`, tak uživatele s rolí správce dotazníků
-můžete vytvořit pomocí shell skriptu `./create_form_manager.sh`. Skript se
-spustí v interaktivním módu, pokud uživatel neposkytne všechny parametry
-programu. Parametry programu lze take předat pomocí argumentů programu.
-Parametry programu se odvíjí od konfigurace definované při instalaci aplikace.
-Dokumentaci nástroje lze získat pomocí příkazu:
+můžete vytvořit pomocí shell skriptu
+`./src/scripts/create_form_manager_user.sh`. Skript se spustí v interaktivním
+módu, pokud uživatel neposkytne všechny parametry programu. Parametry programu
+lze take předat pomocí argumentů programu. Parametry programu se odvíjí od
+konfigurace definované při instalaci aplikace. Dokumentaci nástroje lze získat
+pomocí příkazu:
 
 ```sh
-./create_form_manager.sh –help
+./src/scripts/create_form_manager_user.sh --help
 ```
 
 ## Správa aplikace
@@ -147,3 +148,19 @@ Aplikace se skládá z několika částí, které je potřeba spravovat. Zde je 
     po spuštění aplikace. Oficiální dokumentace k webovému rozhraní je dostupná
     online v anglickém jazyce zde. Oficiální dokumentace k API je dostupná
     online v anglickém jazyce zde.
+
+## Struktura repozitáře
+
+-   `/docs/` - Dokumentace k projektu (Dostupná i na
+    [tomto odkazu](https://mental-health-monitoring-platform.patriktrefil.com/)).
+    Více informací lze najít v [README podprojektu](./docs/README.md).
+-   `/src/formio/` - Git submodul obsahující fork repozitáře formio
+-   `/src/formio-mongo/` - Obsahuje Dockerfile pro MongoDB, kterou používá
+    Form.io.
+-   `/src/reverse-proxy/` - Obsahuje Dockerfile a konfigurační soubory pro
+    reverse proxy.
+-   `/src/web-app/` - Obsahuje zdrojový kód pro kontejnery Správa nedokončených
+    vyplnění, Databáze nedokončených vyplnění, Správa úkolů, Databáze úkolů,
+    Export dat, Webová aplikace. Více informací lze najít v
+    [README podprojektu](./src/web-app/README.md).
+-   `/src/scripts/` - Obsahuje skripty pro zjednodušení inicializace aplikace.
