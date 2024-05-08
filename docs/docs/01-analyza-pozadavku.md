@@ -76,7 +76,7 @@ Požadavky na monitoring jsou označeny R-MR-ID a požadavky na nasazení R-DR-I
 kde ID je opět číslo požadavku z dané kategorie. Mnoho požadavků pracuje s
 uživatelskými rolemi, které jsou definovány v požadavku [R-NR-1](#r-nr-1).
 Specifikace vznikla v rané fázi vývoje a některé požadavky byly později změněny.
-Změny jsou popsány v sekci [Změny specifikace](#zmeny-specifikace).
+Změny jsou popsány v sekci [Změny specifikace](#změny-specifikace).
 
 ### Funkční požadavky
 
@@ -254,8 +254,8 @@ Bude k dispozici rozhraní pro monitorování aplikace.
 ### Změny specifikace
 
 V průběhu vývoj se ukázalo, že některé požadavky popsané v
-sekci [1.2.1.1](#subsubsec:viditelnost-vyhodnoceni-dotazniku) je potřeba
-pozměnit. Tato podsekce popisuje všechny provedené změny.
+sekci [Viditelnost vyhodnocení dotazníků](#viditelnost-vyhodnocení-dotazníků) je
+potřeba pozměnit. Tato podsekce popisuje všechny provedené změny.
 
 Původní specifikace pracovala s možností nastavení viditelnosti vyhodnocení
 dotazníků. Toto bylo pokryto požadavky [R-FR-15](#r-fr-15), [R-FR-16](#r-fr-16)
@@ -279,7 +279,7 @@ Na základě schůzek a specifikace ze sekce [Specifikace](#specifikace) jsme
 vytvořili doménový model. Model byl následně konzultován s pracovníky NUDZ a byl
 schválen. Model je popsán diagramem na obrázku níže. Jednotlivé entity jsou
 definovány níže. Omezení kladené na model, která nejsou vyjádřena v diagramu,
-jsou popsána v sekci [1.3.1](#sbsec:omezeni).
+jsou popsána v sekci [Omezení](#omezení).
 
 ### Doménový model formou Class diagramu v notaci [UML](https://www.omg.org/spec/UML/2.5.1/PDF)
 
@@ -502,7 +502,7 @@ může ovlivnit způsob implementace. Jedná se o přepis funkčních požadavk�
 neformální specifikace ze sekce [Specifikace](#specifikace). Role uživatelů jsou
 definovány v nefunkčním požadavku [R-NR-1](#r-nr-1) ve specifikaci. Tato sekce
 pracuje již s změnami specifikace, které byly popsány v
-sekci [Změny specifikace](#zmeny-specifikace). Každá položka má identifikátor ve
+sekci [Změny specifikace](#změny-specifikace). Každá položka má identifikátor ve
 formátu R-US-ID, kde ID je číslo položky.
 
 ### R-US-1

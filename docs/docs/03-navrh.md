@@ -5,9 +5,9 @@ způsobem jsme se rozhodli řešit požadavky zadavatele v
 sekci [Návrh řešení](#návrh-řešení). Poté navrhneme architekturu systému v
 sekci [Architektura](#architektura). Následně se budeme věnovat návrhu
 uživatelského rozhraní formou wireframů
-(sekce [1.4](#sec:navrh-uzivatelskeho-rozhrani)). Následně popíšeme výběr
-technologií (sekce [Výběr technologií](#výběr-technologií)) a způsob ukládání
-dat v systému (sekce [Ukládání dat](#ukládání-dat)).
+(sekce [Návrh uživatelského rozhraní](#návrh-uživatelského-rozhraní)). Následně
+popíšeme výběr technologií (sekce [Výběr technologií](#výběr-technologií)) a
+způsob ukládání dat v systému (sekce [Ukládání dat](#ukládání-dat)).
 
 ## Návrh řešení
 
@@ -375,10 +375,10 @@ vybírat primárně z open-source řešení.
 ### Software pro práci s formuláři
 
 Software pro práci s formuláři je klíčovou součástí aplikace, jak je popsáno v
-kapitole [Analýza existujících řešení](#analýza-existujících-řešení).
-Problematika správy formulářů je detailně popsána v
-sekci [Problematika správy formulářů](#problematika-správy-formulářů). V závěru
-kapitoly [Analýza existujících řešení](#analýza-existujících-řešení) jsme se
+[Analýze existujících řešení](./analyza-existujicich-reseni). Problematika
+správy formulářů je detailně popsána v
+sekci [Problematika správy formulářů](./analyza-existujicich-reseni#problematika-správy-formulářů).
+V závěru [Analýzy existujících řešení](./analyza-existujicich-reseni) jsme se
 rozhodli pro využití software Form.io. Nyní popíšeme, jak přesně tento software
 bude využit.
 
@@ -691,7 +691,6 @@ systému nezachová déle než 30 dní.
 ```plantuml
 @startuml
 skinparam dpi 300
-skinparam defaultFontSize 30
 skinparam defaultTextAlignment center
 
 |Uživatel|

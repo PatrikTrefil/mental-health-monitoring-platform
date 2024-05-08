@@ -221,8 +221,10 @@ podporována, ale neumí přeposílat hlavičky HTTP dotazu, který požadavek
 inicioval. Tuto funkcionalitu potřebujeme, jelikož chceme přeposílat
 autentizační hlavičky při komunikaci mezi systémem spravující formuláře a
 systémem spravující úkoly uživatelů. Detaily ohledně této komunikace jsou
-popsány v sekci [1.5](#sec:propojeni-spravy-ukolu-a-spravy-formularu). Proto
-jsem upravil tuto funkci tak, aby bylo možné přeposílat autentizační hlavičky.
+popsány v
+sekci [Propojení správy úkolů a správy formulářů](#propojení-správy-úkolů-a-správy-formulářů).
+Proto jsem upravil tuto funkci tak, aby bylo možné přeposílat autentizační
+hlavičky.
 
 #### Imutabilita ID uživatele
 

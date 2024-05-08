@@ -1,0 +1,8 @@
+export default function Figure({ src, caption, alt }) {
+    return (
+        <figure id={`fig:${src}`}>
+            <img src={src} alt={alt ?? caption} />
+            <figcaption style={{ textAlign: "center" }}>{caption}</figcaption>
+        </figure>
+    );
+}
