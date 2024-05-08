@@ -22,7 +22,7 @@ const config = {
                 ],
                 excludeExternals: true,
                 entryPointStrategy: "expand",
-                out: "Webová aplikace/Reference",
+                out: "09-Webová aplikace/Reference",
                 watch: process.env.TYPEDOC_WATCH,
                 sidebar: {
                     categoryLabel: "Reference",
@@ -30,12 +30,12 @@ const config = {
             },
         ],
     ],
-    title: "Dokumentace - Mental health monitoring platform",
+    title: "Dokumentace - Platforma pro monitorování mentálního zdraví",
     tagline: "",
     favicon: "img/favicon.ico",
 
     // Set the production url of your site here
-    url: "https://mental-health-monitoring-platform.vercel.app",
+    url: "https://mental-health-monitoring-platform.patriktrefil.com",
     // Set the /<baseUrl>/ pathname under which your site is served
     // For GitHub pages deployment, it is often '/<projectName>/'
     baseUrl: "/",
@@ -88,7 +88,7 @@ const config = {
             // Replace with your project's social card
             image: "img/docusaurus-social-card.jpg",
             navbar: {
-                title: "Mental health monitoring platform",
+                title: "Platforma pro monitorování mentálního zdraví",
                 logo: {
                     alt: "My Site Logo",
                     src: "img/logo.svg",
@@ -98,7 +98,7 @@ const config = {
                         type: "docSidebar",
                         sidebarId: "docsSidebar",
                         position: "left",
-                        label: "Docs",
+                        label: "Dokumentace",
                     },
                     {
                         href: "https://github.com/PatrikTrefil/mental-health-monitoring-platform",
@@ -117,10 +117,14 @@ const config = {
                                 label: "GitHub",
                                 href: "https://github.com/PatrikTrefil/mental-health-monitoring-platform",
                             },
+                            {
+                                label: "Autorův osobní web",
+                                href: "https://www.patriktrefil.com/",
+                            },
                         ],
                     },
                 ],
-                copyright: `Copyright © ${new Date().getFullYear()} Mental health monitoring platform, Patrik Trefil.`,
+                copyright: `Copyright © ${new Date().getFullYear()} Platforma pro monitorování mentálního zdraví, Patrik Trefil.`,
             },
             prism: {
                 theme: lightCodeTheme,
