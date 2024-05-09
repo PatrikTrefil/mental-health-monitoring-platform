@@ -24,7 +24,7 @@ potřeba naklonovat repozitář mental-health-monitoring-platform včetně submo
 což lze provést následujícím příkazem:
 
 ```sh
-git clone –recurse-submodules \
+git clone --recurse-submodules \
     https://github.com/PatrikTrefil/mental-health-monitoring-platform.git
 ```
 
@@ -90,8 +90,8 @@ první spuštění aplikace, vytvořte prvního uživatele dle návodu v sekci 6
 spuštění aplikace ve vývojovém módu použijte následující příkaz:
 
 ```sh
-docker compose –file ./docker-compose.yml \
-    –file ./docker-compose.dev.yml \
+docker compose --file ./docker-compose.yml \
+    --file ./docker-compose.dev.yml \
     up
 ```
 
