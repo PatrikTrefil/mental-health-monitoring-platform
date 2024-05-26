@@ -84,7 +84,7 @@ register_response="$(curl --location -g "${FORMIO_URL}/zamestnanec/spravce-dotaz
     }"
     )"
 
-if $(echo $register_response | grep -q "ValidationError"); then
+if [ -z $register_response ] || $(echo $register_response | grep -Pq "(ValidationError|Unauthorized)"); then
     RED='\033[0;31m'
     echo -e "${RED}Error registering user ${NEW_USER_ID}:"
 
