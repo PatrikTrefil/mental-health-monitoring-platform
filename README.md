@@ -78,15 +78,17 @@ uživatelský účet, jak je popsáno v sekci
 ## Spuštění aplikace
 
 Předpokládáme, že aplikace byla nainstalována a konfigurována podle návodu v
-sekci 6.1. Pro spuštění aplikace v produkčním módu spusťte následující příkaz z
-kořenového adresáře repozitáře:
+sekci [Instalace a konfigurace](#instalace-a-konfigurace). Pro spuštění aplikace
+v produkčním módu spusťte následující příkaz z kořenového adresáře repozitáře:
 
 ```sh
 docker compose up
 ```
 
 Po spuštění příkazu bude aplikace dostupná na http://localhost. Pokud se jedná o
-první spuštění aplikace, vytvořte prvního uživatele dle návodu v sekci 6.3. Pro
+první spuštění aplikace, inicializujte databázi dle návodu v sekci
+[Inicializace databáze](#inicializace-databáze) a vytvořte prvního uživatele dle
+návodu v sekci [Tvorba uživatelských účtů](#tvorba-uživatelských-účtů). Pro
 spuštění aplikace ve vývojovém módu použijte následující příkaz:
 
 ```sh
@@ -95,9 +97,33 @@ docker compose --file ./docker-compose.yml \
     up
 ```
 
-Po spuštění příkazu bude aplikace dostupná na http://localhost:8080. Na
-jednotlivé služby aplikace se lze připojit i přímo. Mapování portů je definováno
-v `docker-compose.dev.yml`.
+Po spuštění příkazu bude aplikace dostupná na http://localhost:8080. Pokud se
+jedná o první spuštění aplikace, inicializujte databázi dle návodu v sekci
+[Inicializace databáze](#inicializace-databáze). Na jednotlivé služby aplikace
+se lze připojit i přímo. Mapování portů je definováno v
+`docker-compose.dev.yml`.
+
+## Inicializace databáze
+
+Po spuštění aplikace je potřeba inicializovat databázi. Pro provedení tohoto
+kroku v produkčním prostředi využijeme tento příkaz:
+
+```sh
+npx prisma migrate deploy --schema=<cesta k souboru schema.prisma>
+```
+
+Pokud inicializujeme databázi ve vývojovém prostředí, použijeme tento příkaz:
+
+```sh
+npx prisma migrate dev --schema=<cesta k souboru schema.prisma>
+```
+
+Soubor `schema.prisma` je v repozitáři dostupný v adresáři
+`/src/web-app/prisma/`. Příkaz pro připojení k databázi využívá proměnné prostředí jejichž názvy jsou
+definovány v `schema.prisma` souboru. Proces inicializace a migrací databáze je
+vhodné automatizovat v rámci procesu nasazení aplikace. Více informací lze najít
+v
+[dokumentaci Prisma](https://www.prisma.io/docs/orm/prisma-client/deployment/deploy-prisma).
 
 ## Tvorba uživatelských účtů
 
